@@ -1,7 +1,8 @@
-let terminalCreated = false
+const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
 function savePositionToLocalStorage(x, y){
-    localStorage.setItem("position", JSON.stringify({ x:x, y:y }))
+    localStorage.setItem("position", JSON.stringify({ x:Math.floor(x), y:Math.floor(y) }))
 }
 
 function getPositionFromLocalStorage(){
@@ -21,9 +22,17 @@ function getSizeFromLocalStorage(){
     return { height, width }
 }
 
+const getPosition = () =>{
+    const { x, y } = getPositionFromLocalStorage()
+    if(vw < 1000){
+        return { x:0, y:0 }
+    }else{
+        return { x:x,y:y }
+    }
+}
 
-
-const { x, y } = getPositionFromLocalStorage()
+// const { x, y } = getPositionFromLocalStorage()
+const { x, y } = getPosition()
 
 const getHeight = () =>{
     let height = localStorage.getItem("height")
@@ -64,7 +73,6 @@ const createConsole = (id) =>{
      // Initialize a new terminal object
      const term = new TerminalEmulator(id);
      term.init();
-     terminalCreated = true
  }
 
 function createTerminalWindow(){
@@ -81,12 +89,14 @@ function createTerminalWindow(){
         height: "300px",//getHeight(),//height,
         width: "500px",//getWidth(),//width,
         onmove: function(x, y){
-            savePositionToLocalStorage(x, y)
-            console.log(x, y)
+            savePositionToLocalStorage(Math.floor(x), Math.floor(y))
         },
         onresize:(width, height)=>{
             saveSizeToLocalStorage(height, width)
             console.log(height, width)
+        },
+        onclose:()=>{
+            terminal.remove();
         }
     });
     terminal.style.height = "100%"

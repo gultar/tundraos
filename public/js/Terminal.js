@@ -157,7 +157,8 @@ class TerminalEmulator{
       $('body').css("background-size", "cover")
     }else{
       $('body').css("background-image", "none")
-      $('body').css("background-color", value)
+      console.log(value)
+      $('body').css("background", value)
     }
     
   }
