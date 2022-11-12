@@ -65,7 +65,7 @@ class TerminalEmulator{
         this.redirect(args[0])
       },
       background:(args, cmd)=>{
-        $('body').css("background-image", "url("+args[0]+")")
+        this.changeBackground(args)
       },
       window:()=>{
         const win = new WinBox({ title: "Window Title" });
@@ -150,6 +150,15 @@ class TerminalEmulator{
       this.initTerminalMsg();
   }
 
+  changeBackground(args){
+    const value = args[0]
+    if(value.substr(0, 4) == "http"){
+      $('body').css("background-image", "url("+args[0]+")")
+    }else{
+      $('body').css("background", value)
+    }
+    
+  }
   //Already existing
   processNewCommand(e){
     if (e.key == "Tab") { // tab

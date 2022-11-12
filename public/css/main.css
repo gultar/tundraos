@@ -2,13 +2,20 @@
     position:fixed;
     background-color: #404347;
     color:white;
-    background-size: cover;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position:left left;
+    z-index:1;
+    margin:0;
+    height:100%;
+  }
+
+  .desktop-variables{
+    --window-height: 300px;
+    --window-width: 500px;
   }
 
   .terminal-window{
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
     margin: 0;
     font-size: 9pt;
     font-family: Inconsolata, monospace;
