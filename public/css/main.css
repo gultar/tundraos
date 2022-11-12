@@ -8,22 +8,24 @@
     z-index:1;
     margin:0;
     height:100%;
+    width:100%;
+    font-family: Inconsolata, monospace;
   }
 
-  .desktop-variables{
+  :root{
     --window-height: 300px;
     --window-width: 500px;
+    --window-tint: 0.5;
+    --terminal-font-color:#57ff0a;
+    --console-window-background:rgba(0,0,0,var(--window-tint));
   }
 
   .terminal-window{
     margin: 0;
     font-size: 9pt;
-    font-family: Inconsolata, monospace;
-    color: #57ff0a;
-    /* background-color: rgba(0,0,0,.5); */
-    /* resize: both; */
+    
+    color: var(--terminal-font-color);
     overflow:auto;
-    /* border-radius:5px; */
     display:block; 
     position:absolute; 
     z-index:9;
@@ -35,7 +37,7 @@
   }
 
   .wb-header{
-    background: rgba(0,0,0,0.3) !important;
+    background: var(--console-window-background) !important;
   }
   .wb-title{
     font-size: 10pt;
@@ -44,7 +46,7 @@
     background-color:transparent !important;
   }
   .wb-body{
-    background: rgba(0,0,0,0.3) !important;
+    background: var(--console-window-background) !important;
     /* background-color: transparent; */
   }
 
@@ -150,39 +152,20 @@
     background: rgba(0,0,0,0);
   }
   
-  .mobile-enter{
-    visibility: hidden;
-  }
 
-  @media screen and (min-width : 320px) and (max-width : 800px) {
+  @media screen and (min-width : 320px) and (max-width : 500px) {
     body{
-      font-size:15px !important;
+      font-size:12pt !important;
       background-size:100% 100%;
     }
-  
-    body::before{
-      top: 10px;
-      bottom: 10px;
-      left: 8px;
-      right: 10px;
-    }
-  
-    .panel{
-      top: 0px;
-      left: 12px;
-      right: 12px;
-      width:95%;
-      height:50%;
-      font-size:12px !important;
-    }
-  
-    .mobile-enter{
-      visibility: visible;
+
+    .winbox{
+      max-width:100%;
     }
   }
   
   @media only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
-    .panel{
+    /* .panel{
       top: 0px;
       left: 12px;
       right: 12px;
@@ -191,19 +174,16 @@
       font-size:12px !important;
       margin-top:2%;
     }
-  
-    .console-panel{
+   */
+    /* .console-panel{
       margin-top:92%;
       width:95%;
       height:32%;
       margin-left:2%;
       margin-right:5%;
       font-size:12px !important;
-    }
+    } */
   
-    .mobile-enter{
-      visibility: visible;
-    }
   }
   
   @media only screen and (max-width : 320px) {

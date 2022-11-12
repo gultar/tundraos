@@ -14,7 +14,6 @@ const spawnTerminalContainer = ()=>{
                   <input id="cmdline-${id}" class="cmdline" autofocus />
                 </div>
             </div>
-            <button class="mobile-enter" id="mobile-enter-${id}">Enter</button>
     </div>
   </div>
   `
