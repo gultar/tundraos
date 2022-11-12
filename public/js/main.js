@@ -24,11 +24,23 @@ function getSizeFromLocalStorage(){
 
 
 const { x, y } = getPositionFromLocalStorage()
-let { height, width } = getSizeFromLocalStorage()
-if(height == undefined || width == undefined){
-    //default size
-    height = "300px"
-    width = "500px"
+
+const getHeight = () =>{
+    let height = localStorage.getItem("height")
+
+    if(!height)
+        return "300px"
+    else
+        return height
+}
+
+const getWidth = () =>{
+    let width = localStorage.getItem("width")
+
+    if(!width)
+        return "500px"
+    else
+        return width
 }
 
 
@@ -47,19 +59,10 @@ function saveWidthToLocalStorage(width){
 }
 
 const createConsole = (id) =>{
-    // Set the command-line prompt to include the user's IP Address
-    //$('.prompt').html('[' + codehelper_ip["IP"] + '@HTML5] # ');
-    
      $('.prompt').html('[user@shell] ');
          
      // Initialize a new terminal object
      const term = new TerminalEmulator(id);
-    //  const term = new TerminalEmulator(
-    //      '#input-line .cmdline', 
-    //      '#container output',
-    //      '#terminal-window'
-    //      );
-     // console.log(term)
      term.init();
      terminalCreated = true
  }
@@ -69,13 +72,14 @@ function createTerminalWindow(){
     createConsole(id);
     const terminal = document.getElementById("terminal-window-"+id)
     terminal.style.visibility = "visible"
-    const win = new WinBox({ 
+
+    const termWindow = new WinBox({ 
         x:x,
         y:y,
         title: "", 
         mount: terminal,
-        height: "300px",//height,
-        width: "500px",//width,
+        height: "300px",//getHeight(),//height,
+        width: "500px",//getWidth(),//width,
         onmove: function(x, y){
             savePositionToLocalStorage(x, y)
             console.log(x, y)
@@ -87,7 +91,6 @@ function createTerminalWindow(){
     });
     terminal.style.height = "100%"
     terminal.style.width = "100%"
-    // win.removeControl("wb-close")
 }
 
 setInterval(()=>{
