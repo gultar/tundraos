@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="./css/main.css" type="text/css"/>
+    <link rel="stylesheet" href="./css/topnav.css" type="text/css"/>
+    <link rel="canonical" href="https://robwu.nl/cors-anywhere.html"/>
+    
+    <script src="https://rawcdn.githack.com/nextapps-de/winbox/0.2.6/dist/winbox.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script  src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+            integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+            crossOrigin="anonymous"></script>
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <script src="./js/Terminal.js"></script>
+    <script src="./js/main.js"></script>
+    <!-- <script src="./js/Terminal-backup.js"></script>
+    <script src="./js/main copy.js"></script> -->
+    <title>Document</title>
+</head>
+<body>
+    <div id="page-wrapper" class="flex">
+        <nav class=".topnav">
+            <ul >
+                <li class="nav-item-group">
+                    <li><a href="#">Menu</a>
+                        <ul>
+                            <li><a href="#">About</a></li>
+                            <li><a onClick="spawnTerminalContainer()" href="#">Projects</a></li>
+                            <li><a href="#">Tools</a>
+                            <ul>
+                                <li><a href="#">Other</a>
+                                    <ul>
+                                        <li><a href="#">Stuff</a></li>
+                                        <li><a href="#">Things</a></li>
+                                        <li><a href="#">Other Stuff</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            </li>
+                        </ul>
+                        </li>
+                        <li><a href="#" onClick="createTerminalWindow()"><i class='bx bxs-user'></i>Console</a></li>
+                </li>
+            </ul>
+            <li class="clock-container">
+                <span id="clock">
+                </span>
+            </li>
+        </nav>
+        <div id="page-anchor"></div>
+        <div id="main-container">
+            <div id="terminal-window" class="terminal-window" style="visibility:hidden">
+                <div id="container" class="container">
+                        <output class="output">
+                        </output>
+                        <div action="#" id="input-line" class="input-line">
+                            <div class="prompt"></div><div><input class="cmdline" autofocus /></div>
+                        </div>
+                        <button id="mobile-enter">Enter</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

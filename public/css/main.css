@@ -1,0 +1,205 @@
+  body{
+    position:fixed;
+    background-color: #404347;
+    color:white;
+    background-size: cover;
+  }
+
+  .terminal-window{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin: 0;
+    font-size: 9pt;
+    font-family: Inconsolata, monospace;
+    color: #57ff0a;
+    /* background-color: rgba(0,0,0,.5); */
+    /* resize: both; */
+    overflow:auto;
+    /* border-radius:5px; */
+    display:block; 
+    position:absolute; 
+    z-index:9;
+  }
+
+  .terminal-display{
+    height:88%;
+    overflow:auto;
+  }
+
+  .wb-header{
+    background: rgba(0,0,0,0.3) !important;
+  }
+  .wb-title{
+    font-size: 10pt;
+  }
+  .winbox{
+    background-color:transparent !important;
+  }
+  .wb-body{
+    background: rgba(0,0,0,0.3) !important;
+    /* background-color: transparent; */
+  }
+
+  ::selection {
+    background: #FF5E99;
+  }
+  
+  .container {
+    padding: 0em 1em 1em 1em;
+  }
+  .output {
+    clear: both;
+    width: 100%;
+  }
+  .output h3 {
+    margin: 0;
+  }
+  .output pre {
+    margin: 0;
+  }
+  
+  .input-line {
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: horizontal;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: horizontal;
+    box-align: stretch;
+    clear: both;
+  }
+  .input-line > div:nth-child(2) {
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
+  }
+  
+  .prompt {
+    white-space: nowrap;
+    color: #96b38a;
+    margin-right: 7px;
+    display: -webkit-box;
+    -webkit-box-pack: center;
+    -webkit-box-orient: vertical;
+    display: -moz-box;
+    -moz-box-pack: center;
+    -moz-box-orient: vertical;
+    display: box;
+    box-pack: center;
+    box-orient: vertical;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  .cmdline {
+    outline: none;
+    background-color: transparent;
+    margin: 0;
+    width: 100%;
+    font: inherit;
+    border: none;
+    color: inherit;
+  }
+  .ls-files p span{
+    line-height:20px;
+  }
+  .help-line{
+    line-height:10px !important;
+  }
+  .help-cmd{
+    text-decoration: underline;
+  }
+  
+  .terminal-window:before {
+    content: "";
+    position: absolute;
+    top: 30px;
+    bottom: 30px;
+    left: 30px;   
+    right: 30px;
+    z-index: 1;
+    border-radius: 6px;
+    width:59%;
+  }
+  
+  ::-webkit-scrollbar {
+      width: 12px;
+  }
+  
+  ::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+      border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+      border-radius: 10px;
+      background-color:#404347;
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  }
+  ::-webkit-scrollbar-corner {
+    background: rgba(0,0,0,0);
+  }
+  
+  .mobile-enter{
+    visibility: hidden;
+  }
+
+  @media screen and (min-width : 320px) and (max-width : 800px) {
+    body{
+      font-size:15px !important;
+      background-size:100% 100%;
+    }
+  
+    body::before{
+      top: 10px;
+      bottom: 10px;
+      left: 8px;
+      right: 10px;
+    }
+  
+    .panel{
+      top: 0px;
+      left: 12px;
+      right: 12px;
+      width:95%;
+      height:50%;
+      font-size:12px !important;
+    }
+  
+    .mobile-enter{
+      visibility: visible;
+    }
+  }
+  
+  @media only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
+    .panel{
+      top: 0px;
+      left: 12px;
+      right: 12px;
+      width:95%;
+      height:50%;
+      font-size:12px !important;
+      margin-top:2%;
+    }
+  
+    .console-panel{
+      margin-top:92%;
+      width:95%;
+      height:32%;
+      margin-left:2%;
+      margin-right:5%;
+      font-size:12px !important;
+    }
+  
+    .mobile-enter{
+      visibility: visible;
+    }
+  }
+  
+  @media only screen and (max-width : 320px) {
+  
+  }
+  
