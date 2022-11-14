@@ -1,6 +1,7 @@
   body{
     position:fixed;
-    background-color: #404347;
+    background-image: url("../images/wallpaper.jpg");
+    /* background-color: #404347; */
     color:white;
     background-size:cover;
     background-repeat: no-repeat;
@@ -29,6 +30,11 @@
     display:block; 
     position:absolute; 
     z-index:9;
+  }
+
+  p{
+    margin-block-start: 0 !important;
+    margin-block-end: 0 !important;
   }
 
   .terminal-display{

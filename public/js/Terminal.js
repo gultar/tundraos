@@ -43,62 +43,25 @@ class TerminalEmulator{
       "date":"Displays the current date",
       "echo":"Outputs a string into the console. Usage: echo string. Ex: echo Hello World",
       "background":"Changes the background image. Usage: background http://url.url",
-      "goto":"Navigates to another page on website",
-      "window":"Creates a new window element",
-      "wiki":"Opens up a wikipedia page, or another website (not all of them work)"
+      "wiki":"Opens up a wikipedia page, or another website (not all of them work)",
+      "gdt":"Opens up the Grand dictionnaire terminologique",
+      "linguee":"Searches on Linguee for a translation of the text provided",
+      "#":"Runs most terminal commands (cd does not work, for example) Usage: # ls -la"
     }
     this.commands = {
-      help:(args, cmd)=>{
-        this.runHelp(args, cmd);
-      },
-      clear:(args, cmd)=>{
-        this.clear(args, cmd);
-      },
-      echo:(args, cmd)=>{
-        this.output(args)
-      },
-      date:(args, cmd)=>{
-        this.output( new Date() );
-      },
-      goto:(args, cmd)=>{
-        this.redirect(args[0])
-      },
-      background:(args, cmd)=>{
-        this.changeBackground(args)
-      },
-      window:()=>{
-        const win = new WinBox({ title: "Window Title" });
-      },
-      wiki:(args)=>{ //
-        if(args.length == 0){
-          args = [["https://wikipedia.org"]]
-        }
-        new WinBox({ title: "Window Title", html:`
-        <iframe id="wiki-window" style="border:none;" src="${args[0]}"></iframe>
-        ` });
-      },
-      check:()=>{ //
-        // fetch("http://localhost:8000/about")
-        // .then((data)=>{ return data.text() })
-        // .then((text)=>{ new WinBox({ title: "Window Title", html:text }); })
-        new WinBox({ title: "Window Title", html:`
-        <iframe
-        style="border:none;" 
-        src="http://localhost:8000/about">
-        </iframe>
-        ` });
-      },
-      linguee:()=>{
-        new WinBox({ title: "Window Title", html:`
-        <iframe id="wiki-window" style="border:none;" src="https://linguee.fr"></iframe>
-        ` });
-      }
+      help:(args, cmd)=>this.runHelp(args, cmd),
+      clear:(args, cmd)=>this.clear(args, cmd),
+      echo:(args, cmd)=>this.output(args),
+      date:(args, cmd)=>this.output( new Date() ),
+      background:(args, cmd)=>this.changeBackground(args),
+      wiki:(args)=>this.runWiki(args),
+      gdt:()=>this.runGDT(),
+      linguee:(args)=>this.runLingueeSearch(args),
+      termium:()=> this.runTermium(),
+      "#":(args)=>this.runBashCommand(args), //DANGEROUS
     }
   }
   
-  
-
-
   init(){
     this.defineKeyEventListeners();
     this.initTerminalMsg();
@@ -110,6 +73,19 @@ class TerminalEmulator{
     setInterval(function(){
       $(`.date`).html(new Date());
     }, 1000)
+  }
+
+  runBashCommand(args){
+    const socket = io()
+    const cmd = this.argumentsToString(args)
+    socket.on("stdout", (data)=>{
+      this.output(`
+<pre>
+${data}
+</pre>
+      `)
+    })
+    socket.emit("stdin",cmd)
   }
 
   defineKeyEventListeners(){
@@ -160,8 +136,60 @@ class TerminalEmulator{
       console.log(value)
       $('body').css("background", value)
     }
-    
   }
+
+  turnToURLQueryText(args){
+    const argsFused = args.toString()
+    const text = argsFused.replaceAll(",","+")
+    return text
+  }
+
+  runWiki(args){
+    if(args.length == 0){
+      args = [["https://wikipedia.org"]]
+    }
+    new WinBox({ title: "Window Title", html:`
+    <iframe id="wiki-window" style="border:none;" src="${args[0]}"></iframe>
+    ` });
+  }
+
+  runLingueeSearch(args){
+    const text = this.turnToURLQueryText(args)
+    new WinBox({ title: "Window Title", html:`
+    <iframe 
+    id="wiki-window" 
+    style="border:none;" 
+    src="https://www.linguee.fr/search?source=auto&query=${text}">
+    </iframe>
+    ` });
+  }
+
+  runGDT(){
+    new WinBox({ title: "Window Title", html:`
+        <iframe
+        style="border:none;" 
+        src="https://gdt.oqlf.gouv.qc.ca/Resultat.aspx">
+        </iframe>
+    ` });
+  }
+
+  runTermium(){//
+    $.get('http://thingproxy.freeboard.io/fetch/https://www.btb.termiumplus.gc.ca/tpv2alpha/alpha-eng.html?lang=eng', function(data){
+      
+      let dom = new DOMParser()
+      .parseFromString(data, 'text/html');
+      new WinBox({ title: "Window Title", html:`
+        <iframe
+        id="termium-window"
+        style="border:none;">
+        </iframe>
+    ` });
+
+      console.log('Doing a search', dom)
+    });
+
+  }
+
   //Already existing
   processNewCommand(e){
     if (e.key == "Tab") { // tab
@@ -219,6 +247,12 @@ class TerminalEmulator{
     });
 
     return args
+  }
+
+  argumentsToString(args){
+    const argsFused = args.toString()
+    const text = argsFused.replaceAll(","," ")
+    return text
   }
 
   historyHandler(e){
