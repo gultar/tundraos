@@ -33,6 +33,7 @@ class TerminalEmulator{
     this.terminalWindowId = `#terminal-window-${this.id}`
     this.terminalWindow = document.querySelector(this.terminalWindowId);
     this.pageAnchor = document.querySelector("#page-anchor");
+    this.socket = io()
     this.dateElement = {}
     this.history_ = [];
     this.histpos_ = 0;
@@ -54,11 +55,23 @@ class TerminalEmulator{
       echo:(args, cmd)=>this.output(args),
       date:(args, cmd)=>this.output( new Date() ),
       background:(args, cmd)=>this.changeBackground(args),
-      wiki:(args)=>this.runWiki(args),
-      gdt:()=>this.runGDT(),
+      web:(args)=>this.runWeb(args),
+      wiki:()=>this.runWeb(["https://wikipedia.org"]),
+      gdt:()=>this.runWeb(["https://gdt.oqlf.gouv.qc.ca/Resultat.aspx"]),
+      iching:()=>this.runWeb(["https://gultar.github.io/iching/"]),//
+      georatio:()=>this.runWeb(["https://georatio.com/"]),
       linguee:(args)=>this.runLingueeSearch(args),
-      termium:()=> this.runTermium(),
+      createuser:(args)=>this.createUser(args),
+      login:(args)=>this.login(args),
       "#":(args)=>this.runBashCommand(args), //DANGEROUS
+      ls:(args)=>this.runBashCommand(["ls", ...args]),
+      cd:(args)=>this.runBashCommand(["cd", ...args]),
+      cat:(args)=>this.runBashCommand(["cat", ...args]),
+      pwd:(args)=>this.runBashCommand(["pwd", ...args]),
+      mkdir:(args)=>this.runBashCommand(["mkdir", ...args]),
+      touch:(args)=>this.runBashCommand(["touch", ...args]),
+      rmdir:(args)=>this.runBashCommand(["rmdir", ...args]),
+      rm:(args)=>this.runBashCommand(["rm", ...args]),
     }
   }
   
@@ -76,16 +89,27 @@ class TerminalEmulator{
   }
 
   runBashCommand(args){
-    const socket = io()
+    const formatResult = (data) =>{
+      if(Array.isArray(data)){
+        data = data.join(" ")
+      }
+
+      if(typeof data == "object"){
+        data = JSON.stringify(data, null, 2)
+      }
+
+      return data
+    }
+
     const cmd = this.argumentsToString(args)
-    socket.on("stdout", (data)=>{
+    this.socket.once("stdout", (data)=>{
       this.output(`
 <pre>
-${data}
+${formatResult(data)}
 </pre>
       `)
     })
-    socket.emit("stdin",cmd)
+    this.socket.emit("stdin",cmd)
   }
 
   defineKeyEventListeners(){
@@ -144,50 +168,54 @@ ${data}
     return text
   }
 
-  runWiki(args){
-    if(args.length == 0){
-      args = [["https://wikipedia.org"]]
-    }
-    new WinBox({ title: "Window Title", html:`
+  createUser(args){
+    const [ username, password ] = args
+
+    if(username == undefined) return this.output("LOGIN ERROR: Need to provide username")
+    if(password == undefined) return this.output("LOGIN ERROR: Need to provide password")
+   
+    $.ajax({
+      type: "POST",
+      url: "/createUser",
+      data: {
+        timestamp:Date.now(),
+        username:username,
+        password:sha256(password),
+      },
+      success: (res)=>{
+        this.output(res)
+      },
+    })
+  }
+
+  login(args){
+    const [ username, rawPassword ] = args
+    if(username == undefined) return this.output("LOGIN ERROR: Need to provide username")
+    if(rawPassword == undefined) return this.output("LOGIN ERROR: Need to provide password")
+    
+    const password = sha256(rawPassword)
+    this.socket.once('login-result', (result)=>{
+      this.output(result)
+    })
+    this.socket.emit('login', JSON.stringify({username, password}))
+
+  }
+
+  runWeb(args=[]){
+    new WinBox({ title: "Window Title", height:"90%", width:"90%", html:`
     <iframe id="wiki-window" style="border:none;" src="${args[0]}"></iframe>
     ` });
   }
 
   runLingueeSearch(args){
     const text = this.turnToURLQueryText(args)
-    new WinBox({ title: "Window Title", html:`
+    new WinBox({ title: "Window Title", height:"100%", width:"100%", html:`
     <iframe 
     id="wiki-window" 
     style="border:none;" 
     src="https://www.linguee.fr/search?source=auto&query=${text}">
     </iframe>
     ` });
-  }
-
-  runGDT(){
-    new WinBox({ title: "Window Title", html:`
-        <iframe
-        style="border:none;" 
-        src="https://gdt.oqlf.gouv.qc.ca/Resultat.aspx">
-        </iframe>
-    ` });
-  }
-
-  runTermium(){//
-    $.get('http://thingproxy.freeboard.io/fetch/https://www.btb.termiumplus.gc.ca/tpv2alpha/alpha-eng.html?lang=eng', function(data){
-      
-      let dom = new DOMParser()
-      .parseFromString(data, 'text/html');
-      new WinBox({ title: "Window Title", html:`
-        <iframe
-        id="termium-window"
-        style="border:none;">
-        </iframe>
-    ` });
-
-      console.log('Doing a search', dom)
-    });
-
   }
 
   //Already existing
@@ -201,7 +229,7 @@ ${data}
         this.history_[this.history_.length] = this.cmdLine_.value;
         this.histpos_ = this.history_.length;
       }
-
+      
       let [ cmd, ...args ] = this.parseArguments(this.cmdLine_.value);
       if(!cmd){
         this.output("");
@@ -221,14 +249,6 @@ ${data}
       window.scrollTo(0, this.getDocHeight_());
       this.cmdLine_.value = ''; // Clear/setup line for next input.
     }
-  }
-
-  redirect(slug=""){
-    if(slug == "home" || slug == "h"){
-      slug = ""
-    }
-    var url = `/${slug}`;
-    window.location = url
   }
 
   addCurrentLineToConsole(){

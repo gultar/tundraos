@@ -82,8 +82,8 @@ function createTerminalWindow(){
     terminal.style.visibility = "visible"
 
     const termWindow = new WinBox({ 
-        x:x,
-        y:y,
+        x:50,
+        y:50,
         title: "", 
         mount: terminal,
         height: "300px",//getHeight(),//height,

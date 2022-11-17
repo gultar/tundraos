@@ -62,6 +62,8 @@
   
   .container {
     padding: 0em 1em 1em 1em;
+    height:90%;
+    width:90%;
   }
   .output {
     clear: both;
