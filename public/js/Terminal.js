@@ -47,7 +47,14 @@ class TerminalEmulator{
       "wiki":"Opens up a wikipedia page, or another website (not all of them work)",
       "gdt":"Opens up the Grand dictionnaire terminologique",
       "linguee":"Searches on Linguee for a translation of the text provided",
-      "#":"Runs most terminal commands (cd does not work, for example) Usage: # ls -la"
+      "ls":'List information about the FILEs (the current directory by default). Usage: ls directory/',
+      "rm":'Removes specified file. By default, it does not remove directories. . Usage: rm filename',
+      "cd":"Change the working directory of the current shell execution environment. Usage: cd dir1/dir2/dir3",
+      "pwd":"Print the name of current working directory",
+      "cat":"Concatenate FILE(s) to standard output. Usage: cat filename",
+      "mkdir":"Create the DIRECTORY, if it does not already exist. Usage: mkdir directoryname/",
+      "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
+      "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname"
     }
     this.commands = {
       help:(args, cmd)=>this.runHelp(args, cmd),
@@ -63,7 +70,6 @@ class TerminalEmulator{
       linguee:(args)=>this.runLingueeSearch(args),
       createuser:(args)=>this.createUser(args),
       login:(args)=>this.login(args),
-      "#":(args)=>this.runBashCommand(args), //DANGEROUS
       ls:(args)=>this.runBashCommand(["ls", ...args]),
       cd:(args)=>this.runBashCommand(["cd", ...args]),
       cat:(args)=>this.runBashCommand(["cat", ...args]),

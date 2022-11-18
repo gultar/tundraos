@@ -26,11 +26,12 @@ class Directory{
         this[".."] = parent
         this.name = name
         this.files = {}
+        this.isDirectory = true
         this.permissions = "" //to be implemented
     }
 
     getDirectoryProperties(){
-        return ["name","files","permissions"]
+        return ["name","files","permissions","isDirectory"]
     }
 
     parent(){
@@ -50,7 +51,9 @@ class Directory{
         const props = Object.keys(this)
         const thisDirectoryProperties = this.getDirectoryProperties()
         const dirnames = props.filter(prop =>{
-            if(thisDirectoryProperties.includes(prop) == false){
+            const isObject = typeof this[prop] == 'object'
+            const isDirectoryProp = thisDirectoryProperties.includes(prop)
+            if(isDirectoryProp == false && isObject == true){
                 return prop
             }
                 
@@ -129,7 +132,7 @@ class VirtualFileSystem{
 
     isDir(destination){
         if(destination === undefined) return false
-        const canContainFiles = destination.files !== undefined
+        const canContainFiles = destination !== undefined
         
         return canContainFiles
     }
