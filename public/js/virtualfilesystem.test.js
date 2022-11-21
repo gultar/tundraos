@@ -25,7 +25,6 @@ describe('Virtual File System Validations methods', ()=> {
   });
   describe('isDir()', ()=> {
     it('Should check whether it is a directory', ()=>{
-      console.log('roooooot', filesystem.isDir(root))
         assert.equal(filesystem.isDir(root), true)
     });
     it('Should also say if it is a file', ()=>{
@@ -261,13 +260,13 @@ describe("Virtual File System Bash Command methods", ()=>{
 
 describe("try", ()=>{
   it("should try", ()=>{
-    const fsStr = filesystem.export()
-    const fs = JSON.parse(fsStr)
-    // console.log(fs)
-    const newFs = new VirtualFileSystem("new")
+    // const fsStr = filesystem.export()
+    // const fs = JSON.parse(fsStr)
+    // // console.log(fs)
+    // const newFs = new VirtualFileSystem("new")
 
-    newFs.setDirectoryContent(newFs.root(),fs)
-    console.log(newFs.root().home.contents)
+    // newFs.setDirectoryContent(newFs.root(),fs)
+    // console.log(newFs.root().home.contents)
   })
 })
 

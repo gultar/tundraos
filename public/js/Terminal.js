@@ -87,8 +87,10 @@ class TerminalEmulator{
       this.pageAnchor.focus();
     }, false);
     // this.cmdLine_.addEventListener('click', (e)=>this.inputTextClick(e), false);
-    this.cmdLine_.addEventListener('keydown', (e)=>this.historyHandler(e), false);
-    this.cmdLine_.addEventListener('keydown', (e)=>this.processNewCommand(e), false);
+    this.cmdLine_.addEventListener('keydown', (e)=>{
+      console.log('Event', e)
+      this.processNewCommand(e)
+    }, false);
   }
 
   outputHelpMenu(){
@@ -185,7 +187,8 @@ class TerminalEmulator{
     if (e.key == "Tab") { // tab
       e.preventDefault();
       this.autoCompleteCommand()
-      this.autoCompletePath(cmd, args[0])
+      // this.autoCompletePath(cmd, args[0])
+      this.parsePath(args[0], cmd)
       // Implement tab suggest.
     } else if (e.key == "Enter") { // enter
       // Save shell history.
@@ -247,8 +250,6 @@ class TerminalEmulator{
     if (this.cmdLine_.value) {
       this.history_[this.history_.length] = this.cmdLine_.value;
       this.histpos_ = this.history_.length;
-      console.log('Hist len', this.history_.length)
-      console.log('Hist pos', this.histpos_)
     }
   }
 
@@ -272,12 +273,70 @@ class TerminalEmulator{
     if(potentialCmds.length === 1){
       this.cmdLine_.value = potentialCmds[0]
     }else{
+      this.output(potentialCmds.join(" "))
+    }
+  }
+
+  parsePath(partialPath, cmd){
+    const hasSubPaths = partialPath.includes("/")
+    
+    if(hasSubPaths){
+      const subPaths = partialPath.split("/")
+      const partialSubPath = subPaths[subPaths.length - 1]
+
+      subPaths.pop()
+      const relativePath = subPaths.join("/")
+
+      const suggestion = this.suggestPath(partialSubPath, relativePath)
+      if(suggestion.length === 1){
+        this.cmdLine_.value = `${cmd} ${relativePath}/${suggestion[0]}/`
+        return suggestion[0]
+      }else{
+        this.output(suggestion.join(" "))
+        return suggestion
+      }
+
+    }else{
+
+      const suggestion = this.suggestPath(partialPath)
+      if(suggestion.length === 1){
+        this.cmdLine_.value = `${cmd} ${suggestion[0]}/`
+        return suggestion[0]
+      }else{
+        this.output(suggestion.join(" "))
+        return suggestion
+      }
+
+    }
+    // const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
+  }
+
+  suggestPath(partialPath, relativePath){
+    if(!relativePath) relativePath = FileSystem.wd().name
+    const directory = FileSystem.find(relativePath)
+    if(!directory) return []
+
+    const dirnames = directory.getDirnames()
+    const filenames = directory.getFilenames()
+    const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
+    return potentialDirs
+  }
+
+  autoFillPath(partialPath){
+    const dirnames = FileSystem.wd().getDirnames()
+    const filenames = FileSystem.wd().getFilenames()
+    const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
+    if(potentialDirs.length === 1){
+      return potentialDirs[0]
+    }else{
       if(this.listPossibilities == true){
-        this.output(potentialCmds.join(" "))
+        this.output(potentialDirs.join(" "))
         this.listPossibilities = false
       }else{
         this.listPossibilities = true
       }
+
+      return false
     }
   }
 
@@ -286,7 +345,7 @@ class TerminalEmulator{
     const filenames = FileSystem.wd().getFilenames()
     const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
     if(potentialDirs.length === 1){
-      this.cmdLine_.value = `${cmd} ${potentialDirs[0]}`
+      this.cmdLine_.value = `${cmd} ${potentialDirs[0]}/`
     }else{
       if(this.listPossibilities == true){
         this.output(potentialDirs.join(" "))
@@ -322,30 +381,31 @@ class TerminalEmulator{
   }
 
   historyHandler(e){
-    
     if (this.history_.length >= 0) {
       if (e.key == "ArrowUp" || e.key == "ArrowDown") {
+        //Stores current value or past value in temporary variable
+        //for switching back and forth between both of them
         if (this.history_[this.histpos_]) {
           this.history_[this.histpos_] = this.cmdLine_.value;
         } else {
           this.histtemp_ = this.cmdLine_.value;
         }
+
       }
-      
+      //Move cursor up and down history
       if (e.key == "ArrowUp") { // up
-        console.log("ArrowUp")
         this.histpos_--;
         if (this.histpos_ < 0) {
           this.histpos_ = 0;
         }
       } else if (e.key == "ArrowDown") { // down
-        console.log("ArrowDown")
         this.histpos_++;
         if (this.histpos_ > this.history_.length) {
           this.histpos_ = this.history_.length;
         }
       }
 
+      //Displays past or current command, depending on cursor position
       if (e.key == "ArrowUp" || e.key == "ArrowDown") {
         this.cmdLine_.value = this.history_[this.histpos_] ? this.history_[this.histpos_] : this.histtemp_;
         this.cmdLine_.value = this.cmdLine_.value; // Sets cursor to end of input.

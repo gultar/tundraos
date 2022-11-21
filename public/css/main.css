@@ -11,6 +11,7 @@
     height:100%;
     width:100%;
     font-family: Inconsolata, monospace;
+    
   }
 
   :root{
@@ -21,6 +22,11 @@
     --console-window-background:rgba(0,0,0,var(--window-tint));
     --terminal-font-size:8pt;
     --background:#45505f;
+  }
+
+  #page-wrapper{
+    height:100%;
+    width:100%;
   }
 
   .terminal-window{

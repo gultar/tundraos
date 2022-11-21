@@ -4,6 +4,12 @@ String.prototype.unshift = function(el) {
     return arr.join("");
 }
 
+function cleanUpEmptyArrayCells(array){
+    return array.filter(el => {
+        return el != null && el != '';
+    });
+}
+
 function stringify(obj, replacer, spaces, cycleReplacer) {
     return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
   }
@@ -51,9 +57,9 @@ let parenter = {
 
 
 class File{
-    constructor(name=""){
+    constructor(name="", content=""){
         this.name = name
-        this.content = ""
+        this.content = content
     }
 
     setContent(content){
@@ -166,7 +172,6 @@ class Directory{
     getFilenames(){
         const filenames = []
         for(const file of this.contents){
-            console.log('File', file)
             if(file){
                 filenames.push(file.name)
             }
@@ -235,20 +240,139 @@ class VirtualFileSystem{
         return (parentDir[childDirName] ? true : false)
     }
 
-    splitPathIntoArray(path){
-        const directories = path.split("/")
-        return directories
+    cd(path){
+        try{
+            const newWorkingDirectory = this.find(path)
+            if(this.isDir(newWorkingDirectory)){
+                this.workingDir = newWorkingDirectory
+            }
+            
+            return this.workingDir.name
+            
+        }catch(e){
+            console.log(e)
+            return e.message
+        }
     }
 
-    fromPathToArray(path){
-        const arrayOfDirectories = this.splitPathIntoArray(path)
-        return arrayOfDirectories
+    ls(path, args){
+        let directory = {}
+        if(path == undefined){
+            directory = this.workingDir
+        }else{
+            directory = this.find(path)
+            const isDirectory = this.isDir(directory)
+            if(!isDirectory) throw new Error(`Command ls failed. ${path} is not a directory`)
+        }
+        
+        const contents = directory.getContentNames()
+
+        return contents
     }
 
-    fromArrayToPath(arrayOfDirectories){
-        const path = this.convertToPathString(arrayOfDirectories)
+    mkdir(path){
+        if(path === undefined) throw new Error('touch: missing file operand')
+        
+        const pathArray = this.fromPathToArray(path)
+        const dirname = pathArray[pathArray.length - 1]
+        const isWithinThisDir = pathArray.length == 1
+
+        const exists = this.workingDir[dirname]
+        if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
+
+        if(isWithinThisDir){
+            this.workingDir[dirname] = {}
+
+        }else{
+            pathArray.pop()
+            const pathToFile = this.fromArrayToPath(pathArray) 
+            const targetDirectory = this.find(pathToFile)
+            
+            const exists = targetDirectory[dirname]
+            if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
+
+            targetDirectory[dirname] = {}
+        }
+
+        return true
+    }
+
+    cat(path){
+        if(path === undefined) throw new Error('cat: missing file operand')
+        const pathArray = this.fromPathToArray(path)
+        const filename = pathArray[pathArray.length - 1]
+        const directory = this.findDir(path)
+        const file = directory.getFile(filename)
+        if(!file) return undefined
+        
+        return file.content
+    }
+
+    pwd(){
+        let path = this.getAbsolutePath(this.workingDir)
+        path = path.unshift("/")
         return path
     }
+
+    touch(path, content){
+        if(path === undefined) throw new Error('touch: missing file operand')
+        const pathArray = this.fromPathToArray(path)
+        const filename = pathArray[pathArray.length - 1]
+        if(this.workingDir[filename]) throw new Error(`touch: cannot overwrite directory ${filename}`)
+        const directory = this.findDir(path)
+        const exists = directory.hasFile(filename)
+        if(exists) throw new Error(`touch: file ${filename} already exists`)
+
+        directory.contents.push(new File(filename, content))
+        
+        return true
+    }
+
+    
+    rm(path, args){
+        if(path === undefined) throw new Error('rmdir: missing file operand')
+        const pathArray = this.fromPathToArray(path)
+        const filename = pathArray[pathArray.length - 1]
+        const isWithinThisDir = pathArray.length == 1
+        if(isWithinThisDir){
+            const isElementToDeleteDirectory = this.workingDir.hasDir(path)
+            if(isElementToDeleteDirectory == true){
+                throw new Error(`rm: cannot remove '${path}': Is a directory`)
+            }
+            return this.workingDir.removeFile(filename)
+
+        }
+        
+        pathArray.pop()
+        const pathToFile = this.fromArrayToPath(pathArray) 
+        const targetDirectory = this.find(pathToFile)
+        const isElementToDeleteDirectory = targetDirectory.hasDir(pathToFile)
+        if(isElementToDeleteDirectory == true){
+            throw new Error(`rm: cannot remove '${path}': Is a directory`)
+        }
+        return targetDirectory.removeFile(filename)
+
+    }
+
+    rmdir(path, args){
+        if(path === undefined) throw new Error('rmdir: missing file operand')
+        
+        const pathArray = this.fromPathToArray(path)
+        const dirname = pathArray[pathArray.length - 1]
+        const isWithinThisDir = pathArray.length == 1
+        
+        if(isWithinThisDir){
+            delete this.workingDir[dirname]
+        }else{
+            pathArray.pop()
+            const pathToDir = this.fromArrayToPath(pathArray) 
+            const targetDirectory = this.find(pathToDir)
+            delete targetDirectory[dirname]
+        }
+
+        return true
+    }
+
 
     find(path){
         const isPathRoot = path === "/"
@@ -266,9 +390,9 @@ class VirtualFileSystem{
         const isDirectChild = workingDir[path]
         if(isDirectChild) return workingDir[path]
 
-        const directories = this.fromPathToArray(path)
+        const dirnames = this.fromPathToArray(path)
 
-        for(const dir of directories){
+        for(const dir of dirnames){
             if(dir !== ""){
 
                 const exists = workingDir[dir]
@@ -323,83 +447,6 @@ class VirtualFileSystem{
         return this.fromArrayToPath(directoriesArray)
     }
 
-    cd(path){
-        try{
-            const newWorkingDirectory = this.find(path)
-            if(this.isDir(newWorkingDirectory)){
-                this.workingDir = newWorkingDirectory
-            }
-            
-            return this.workingDir.name
-            
-        }catch(e){
-            console.log(e)
-            return e.message
-        }
-    }
-
-    ls(path, args){
-        let directory = {}
-        if(path == undefined){
-            directory = this.workingDir
-        }else{
-            directory = this.find(path)
-            const isDirectory = this.isDir(directory)
-            if(!isDirectory) throw new Error(`Command ls failed. ${path} is not a directory`)
-        }
-        
-        const contents = directory.getContentNames()
-
-        return contents
-    }
-
-    pwd(){
-        let path = this.getAbsolutePath(this.workingDir)
-        path = path.unshift("/")
-        return path
-    }
-
-    mkdir(path){
-        if(path === undefined) throw new Error('touch: missing file operand')
-        
-        const pathArray = this.fromPathToArray(path)
-        const dirname = pathArray[pathArray.length - 1]
-        const isWithinThisDir = pathArray.length == 1
-        
-        const exists = this.workingDir[dirname]
-        if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
-
-        if(isWithinThisDir){
-            this.workingDir[dirname] = {}
-
-        }else{
-            pathArray.pop()
-            const pathToFile = this.fromArrayToPath(pathArray) 
-            const targetDirectory = this.find(pathToFile)
-            
-            const exists = targetDirectory[dirname]
-            if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
-
-            targetDirectory[dirname] = {}
-        }
-
-        return true
-    }
-
-    touch(path){
-        if(path === undefined) throw new Error('touch: missing file operand')
-        const pathArray = this.fromPathToArray(path)
-        const filename = pathArray[pathArray.length - 1]
-        if(this.workingDir[filename]) throw new Error(`touch: cannot overwrite directory ${filename}`)
-        const directory = this.findDir(path)
-        const exists = directory.hasFile(filename)
-        if(exists) throw new Error(`touch: file ${filename} already exists`)
-
-        directory.contents.push(new File(filename))
-        
-        return true
-    }
-
     findDir(path){
         const pathArray = this.fromPathToArray(path)
         const isWithinThisDir = pathArray.length == 1
@@ -409,69 +456,31 @@ class VirtualFileSystem{
             directory = this.workingDir
         else{
             pathArray.pop()
-            const pathToFile = this.fromArrayToPath(pathArray) 
-            directory = this.find(pathToFile)
+            const pathToDir = this.fromArrayToPath(pathArray) 
+            directory = this.find(pathToDir)
         }
 
         return directory
     }
-
-    cat(path){
-        if(path === undefined) throw new Error('cat: missing file operand')
-        const pathArray = this.fromPathToArray(path)
-        const filename = pathArray[pathArray.length - 1]
-        const directory = this.findDir(path)
-        const file = directory.getFile(filename)
-        if(!file) return undefined
-        
-        return file.content
-    }
-
-    rmdir(path, args){
-        if(path === undefined) throw new Error('rmdir: missing file operand')
-        const pathArray = this.fromPathToArray(path)
-        const dirname = pathArray[pathArray.length - 1]
-        const isWithinThisDir = pathArray.length == 1
-        if(isWithinThisDir){
-            delete this.workingDir[dirname]
-
-        }else{
-            pathArray.pop()
-            const pathToFile = this.fromArrayToPath(pathArray) 
-            const targetDirectory = this.find(pathToFile)
-            delete targetDirectory[dirname]
-        }
-
-        return true
-    }
-
-    rm(path, args){
-        if(path === undefined) throw new Error('rmdir: missing file operand')
-        const pathArray = this.fromPathToArray(path)
-        const filename = pathArray[pathArray.length - 1]
-        const isWithinThisDir = pathArray.length == 1
-        if(isWithinThisDir){
-            const isElementToDeleteDirectory = this.workingDir.hasDir(path)
-            if(isElementToDeleteDirectory == true){
-                throw new Error(`rm: cannot remove '${path}': Is a directory`)
-            }
-            return this.workingDir.removeFile(filename)
-
-        }
-        
-        pathArray.pop()
-        const pathToFile = this.fromArrayToPath(pathArray) 
-        const targetDirectory = this.find(pathToFile)
-        const isElementToDeleteDirectory = targetDirectory.hasDir(pathToFile)
-        if(isElementToDeleteDirectory == true){
-            throw new Error(`rm: cannot remove '${path}': Is a directory`)
-        }
-        return targetDirectory.removeFile(filename)
-
+    
+    fromArrayToPath(arrayOfDirectories){
+        const path = this.convertToPathString(arrayOfDirectories)
+        return path
     }
 
     convertToPathString(directoriesArray){
         return Array.isArray(directoriesArray) ? directoriesArray.join("/") : ""
+    }
+
+    fromPathToArray(path){
+        let arrayOfDirectories = this.splitPathIntoArray(path)
+        arrayOfDirectories = cleanUpEmptyArrayCells(arrayOfDirectories)
+        return arrayOfDirectories
+    }
+    
+    splitPathIntoArray(path){
+        const directories = path.split("/")
+        return directories
     }
 
     recursiveWalk(directory, modifierFunc=()=>{}){
@@ -484,6 +493,7 @@ class VirtualFileSystem{
         }
     }
 
+    //does not work
     * walkTree(directory, modifierFunc){
         const children = this.getSubDirectories(directory)//directory.getChildDirectories()
         for(const child of children){
@@ -494,50 +504,49 @@ class VirtualFileSystem{
         }
     }
 
-    removeCircularReferences(directory){
-        const unlinked = {
-            name:directory.name,
-            id:directory.id,
-            type:directory.type,
-            permissions:directory.permissions,
-            contents:directory.contents
-        }
-        const noCircularStr = stringify(directory, null, null, () => undefined)
-        const noCircular = JSON.parse(noCircularStr)
-        let clean = {}
-        Object.keys(noCircular).map(prop =>{
-            if(prop !== '..'){
-                clean[prop] = noCircular[prop]
-            }
-        })
-        console.log(clean)
-        return clean
-    }
+    // removeCircularReferences(directory){
+    //     const unlinked = {
+    //         name:directory.name,
+    //         id:directory.id,
+    //         type:directory.type,
+    //         permissions:directory.permissions,
+    //         contents:directory.contents
+    //     }
+    //     const noCircularStr = stringify(directory, null, null, () => undefined)
+    //     const noCircular = JSON.parse(noCircularStr)
+    //     let clean = {}
+    //     Object.keys(noCircular).map(prop =>{
+    //         if(prop !== '..'){
+    //             clean[prop] = noCircular[prop]
+    //         }
+    //     })
+    //     return clean
+    // }
 
-    extractDirectories(directory, structure){
+    // extractDirectories(directory, structure){
         
-        const dirnames = directory.getDirnames()
-        for(const dirname of dirnames){
+    //     const dirnames = directory.getDirnames()
+    //     for(const dirname of dirnames){
             
-            if(dirname !== '..'){
-                const child = directory[dirname]
-                if(child.contents && this.isDir(child)){
-                    if(child.parent().name == directory.name){
-                        const exportable = this.removeCircularReferences(child)
-                        structure[dirname] = exportable
-                        this.extractDirectories(child, structure[dirname])
-                    }
-                }
-            }
-        }
-        return structure
-    }
+    //         if(dirname !== '..'){
+    //             const child = directory[dirname]
+    //             if(child.contents && this.isDir(child)){
+    //                 if(child.parent().name == directory.name){
+    //                     const exportable = this.removeCircularReferences(child)
+    //                     structure[dirname] = exportable
+    //                     this.extractDirectories(child, structure[dirname])
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return structure
+    // }
 
     setDirectoryContent(directory, structureEntry){
         for(const prop in structureEntry){
             if(Array.isArray(structureEntry[prop]) && typeof structureEntry[prop] == "object"){
                 for(const value of structureEntry[prop]){
-                    console.log('Has', directory.contents)
+                    // console.log('Has', directory.contents)
                 }
 
             }else if(!Array.isArray(structureEntry[prop]) && typeof structureEntry[prop] == "object"){
@@ -545,7 +554,7 @@ class VirtualFileSystem{
                 this.setDirectoryContent(directory[prop], structureEntry[prop])
             }else{
                 // directory[prop] = structureEntry[prop]
-                console.log('Structure has prop',prop, structureEntry[prop])
+                // console.log('Structure has prop',prop, structureEntry[prop])
             }
         }
 
