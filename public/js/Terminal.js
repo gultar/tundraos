@@ -1,28 +1,3 @@
-const activeTerminals = []
-
-const spawnTerminalContainer = ()=>{
-  const id = Date.now()
-  const domElement = `
-  <div id="terminal-window-${id}" class="terminal-window" style="">
-    <div id="container-${id}" class="container">
-            <output id="output-${id}" class="output">
-            </output>
-            <div action="#" id="input-line-${id}" class="input-line">
-                <div id="prompt-${id}" class="prompt">
-                </div>
-                <div>
-                  <input id="cmdline-${id}" class="cmdline" autofocus />
-                </div>
-            </div>
-    </div>
-  </div>
-  `
-  const parentNode = $("#main-container")
-  parentNode.append(domElement)
-  activeTerminals.push(id)
-  return id
-}
-
 class TerminalEmulator{
   constructor(id){
     this.id = id
@@ -33,11 +8,11 @@ class TerminalEmulator{
     this.terminalWindowId = `#terminal-window-${this.id}`
     this.terminalWindow = document.querySelector(this.terminalWindowId);
     this.pageAnchor = document.querySelector("#page-anchor");
-    this.socket = io()
     this.dateElement = {}
     this.history_ = [];
     this.histpos_ = 0;
     this.histtemp_ = 0;
+    this.listPossibilities = false
     this.helpMessages = {
       "help":"Displays this message",
       "clear":"Clears the console",
@@ -47,6 +22,8 @@ class TerminalEmulator{
       "wiki":"Opens up a wikipedia page, or another website (not all of them work)",
       "gdt":"Opens up the Grand dictionnaire terminologique",
       "linguee":"Searches on Linguee for a translation of the text provided",
+      "map":"Displays a Google Maps window",
+      "tirex":"Start the famous tirex game from Google",
       "ls":'List information about the FILEs (the current directory by default). Usage: ls directory/',
       "rm":'Removes specified file. By default, it does not remove directories. . Usage: rm filename',
       "cd":"Change the working directory of the current shell execution environment. Usage: cd dir1/dir2/dir3",
@@ -56,28 +33,36 @@ class TerminalEmulator{
       "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
       "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname"
     }
+
     this.commands = {
+      //Basic commands
       help:(args, cmd)=>this.runHelp(args, cmd),
       clear:(args, cmd)=>this.clear(args, cmd),
-      echo:(args, cmd)=>this.output(args),
+      echo:(args, cmd)=>this.echo(args),
       date:(args, cmd)=>this.output( new Date() ),
-      background:(args, cmd)=>this.changeBackground(args),
-      web:(args)=>this.runWeb(args),
-      wiki:()=>this.runWeb(["https://wikipedia.org"]),
-      gdt:()=>this.runWeb(["https://gdt.oqlf.gouv.qc.ca/Resultat.aspx"]),
-      iching:()=>this.runWeb(["https://gultar.github.io/iching/"]),//
-      georatio:()=>this.runWeb(["https://georatio.com/"]),
-      linguee:(args)=>this.runLingueeSearch(args),
-      createuser:(args)=>this.createUser(args),
-      login:(args)=>this.login(args),
-      ls:(args)=>this.runBashCommand(["ls", ...args]),
-      cd:(args)=>this.runBashCommand(["cd", ...args]),
-      cat:(args)=>this.runBashCommand(["cat", ...args]),
-      pwd:(args)=>this.runBashCommand(["pwd", ...args]),
-      mkdir:(args)=>this.runBashCommand(["mkdir", ...args]),
-      touch:(args)=>this.runBashCommand(["touch", ...args]),
-      rmdir:(args)=>this.runBashCommand(["rmdir", ...args]),
-      rm:(args)=>this.runBashCommand(["rm", ...args]),
+      ls:(args)=>this.runBash("ls",args),
+      cd:(args)=>this.runBash("cd",args),
+      cat:(args)=>this.runBash("cat",args),
+      pwd:(args)=>this.runBash("pwd",args),
+      mkdir:(args)=>this.runBash("mkdir",args),
+      touch:(args)=>this.runBash("touch",args),
+      rmdir:(args)=>this.runBash("rmdir",args),
+      rm:(args)=>this.runBash("rm",args),
+      whereis:(args)=>this.search(args),
+      //Style Settings
+      background:(args, cmd)=>changeBackground(args),
+      //Web Tools
+      web:(args)=>runWeb(args),
+      wiki:()=>runWeb(["https://wikipedia.org"]),
+      gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/Resultat.aspx"]),
+      iching:()=>runWeb(["https://gultar.github.io/iching/"]),//
+      georatio:()=>runWeb(["https://georatio.com/"]),
+      linguee:(args)=>runLinguee(args),
+      tirex:()=>runTirex(),
+      test:()=>this.runTest(),
+      map:()=>runMap(),
+      lofi:()=>runLofi()
+      // explorer:()=>runFileManager()
     }
   }
   
@@ -92,30 +77,6 @@ class TerminalEmulator{
     setInterval(function(){
       $(`.date`).html(new Date());
     }, 1000)
-  }
-
-  runBashCommand(args){
-    const formatResult = (data) =>{
-      if(Array.isArray(data)){
-        data = data.join(" ")
-      }
-
-      if(typeof data == "object"){
-        data = JSON.stringify(data, null, 2)
-      }
-
-      return data
-    }
-
-    const cmd = this.argumentsToString(args)
-    this.socket.once("stdout", (data)=>{
-      this.output(`
-<pre>
-${formatResult(data)}
-</pre>
-      `)
-    })
-    this.socket.emit("stdin",cmd)
   }
 
   defineKeyEventListeners(){
@@ -145,8 +106,27 @@ ${formatResult(data)}
     }
   }
 
-  output(html){
-    this.output_.insertAdjacentHTML('beforeEnd', '<p>' + html + '</p>');
+  echo(args){
+    const hasPipeOperator = args.includes("|")
+    if(hasPipeOperator === false){
+      this.output(args.join(" "))
+    }else{
+      const indexOfPipeOp = args.indexOf("|")
+      let echoMessage = args.slice(0, indexOfPipeOp).join(" ")
+      this.output(echoMessage)
+      const newCommand = args.slice(indexOfPipeOp+1)
+      const [ cmd, ...newArgs ] = newCommand
+      const path = newArgs[0]
+      this.runBash(cmd, [path, echoMessage])
+    }
+    
+  }
+
+  output(data){
+    if(typeof data == 'object'){
+      data = JSON.stringify(data, null, 2)
+    }
+    this.output_.insertAdjacentHTML('beforeEnd', '<p>' + data + '</p>');
     this.cmdLine_.focus();
   }
 
@@ -155,105 +135,165 @@ ${formatResult(data)}
       this.initTerminalMsg();
   }
 
-  changeBackground(args){
-    const value = args[0]
-    if(value.substr(0, 4) == "http"){
-      console.log('Make http')
-      $('body').css("background-image", "url("+args[0]+")")
-      $('body').css("background-size", "cover")
-    }else{
-      $('body').css("background-image", "none")
-      console.log(value)
-      $('body').css("background", value)
-    }
-  }
-
   turnToURLQueryText(args){
     const argsFused = args.toString()
     const text = argsFused.replaceAll(",","+")
     return text
   }
 
-  createUser(args){
-    const [ username, password ] = args
+  runBash(cmd, args){
+    const result = runFileSystemCommand(cmd, args)
+    this.output(result)
+  }
 
-    if(username == undefined) return this.output("LOGIN ERROR: Need to provide username")
-    if(password == undefined) return this.output("LOGIN ERROR: Need to provide password")
-   
-    $.ajax({
-      type: "POST",
-      url: "/createUser",
-      data: {
-        timestamp:Date.now(),
-        username:username,
-        password:sha256(password),
-      },
-      success: (res)=>{
-        this.output(res)
-      },
+  search(args){
+    runFileSystemCommand("search", args)
+    .then(result => {
+      if(result){
+        if(result.directory){
+          this.output(FileSystem.getAbsolutePath(result.directory))
+        }else if(result.file){
+          const { file, containedIn } = result
+          this.output(FileSystem.getAbsolutePath(containedIn)+"/"+file.name)
+        }
+      }
     })
   }
 
-  login(args){
-    const [ username, rawPassword ] = args
-    if(username == undefined) return this.output("LOGIN ERROR: Need to provide username")
-    if(rawPassword == undefined) return this.output("LOGIN ERROR: Need to provide password")
-    
-    const password = sha256(rawPassword)
-    this.socket.once('login-result', (result)=>{
-      this.output(result)
-    })
-    this.socket.emit('login', JSON.stringify({username, password}))
-
+  runFileManager(){
+    const anchor = document.getElementById("filemanager")
+    const temp = anchor.insertAdjacentHTML('beforeEnd', `
+    <iframe src="./js-fileexplorer/demo.html"></iframe>
+    `)
+    new WinBox({ title: "Window Title", mount:temp });
   }
 
-  runWeb(args=[]){
-    new WinBox({ title: "Window Title", height:"90%", width:"90%", html:`
-    <iframe id="wiki-window" style="border:none;" src="${args[0]}"></iframe>
-    ` });
+  runTest(){
+    // const editor = `<iframe height="30%" width="60%" src="./text-editor.html"></iframe>`
+    new WinBox({ title: "Window Title", height:"95%", width:"80%", url:"./editor.html"  });
   }
 
-  runLingueeSearch(args){
-    const text = this.turnToURLQueryText(args)
-    new WinBox({ title: "Window Title", height:"100%", width:"100%", html:`
-    <iframe 
-    id="wiki-window" 
-    style="border:none;" 
-    src="https://www.linguee.fr/search?source=auto&query=${text}">
-    </iframe>
-    ` });
+  runMap(){
+    const maps = `<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11061.57471035846!2d-70.6774246087825!3d46.12298747613765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cb9bfe1bb01d291%3A0x5040cadae4d29b0!2sSaint-Georges%2C%20QC%2C%20Canada!5e0!3m2!1sfr!2smx!4v1668968664821!5m2!1sfr!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+    new WinBox({ title: "Window Title", height:"95%", width:"80%", html:maps  });
   }
 
   //Already existing
   processNewCommand(e){
+    let [ cmd, ...args ] = this.parseArguments(this.cmdLine_.value);
+
     if (e.key == "Tab") { // tab
       e.preventDefault();
+      this.autoCompleteCommand()
+      this.autoCompletePath(cmd, args[0])
       // Implement tab suggest.
     } else if (e.key == "Enter") { // enter
       // Save shell history.
-      if (this.cmdLine_.value) {
-        this.history_[this.history_.length] = this.cmdLine_.value;
-        this.histpos_ = this.history_.length;
-      }
-      
-      let [ cmd, ...args ] = this.parseArguments(this.cmdLine_.value);
-      if(!cmd){
-        this.output("");
-      }else{
-        this.addCurrentLineToConsole();
-        cmd = cmd.toLowerCase();
-        if(Object.hasOwn(this.commands, cmd)){
-          const runCommand = this.commands[cmd]
-          runCommand(args, cmd)
-        }else{
-          if (cmd) {
-            this.output(cmd + ': command not found');
-          }
-        }
-      }
+      return this.makeCommandReady(cmd, args)
+    }else{
+      this.historyHandler(e)
+    }
+  }
 
-      window.scrollTo(0, this.getDocHeight_());
-      this.cmdLine_.value = ''; // Clear/setup line for next input.
+  makeCommandReady(cmd, args){
+
+    if(!cmd){
+      return this.output("");
+    }
+
+    this.saveShellHistory()
+    this.enterNewLine();
+
+    cmd = cmd.toLowerCase();
+    if(Object.hasOwn(this.commands, cmd)){
+      const runCommand = this.commands[cmd]
+
+      runCommand(args, cmd)
+      this.listPossibilities = false
+      return true
+    }else{
+      return this.output(cmd + ': command not found');
+    }
+  }
+
+  handleChainingOperators(args){
+    const hasOrOrOperator = indexOf("||") !== -1
+    const hasPipeOperator = args.indexOf("|") !== -1
+    const hasAndAndOperator = args.indexOf("&&") !== -1
+
+    if(hasPipeOperator){
+      const indexOfPipeOp = args.indexOf("|")
+      const newCommand = args.slice(indexOfPipeOp+1)
+      const [ cmd, ...newArgs ] = newCommand
+      return this.makeCommandReady(cmd, newArgs)
+    }
+
+    if(hasAndAndOperator){
+      const indexOfPipeOp = args.indexOf("|")
+      const newCommand = args.slice(indexOfPipeOp+1)
+      const [ cmd, ...newArgs ] = newCommand
+      return this.makeCommandReady(cmd, newArgs)
+    }
+
+  }
+
+  enterNewLine(){
+    this.addCurrentLineToConsole();
+    window.scrollTo(0, this.getDocHeight_());
+    this.cmdLine_.value = ''; // Clear/setup line for next input.
+  }
+
+  saveShellHistory(){
+    if (this.cmdLine_.value) {
+      this.history_[this.history_.length] = this.cmdLine_.value;
+      this.histpos_ = this.history_.length;
+      console.log('Hist len', this.history_.length)
+      console.log('Hist pos', this.histpos_)
+    }
+  }
+
+  findMatchinPartialValues(partialValue, setOfValues){
+    const options = []
+    for(let value of setOfValues){
+      const contains = value.substr(0, partialValue.length) == partialValue
+      if(contains){
+        options.push(value)
+      }
+    }
+
+    return options
+  }
+
+  autoCompleteCommand(){
+    const partialCmd = this.cmdLine_.value
+    const potentialCmds = this.findMatchinPartialValues(partialCmd, Object.keys(this.commands))
+    
+
+    if(potentialCmds.length === 1){
+      this.cmdLine_.value = potentialCmds[0]
+    }else{
+      if(this.listPossibilities == true){
+        this.output(potentialCmds.join(" "))
+        this.listPossibilities = false
+      }else{
+        this.listPossibilities = true
+      }
+    }
+  }
+
+  autoCompletePath(cmd, partialPath){
+    const dirnames = FileSystem.wd().getDirnames()
+    const filenames = FileSystem.wd().getFilenames()
+    const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
+    if(potentialDirs.length === 1){
+      this.cmdLine_.value = `${cmd} ${potentialDirs[0]}`
+    }else{
+      if(this.listPossibilities == true){
+        this.output(potentialDirs.join(" "))
+        this.listPossibilities = false
+      }else{
+        this.listPossibilities = true
+      }
     }
   }
 
@@ -293,11 +333,13 @@ ${formatResult(data)}
       }
       
       if (e.key == "ArrowUp") { // up
+        console.log("ArrowUp")
         this.histpos_--;
         if (this.histpos_ < 0) {
           this.histpos_ = 0;
         }
       } else if (e.key == "ArrowDown") { // down
+        console.log("ArrowDown")
         this.histpos_++;
         if (this.histpos_ > this.history_.length) {
           this.histpos_ = this.history_.length;
@@ -306,7 +348,7 @@ ${formatResult(data)}
 
       if (e.key == "ArrowUp" || e.key == "ArrowDown") {
         this.cmdLine_.value = this.history_[this.histpos_] ? this.history_[this.histpos_] : this.histtemp_;
-        // this.cmdLine_.value = this.cmdLine_.value; // Sets cursor to end of input.
+        this.cmdLine_.value = this.cmdLine_.value; // Sets cursor to end of input.
       }
     }
   }
@@ -320,9 +362,6 @@ ${formatResult(data)}
         Math.max(d.body.clientHeight, d.documentElement.clientHeight)
     );
   }
-
-  //Divided functions
-  defineAvailableFunctions(){}
 
   formatHelpMessage(commandName, message){
     return `<span class'help-line'><b class='help-cmd'>${commandName}</b> ----------- ${message}</span>`

@@ -1,7 +1,7 @@
   body{
     position:fixed;
-    background-image: url("../images/wallpaper.jpg");
-    /* background-color: #404347; */
+    /* background-image: url("../images/wallpaper.jpg"); */
+    background-color: var(--background);
     color:white;
     background-size:cover;
     background-repeat: no-repeat;
@@ -19,11 +19,13 @@
     --window-tint: 0.5;
     --terminal-font-color:#57ff0a;
     --console-window-background:rgba(0,0,0,var(--window-tint));
+    --terminal-font-size:8pt;
+    --background:#45505f;
   }
 
   .terminal-window{
     margin: 0;
-    font-size: 9pt;
+    font-size: var(--terminal-font-size);
     
     color: var(--terminal-font-color);
     overflow:auto;
@@ -46,7 +48,7 @@
     background: var(--console-window-background) !important;
   }
   .wb-title{
-    font-size: 10pt;
+    font-size: 9pt;
   }
   .winbox{
     background-color:transparent !important;
@@ -165,6 +167,7 @@
     body{
       font-size:12pt !important;
       background-size:100% 100%;
+      background-repeat: no-repeat;
     }
 
     .winbox{
