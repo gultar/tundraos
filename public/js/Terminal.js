@@ -33,7 +33,6 @@ class TerminalEmulator{
       "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
       "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname"
     }
-
     this.commands = {
       //Basic commands
       help:(args, cmd)=>this.runHelp(args, cmd),
@@ -48,9 +47,9 @@ class TerminalEmulator{
       touch:(args)=>this.runBash("touch",args),
       rmdir:(args)=>this.runBash("rmdir",args),
       rm:(args)=>this.runBash("rm",args),
-      whereis:(args)=>this.search(args),
+      whereis:(args)=>this.whereis(args),
       //Style Settings
-      background:(args, cmd)=>changeBackground(args),
+      background:(args)=>changeBackground(args),
       //Web Tools
       web:(args)=>runWeb(args),
       wiki:()=>runWeb(["https://wikipedia.org"]),
@@ -69,6 +68,7 @@ class TerminalEmulator{
   init(){
     this.defineKeyEventListeners();
     this.initTerminalMsg();
+    
   }
 
   initTerminalMsg(){
@@ -144,8 +144,15 @@ class TerminalEmulator{
   }
 
   runBash(cmd, args){
-    const result = runFileSystemCommand(cmd, args)
-    this.output(result)
+    exec(cmd, args)
+    .then(result => this.output(result))
+  }
+
+  whereis(args){
+    runFileSystemCommand("whereis", args)
+    .then(result => {
+      this.output(result)
+    })
   }
 
   search(args){

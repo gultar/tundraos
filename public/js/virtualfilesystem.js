@@ -38,9 +38,6 @@ function stringify(obj, replacer, spaces, cycleReplacer) {
 
 let parenter = {
     set: function(target, prop, value){
-        // console.log('target',target)
-        // console.log('prop', prop)
-        // console.log('value', value)
       if(typeof value === "object" && prop !== 'contents'){
         let p = new Proxy(new Directory(prop, target), parenter);
 
@@ -206,7 +203,20 @@ class VirtualFileSystem{
             home:{},
             [username]:{}
         }
-        this.workingDir = this.filesystem["/"] //this.root.home
+        this.workingDir = this.filesystem["/"] 
+    }
+
+    exposeCommands(){
+        return {
+            ls:this.ls,
+            cd:this.cd,
+            pwd:this.pwd,
+            rm:this.rm,
+            rmdir:this.rmdir,
+            mkdir:this.mkdir,
+            touch:this.touch,
+            cat:this.cat,
+        }
     }
 
     isDir(destination){
@@ -240,8 +250,21 @@ class VirtualFileSystem{
         return (parentDir[childDirName] ? true : false)
     }
 
+    removeDirectoryMarker(path){
+        const hasDirectoryMarker = path[path.length - 1] === "/"
+        if(hasDirectoryMarker){
+            return path.slice(0, path.length - 1)
+        }else{
+            return path
+        }
+    }
+
     cd(path){
         try{
+            if(path !== "/"){
+                path = this.removeDirectoryMarker(path)
+            }
+            
             const newWorkingDirectory = this.find(path)
             if(this.isDir(newWorkingDirectory)){
                 this.workingDir = newWorkingDirectory
@@ -256,7 +279,7 @@ class VirtualFileSystem{
     }
 
     ls(path, args){
-        let directory = {}
+        let directory = false
         if(path == undefined){
             directory = this.workingDir
         }else{
@@ -265,7 +288,7 @@ class VirtualFileSystem{
             if(!isDirectory) throw new Error(`Command ls failed. ${path} is not a directory`)
         }
         
-        const contents = directory.getContentNames()
+        const contents = (directory ? directory.getContentNames() : [])
 
         return contents
     }
@@ -375,6 +398,9 @@ class VirtualFileSystem{
 
 
     find(path){
+
+        if(!path) path = this.wd().name
+        
         const isPathRoot = path === "/"
         if(isPathRoot) return this.root()
 
@@ -409,6 +435,23 @@ class VirtualFileSystem{
         }
         
         return workingDir
+    }
+
+    whereis(itemName){
+        return new Promise((resolve)=>{
+            this.recursiveWalk(this.root(), (directory)=>{
+                const isDir = directory.name == itemName
+                const isFile = directory.getFile(itemName)
+
+                if(isDir){
+                    resolve(this.getAbsolutePath(directory))
+                }else if(isFile){
+                    resolve(this.getAbsolutePath(directory)+"/"+itemName)
+                }
+            })
+
+            resolve(undefined)
+        })
     }
 
     search(itemName){
@@ -479,8 +522,11 @@ class VirtualFileSystem{
     }
     
     splitPathIntoArray(path){
-        const directories = path.split("/")
-        return directories
+        if(path.includes("/")){
+            return path.split("/")
+        }else{
+            return [path]
+        }
     }
 
     recursiveWalk(directory, modifierFunc=()=>{}){
@@ -503,44 +549,6 @@ class VirtualFileSystem{
             }
         }
     }
-
-    // removeCircularReferences(directory){
-    //     const unlinked = {
-    //         name:directory.name,
-    //         id:directory.id,
-    //         type:directory.type,
-    //         permissions:directory.permissions,
-    //         contents:directory.contents
-    //     }
-    //     const noCircularStr = stringify(directory, null, null, () => undefined)
-    //     const noCircular = JSON.parse(noCircularStr)
-    //     let clean = {}
-    //     Object.keys(noCircular).map(prop =>{
-    //         if(prop !== '..'){
-    //             clean[prop] = noCircular[prop]
-    //         }
-    //     })
-    //     return clean
-    // }
-
-    // extractDirectories(directory, structure){
-        
-    //     const dirnames = directory.getDirnames()
-    //     for(const dirname of dirnames){
-            
-    //         if(dirname !== '..'){
-    //             const child = directory[dirname]
-    //             if(child.contents && this.isDir(child)){
-    //                 if(child.parent().name == directory.name){
-    //                     const exportable = this.removeCircularReferences(child)
-    //                     structure[dirname] = exportable
-    //                     this.extractDirectories(child, structure[dirname])
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return structure
-    // }
 
     setDirectoryContent(directory, structureEntry){
         for(const prop in structureEntry){

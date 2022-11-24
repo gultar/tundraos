@@ -5,6 +5,9 @@ function turnToURLQueryText(args){
 }
 
 function runWeb(url){
+    if(url == "" && url.length == 0){
+        url = "https://www.google.com/webhp?igu=1"
+    }
     new WinBox({ title: url, height:"90%", width:"90%", html:`
     <iframe id="wiki-window" style="border:none;" src="${url}"></iframe>
     ` });
@@ -23,7 +26,7 @@ function runLinguee(params=[]){
 
 function runTirex(){
     new WinBox({ title: "Tirex Game", height:"90%", width:"90%", html:`
-    <iframe id="wiki-window" style="border:none;" src="./tirex.html"></iframe>
+    <iframe id="wiki-window" style="border:none;" src="./pages/tirex.html"></iframe>
     ` });
 }
 
