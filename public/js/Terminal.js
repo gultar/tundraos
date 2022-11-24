@@ -86,7 +86,7 @@ class TerminalEmulator{
     self.addEventListener('click', ()=>{
       this.pageAnchor.focus();
     }, false);
-    // this.cmdLine_.addEventListener('click', (e)=>this.inputTextClick(e), false);
+    
     this.cmdLine_.addEventListener('keydown', (e)=>{
       console.log('Event', e)
       this.processNewCommand(e)
@@ -145,18 +145,21 @@ class TerminalEmulator{
 
   runBash(cmd, args){
     exec(cmd, args)
-    .then(result => this.output(result))
+    .then(result => {
+      result = (typeof result == 'object' ? JSON.stringify(result, null, 2) : result)
+      this.output(`<xmp>${result}</xmp>`)
+    })
   }
 
   whereis(args){
-    runFileSystemCommand("whereis", args)
+    exec("whereis", args)
     .then(result => {
       this.output(result)
     })
   }
 
   search(args){
-    runFileSystemCommand("search", args)
+    exec("search", args)
     .then(result => {
       if(result){
         if(result.directory){
@@ -182,20 +185,15 @@ class TerminalEmulator{
     new WinBox({ title: "Window Title", height:"95%", width:"80%", url:"./editor.html"  });
   }
 
-  runMap(){
-    const maps = `<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11061.57471035846!2d-70.6774246087825!3d46.12298747613765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cb9bfe1bb01d291%3A0x5040cadae4d29b0!2sSaint-Georges%2C%20QC%2C%20Canada!5e0!3m2!1sfr!2smx!4v1668968664821!5m2!1sfr!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
-    new WinBox({ title: "Window Title", height:"95%", width:"80%", html:maps  });
-  }
-
   //Already existing
-  processNewCommand(e){
+  async processNewCommand(e){
     let [ cmd, ...args ] = this.parseArguments(this.cmdLine_.value);
 
     if (e.key == "Tab") { // tab
       e.preventDefault();
       this.autoCompleteCommand()
       // this.autoCompletePath(cmd, args[0])
-      this.parsePath(args[0], cmd)
+      await this.parsePath(args[0], cmd)
       // Implement tab suggest.
     } else if (e.key == "Enter") { // enter
       // Save shell history.
@@ -284,7 +282,7 @@ class TerminalEmulator{
     }
   }
 
-  parsePath(partialPath, cmd){
+  async parsePath(partialPath, cmd){
     const hasSubPaths = partialPath.includes("/")
     
     if(hasSubPaths){
@@ -293,10 +291,10 @@ class TerminalEmulator{
 
       subPaths.pop()
       const relativePath = subPaths.join("/")
-
-      const suggestion = this.suggestPath(partialSubPath, relativePath)
+      
+      const suggestion = await this.suggest(partialSubPath, relativePath)
       if(suggestion.length === 1){
-        this.cmdLine_.value = `${cmd} ${relativePath}/${suggestion[0]}/`
+        this.cmdLine_.value = `${cmd} ${relativePath}/${suggestion[0]}`
         return suggestion[0]
       }else{
         this.output(suggestion.join(" "))
@@ -305,9 +303,9 @@ class TerminalEmulator{
 
     }else{
 
-      const suggestion = this.suggestPath(partialPath)
+      const suggestion = await this.suggest(partialPath)
       if(suggestion.length === 1){
-        this.cmdLine_.value = `${cmd} ${suggestion[0]}/`
+        this.cmdLine_.value = `${cmd} ${suggestion[0]}`
         return suggestion[0]
       }else{
         this.output(suggestion.join(" "))
@@ -315,8 +313,14 @@ class TerminalEmulator{
       }
 
     }
-    // const potentialDirs = this.findMatchinPartialValues(partialPath, [...dirnames, ...filenames])
   }
+
+  async suggest(partialPath, relativePath){
+    const lsResult = await exec("ls", relativePath)
+    const potentialDirs = this.findMatchinPartialValues(partialPath, [...lsResult])
+    return potentialDirs
+  }
+
 
   suggestPath(partialPath, relativePath){
     if(!relativePath) relativePath = FileSystem.wd().name

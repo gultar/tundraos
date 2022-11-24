@@ -1,12 +1,13 @@
 const { exec } = require('node:child_process')
 const VirtualFileSystem = require('./public/js/virtualfilesystem.js')
-const createServer = require('./server.js')
+const runServer = require('./server.js')
+const Termit = require("termit");
 const { NodeVM } = require('vm2')
 const fs = require('fs')
 const ReadLine = require('readline')
 
 let input = []
-
+let readline = {}
 
 const help = (cmd)=>{
   if(cmd){
@@ -59,6 +60,24 @@ const node = (args) =>{
 `, 'vm.js');
 }
 
+const edit = (filename) =>{
+  const file = FileSystem.wd().getFile(filename)
+  console.log(file.content)
+  try{
+    let options = {
+        disableOpen: true,
+        disableSaveAs: true
+    }
+    let term = new Termit(options);
+    readline.pause()
+    term.init(file.content)
+    
+  }catch(e){
+    console.log(e)
+    return false
+  }
+}
+
 
 const FileSystem = new VirtualFileSystem('fs')
 let commands = FileSystem.exposeCommands()
@@ -68,6 +87,7 @@ FileSystem.echo = echo
 FileSystem.clear = clear
 FileSystem.date = date
 FileSystem.node = node
+FileSystem.edit = edit
 
 
 const helpMessages = {
@@ -130,7 +150,7 @@ let autoComplete = function completer(line) {
 }
 
 
-const readline = ReadLine.createInterface({
+readline = ReadLine.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: autoComplete
@@ -163,7 +183,7 @@ const run = () =>{
       if(FileSystem[cmd]){
         console.log(runFileSystemCommand(cmd, args));
       }else if(cmd == 'server'){
-        createServer()
+        runServer(FileSystem)
         readline.close()
         stopped = true;
       }else if(cmd == 'electron'){

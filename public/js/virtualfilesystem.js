@@ -396,15 +396,25 @@ class VirtualFileSystem{
         return true
     }
 
-
     find(path){
-
+        
         if(!path) path = this.wd().name
         
+        if(typeof path !== 'string') throw new Error('Path provided needs to be a string')
+
+        if(path.slice(-1)  === "/"){
+            path = path.slice(0, path.length - 1)
+            console.log(path)
+        }   
+
         const isPathRoot = path === "/"
         if(isPathRoot) return this.root()
 
         if(path == ".." && this.isRootDir(this.workingDir)){
+            return this.workingDir
+        }
+
+        if(path == "."){
             return this.workingDir
         }
 
@@ -423,7 +433,6 @@ class VirtualFileSystem{
 
                 const exists = workingDir[dir]
                 const isDirectory = this.isDir(workingDir[dir])
-
                 if(exists){
                     if(isDirectory){
                         workingDir = workingDir[dir]

@@ -18,7 +18,7 @@ document.addEventListener('visibilitychange', function() {
     saveState()
 });
 
-const socket = new io("http://localhost:3333")
+const socket = new io("http://localhost:8000")
 socket.on('connect', ()=>{
     console.log('Shell linked established')
 })
@@ -34,7 +34,6 @@ const execRemoteCommand = (cmd, args=[]) =>{
       socket.once("shell-result", (result)=>{
         resolve(result)
       })
-      console.log('Shell command', commandString)
       socket.emit("shell-command", commandString)
     }catch(e){
       reject(e)
@@ -54,11 +53,11 @@ const runFileSystemCommand = (cmd, args=[]) =>{
   }
 }
 
-const exec = async (cmd, args=[]) =>{
+const exec = async (cmd, args) =>{
   if(socket.connected){
-    return await execRemoteCommand(cmd, args)
+    return await execRemoteCommand(cmd, [args])
   }else{
-    return runFileSystemCommand(cmd, args)
+    return runFileSystemCommand(cmd, [args])
   }
 }
 
