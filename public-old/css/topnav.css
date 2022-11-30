@@ -1,0 +1,101 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+@import url(https://fonts.googleapis.com/css?family=Bree+Serif);
+
+*{
+	--height:30px;
+	--height-minus:-30px;
+	--width:170px;
+	--hover-color:#57ff0a;
+	--nav-background-color:black;
+	--nav-font-color:#ffffff;
+	--nav-font-size:8pt;
+}
+
+.clock-container{
+	display:inline-block;
+	margin-right: 0;
+	margin-left: auto;
+	align-items: center;
+	padding: 8px 8px;
+	font-size: var(--nav-font-size);
+}
+
+.nav-item-group{
+	display:flex;
+}
+
+nav {
+	background-color: var(--nav-background-color);
+    top:0;
+    left:0;
+    position:fixed;
+    width:100%;
+	display:flex;
+	justify-content: space-between;
+	box-shadow: 0 10px 10px -10px rgba(0,0,0,.5);
+}
+
+nav ul {
+	padding: 0;
+    margin: 0;
+	list-style: none;
+	position: relative;
+}
+	
+nav ul li {
+	display:inline-block;
+	background-color: var(--nav-background-color);
+}
+
+nav a {
+	display:block;
+	padding:0 10px;	
+	color:var(--nav-font-color);
+	line-height: var(--height);
+	text-decoration:none;
+    font-size: var(--nav-font-size);
+}
+
+nav a:hover { 
+	background-color: var(--hover-color); 
+}
+
+/* Hide Dropdowns by Default */
+nav ul ul {
+	display: none;
+	position: absolute; 
+	top: var(--height); /* the height of the main nav */
+}
+	
+/* Display Dropdowns on Hover */
+nav ul li:hover > ul {
+	display:inherit;
+}
+	
+/* Fisrt Tier Dropdown */
+nav ul ul li {
+	width:var(--width);
+	float:none;
+	display:list-item;
+	position: relative;
+}
+
+/* Second, Third and more Tiers	*/
+nav ul ul ul li {
+	position: relative;
+	top:var(--height-minus); 
+	left:var(--width);
+}
+
+	
+/* Change this in order to change the Dropdown symbol */
+li > a:after { content:  ' +'; }
+li > a:only-child:after { content: ''; }
+
+
+.main-menu-icons{
+	height:18px;
+	width:18px;
+	margin-right: 3px;
+	vertical-align: middle;
+}

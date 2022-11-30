@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/main.css" type="text/css"/>
+
+    <script src="./js/external/jquery-2.1.1.min.js"></script>
+    <script  src="./js/external/jquery-ui.min.js"></script>
+    <script src="./js/classes/virtualfilesystem.js"></script>
+    <script src="./js/external/socket.io.min.js"></script>
+    <script src="./js/commands/general-cmds.js"></script>
+    <script src="./js/minimal-terminal.js"></script>
+    <script src="./js/terminal-window-init.js"></script>
+    <script src="./js/filesystem-init.js"></script>
+    <script src="./js/websocket-init.js"></script>
+    <title>Document</title>
+</head>
+<body style="background:black; padding:20px;">
+    <div id="terminal-window-1" class="terminal-window" style="">
+        <div id="container-1" class="container">
+                <output id="output-1" class="output">
+                </output>
+                <div action="#" id="input-line-1" class="input-line">
+                    <div id="prompt-1" class="prompt">
+                    </div>
+                    <div>
+                      <input tabindex="0" id="cmdline-1" class="cmdline" autofocus />
+                    </div>
+                </div>
+        </div>
+      </div>
+      <div id="page-anchor"></div>
+      <script>
+        $('.prompt').html('[user@sh] ');
+        
+        // Initialize a new terminal object
+        const term = new MinimalTerminal("1");
+        term.init();
+      </script>
+</body>
+</html>

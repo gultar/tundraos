@@ -1,5 +1,5 @@
 const fs = require("fs")
-const File = require('../../public/js/classes/file.js')
+const File = require('../../browser-os/js/classes/file.js')
 
 const rootFs = {
     "system":{
@@ -28,8 +28,4 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["syste
   return fsPosition
 }
 
-// const { contents, ...rest } = buildFileSystemRepresentation("./public")
-
-// console.log(rest)
-
-module.exports = buildFileSystemRepresentation
+module.exports = { buildFileSystemRepresentation }

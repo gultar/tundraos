@@ -3,10 +3,8 @@ const express = require('express')
 const helmet = require('helmet')
 const cors = require('cors');
 const bodyParser = require('body-parser')
-// const { spawn } = require('node:child_process')
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-// const VirtualFileSystem = require('./public/js/virtualfilesystem.js')
+const { createServer } = require("http")
+const { Server } = require("socket.io")
 
 const runServer = (FileSystem) =>{
   
@@ -19,11 +17,11 @@ const runServer = (FileSystem) =>{
         const result = await FileSystem[cmd](...args)
         return result
       }else{
-        return `Command ${cmd} unavailable`
+        return { error:`Command ${cmd} unavailable` }
       }
     }catch(e){
       console.log(e)
-      return e.message
+      return { error:e.message }
     }
   }
   
@@ -43,7 +41,7 @@ const runServer = (FileSystem) =>{
   const httpServer = createServer(app)
   const port = process.env.PORT || 8000;
   const ioPort = 5000
-  app.use(express.static(__dirname + '/public'));
+  app.use(express.static(__dirname + '/browser-os'));
   app.use(cors())
   app.use(helmet.frameguard())
   app.use(bodyParser.json());       // to support JSON-encoded bodies
@@ -51,18 +49,23 @@ const runServer = (FileSystem) =>{
     extended: true
   })); 
   app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname, '/public/index.html'));
+    res.sendFile(path.join(__dirname, '/index.html'));
   });
+
   const io = new Server(httpServer);
   io.on("connection", (socket)=>{
     socket.on("shell-command", async (commandString)=>{
 
       //Implement an arg parser
       const result = await runCommand(commandString)
-      socket.emit('shell-result', result)
-
+      if(result.error){
+        socket.emit('shell-result', { error:result.error })
+      }else{
+        socket.emit('shell-result', result)
+      }
       
     })
+
   })
   
   httpServer.listen(port, ()=>{

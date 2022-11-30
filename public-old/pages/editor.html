@@ -1,0 +1,156 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/topnav.css">
+</head>
+<body>
+    <style>
+        
+        #console-wrapper{
+            display: block;
+            height:auto;
+            width:auto;
+            background-color: transparent;
+            font-family: Inconsolata, monospace;
+        }
+
+        #console-editor{
+            display: block;
+            padding:2%;
+            width:90%;
+            height:90%;
+            background-color: transparent;
+            border: none;
+            resize: none;
+            color:greenyellow;
+            border: 1px solid greenyellow;
+            margin-top:50px;
+        }
+
+        #console-editor:focus{
+            outline: 0px solid transparent;
+        }
+
+        #editor-nav{
+            background-color:transparent;
+        }
+
+        #editor-nav ul li{
+            background-color:transparent;
+        }
+
+        /*Styling the main menu*/
+nav ul li {
+  float: left;
+  list-style: none;
+}
+
+nav ul li a {
+  color: greenyellow;
+  /* background: cornflowerblue; */
+  
+  padding: 5px;
+  margin: 0 15px;
+  text-decoration: none;
+  display:inline-block;
+  width: 100px;
+}
+
+nav ul li a:hover {
+  background: cornflowerblue;
+}
+
+/* Styling the sub menu */
+.submenu {
+  position: relative;
+}
+
+.submenu ul {
+  position: absolute;
+  padding:0; 
+  margin:5px 0;
+  display: none;
+}
+
+.submenu li{
+  display: block;
+  background:var(--background);
+  /* background: lightsteelblue; */
+  color: white;
+  float: none;
+  width: 100%;
+}
+
+/* Styling drop down links */
+.submenu li a {
+  background: transparent;
+  padding:5px;
+  display: block;
+}
+
+.submenu li a:hover {
+  /* background: gray; */
+}
+
+/* Showing Submenu on hover*/
+.submenu:hover ul {
+  display: block;
+}
+    </style>
+    <div id="console-wrapper">
+        <nav id="editor-nav">
+            <ul>
+                <li class="submenu">
+                    <a href="">File</a>
+                    <ul>
+                        <li><a onclick="">New</a> </li>
+                        <li><a onclick="">Open</a> </li>
+                        <li><a onclick="">Save</a></li>
+                        <li><a onclick="">Save As</a> </li>
+                        <li><a onclick="">Settings</a></li>
+                        <li><a onclick="">Exit</a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+        </nav>
+        <textarea name="console-editor" id="console-editor" cols="10" rows="30"></textarea>
+
+    </div>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>ACE in Action</title>
+<style type="text/css" media="screen">
+    #editor { 
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="editor">function foo(items) {
+    var x = "All this is syntax highlighted";
+    return x;
+}</div>
+    
+<script src="../editor/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/javascript");
+</script>
+</body>
+</html>

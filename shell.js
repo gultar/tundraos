@@ -1,7 +1,7 @@
 const { exec } = require('node:child_process')
-const VirtualFileSystem = require('./public/js/virtualfilesystem.js')
+const VirtualFileSystem = require('./browser-os/js/classes/virtualfilesystem.js')
+const { buildFileSystemRepresentation } = require('./src/filesystem/dir-build.js')
 const runServer = require('./server.js')
-const Termit = require("termit");
 const { NodeVM } = require('vm2')
 const fs = require('fs')
 const ReadLine = require('readline')
@@ -61,21 +61,7 @@ const node = (args) =>{
 }
 
 const edit = (filename) =>{
-  const file = FileSystem.wd().getFile(filename)
-  console.log(file.content)
-  try{
-    let options = {
-        disableOpen: true,
-        disableSaveAs: true
-    }
-    let term = new Termit(options);
-    readline.pause()
-    term.init(file.content)
-    
-  }catch(e){
-    console.log(e)
-    return false
-  }
+  
 }
 
 
@@ -116,15 +102,11 @@ let autoComplete = function completer(line) {
     //complete path
     if(line.includes("/") ){
       const argStr = args.join(" ")
-      let subPath = argStr.split("/")
+      let subPath = argStr.split("/").filter(cell => cell !== '')
       partial = subPath[subPath.length - 1]
-      parentDirname = subPath[subPath.length - 2]
-      if(partial == ""){
-        partial = subPath[subPath.length - 2]
-        parentDirname = subPath[subPath.length - 3]
-      }
+      parentDirname = subPath.slice(0, subPath.length - 1).join("/")
       
-      const parentDirectory = FileSystem.find(parentDirname)
+      const parentDirectory = FileSystem.goToDir(parentDirname)
       completions = parentDirectory.getContentNames()
     }
     
@@ -139,7 +121,7 @@ let autoComplete = function completer(line) {
       parentDirname = (parentDirname ? parentDirname + "/" : "")
       hits[0] = `${cmd} ${parentDirname + hits[0]}`
     }
-    
+
     return [hits.length <= 1 ? hits : completions, line];
   }else{
     completions = commandNames
@@ -149,12 +131,53 @@ let autoComplete = function completer(line) {
 
 }
 
+function parsePath(partialPath, cmd){
+  let relativePath = ""
+  let partialTarget = ""
+
+  const partialPathHasContent = FileSystem.ls(partialPath)
+  console.log('Partial content', partialPathHasContent)
+  if(partialPathHasContent && partialPathHasContent.length){
+    console.log("\n", partialPathHasContent.join(" "))
+    return true
+  }
+
+  
+
+  const hasSubPaths = partialPath.includes("/")
+  if(hasSubPaths){
+    const subPaths = partialPath.split("/")
+    partialTarget = subPaths[subPaths.length - 1]
+    subPaths.pop()
+    relativePath = subPaths.join("/")
+  }else{
+    partialTarget = partialPath
+  }
+  if(relativePath !== "") relativePath = relativePath + "/"
+  // const suggestions = await exec("autoCompletePath", [relativePath+partialTarget])
+  
+  if(suggestions.length > 1){
+    // this.output(suggestions.join(" "))
+  }else if(suggestions.length === 1){
+
+    // this.cmdLine_.value = `${cmd} ${relativePath}${suggestions[0]}`
+    return suggestions[0]
+  }else{
+    
+    // this.output(current.join(" "))
+  }
+}
+
+
+
 
 readline = ReadLine.createInterface({
   input: process.stdin,
   output: process.stdout,
-  completer: autoComplete
+  completer:autoComplete
 })
+
+
 
 
 const runFileSystemCommand = (cmd, args=[]) =>{
@@ -166,11 +189,17 @@ const runFileSystemCommand = (cmd, args=[]) =>{
     return { error:e.message }
   }
 }
-
+let imported = false
 const importBackup = () =>{
-  const bckStr = fs.readFileSync("./public/data/backup.json").toString()
-  const backup = JSON.parse(bckStr)
-  FileSystem.import(backup)
+  if(!imported){
+    const backup = buildFileSystemRepresentation("./browser-os")
+    const systemDir = { 
+      'system':backup
+    }
+    FileSystem.import(systemDir)
+    imported = true;
+  }
+  
 }
 let stopped = false
 const run = () =>{
