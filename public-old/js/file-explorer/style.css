@@ -1,0 +1,49 @@
+#file-explorer-wrapper{
+    max-width:100%;
+}
+
+.file-menu {
+    display: block;
+    transition-duration: 0.5s;
+    background: transparent !important;
+}
+
+.menu-item{
+    background:transparent !important ;
+}
+
+.hoverable:hover {
+    cursor: pointer;
+}
+
+.explorer-item:hover{
+    cursor:pointer;
+    color:blue;
+}
+
+#explorer{
+    display:flex;
+}
+
+.explorer-item{
+    overflow-wrap: break-word;
+    display:block;
+    /* border:2px solid lawngreen; */
+    font-size:8pt;
+    margin:5px;
+    height:auto;
+    width:12vh;
+}
+
+
+.file-menu{
+    display:block;
+}
+
+.explorer-icon{
+    display:block;
+}
+
+#explorer {
+    margin:10vh 5vh;
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="./css/main.css" type="text/css"/>
+    <link rel="stylesheet" href="./css/topnav.css" type="text/css"/>
+    <!-- <link rel="stylesheet" href="./js/finderjs/example/finderjs.css"> -->
+    <!-- <link rel="stylesheet" href="./js-fileexplorer/file-explorer/file-explorer.css"> -->
+    <!-- <script src="https://raw.githubusercontent.com/douglascrockford/JSON-js/master/cycle.js"></script> -->
+    <script src="./js/external/winbox.bundle.min.js"></script>
+    <script src="./js/external/jquery-2.1.1.min.js"></script>
+    <script  src="./js/external/jquery-ui.min.js"></script>
+    <script src="./js/external/boxicons.js"></script>
+    <!-- https://cdn.socket.io/4.5.3/socket.io.min.js -->
+    <script src="./js/external/socket.io.min.js"></script>
+    <!-- "https://cdnjs.cloudflare.com/ajax/libs/ace/1.13.1/ace.min.js" -->
+    <script src="js/external/ace.min.js"></script> 
+    <!-- https://unpkg.com/webamp -->
+    <script src="./js/external/webamp.bundle.js"></script>
+    <!-- <script src="./js/finderjs/build/finder.min.js"></script> -->
+    <script src="./js/classes/virtualfilesystem.js"></script>
+    <script src="./js/commands/web-cmds.js"></script>
+    <script src="./js/commands/general-cmds.js"></script>
+    <script src="./js/applications/webamp.js"></script>
+    <script src="./js/terminal.js"></script>
+    <script src="./js/terminal-window-init.js"></script>
+    <script src="./js/file-explorer/create.js"></script>
+    <script src="./js/filesystem-init.js"></script>
+    <script src="./js/websocket-init.js"></script>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="page-wrapper" class="flex">
+        
+        <nav class=".topnav">
+            <ul >
+                <li class="nav-item-group">
+                    <li><a href="#">Menu</a>
+                        <ul>
+                            <li><a href="#" onClick="createTerminalWindow()"><img class="main-menu-icons" src="./images/icons/terminal.png" />Console</a></li>
+                            <li><a href="#"><img class="main-menu-icons" src="./images/icons/settings.png" />Settings</a></li>
+                            <li><a href="#" onClick="makeFileExplorer()"><img class="main-menu-icons" src="./images/icons/file-explorer.png" />Explorer</a></li>
+                            <li><a href="#"><img class="main-menu-icons" src="./images/icons/internet.png" />Apps</a>
+                            <ul>
+                                <li><a href="#"><img class="main-menu-icons" src="./images/icons/music.png" />Music</a>
+                                    <ul>
+                                        <li>
+                                            <a href=""><img class="main-menu-icons" src="./images/icons/winamp.png" />Webamp</a>
+                                        </li>
+                                        <li><a onclick='runLofi()'><img class="main-menu-icons" src="./images/icons/music.png" />Lo-fi Girl</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#"><img class="main-menu-icons" src="./images/icons/games.png" />Games</a>
+                                    <ul>
+                                        <li><a onclick="runWeb(['https://d07riv.github.io/diabloweb/'])"><img class="main-menu-icons" src="./images/diablo.png" />Diablo Web</a></li>
+                                        <li><a onclick="runTirex()"><img class="main-menu-icons" src="./images/icons/Lonelytrex.webp" />Tirex Game</a></li>
+                                        <li><a onclick="runWeb(['https://gba.js.org/'])"><img class="main-menu-icons" src="./images/icons/games.png" />Game Boy Advance</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#"><img class="main-menu-icons" src="./images/icons/browser.png" />Browser</a>
+                                    <ul>
+                                        <li><a onclick='runWeb(["https://www.google.com/webhp?igu=1"])'><img class="main-menu-icons" src="./images/icons/google.png" />Google</a></li>
+                                        <li><a onclick="runLinguee([])"><img class="main-menu-icons" src="./images/icons/translation.png" />Linguee</a></li>
+                                        <li><a onclick="runWeb(['https://gdt.oqlf.gouv.qc.ca/Resultat.aspx'])"><img class="main-menu-icons" src="./images/icons/dictionary.png" />GDT</a></li>
+                                        <li><a onclick='runWeb(["https://wikipedia.org"])'><img class="main-menu-icons" src="./images/icons/wikipedia.png" />Wiki</a></li>
+                                        <li><a onclick='runWeb(["https://gultar.github.io/iching/"])'><img class="main-menu-icons" src="./images/icons/yinyang.png" />I-Ching</a></li>
+                                        <li><a onclick='runWeb(["https://georatio.com/"])'><img class="main-menu-icons" src="./images/icons/constellation.png" />Georatio</a></li>
+                                        
+                                    </ul>
+                                </li>
+                            </ul>
+                            </li>
+                            
+                        </ul>
+                        </li>
+                </li>
+            </ul>
+            <li class="clock-container">
+                <span id="clock">
+                </span>
+            </li>
+        </nav>
+        
+        <div id="page-anchor"></div>
+        <div id="filemanager"></div>
+        <div id="webamp"></div>
+        <div id="main-container">
+            <!-- <a class="desktop-icon browser-icon" onclick="runWeb(['https://www.google.com/webhp?igu=1'])">
+                <img src="./images/icons/browser-desktop.png" alt="">
+            </a> -->
+        </div>
+    </div>
+</body>
+</html>
