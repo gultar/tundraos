@@ -41,7 +41,7 @@ const runServer = (FileSystem) =>{
   const httpServer = createServer(app)
   const port = process.env.PORT || 8000;
   const ioPort = 5000
-  app.use(express.static(__dirname + '/browser-os'));
+  app.use(express.static(__dirname + '/public'));
   app.use(cors())
   app.use(helmet.frameguard())
   app.use(bodyParser.json());       // to support JSON-encoded bodies

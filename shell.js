@@ -1,5 +1,5 @@
 const { exec } = require('node:child_process')
-const VirtualFileSystem = require('./browser-os/js/classes/virtualfilesystem.js')
+const VirtualFileSystem = require('./public/js/classes/virtualfilesystem.js')
 const { buildFileSystemRepresentation } = require('./src/filesystem/dir-build.js')
 const runServer = require('./server.js')
 const { NodeVM } = require('vm2')
@@ -192,7 +192,7 @@ const runFileSystemCommand = (cmd, args=[]) =>{
 let imported = false
 const importBackup = () =>{
   if(!imported){
-    const backup = buildFileSystemRepresentation("./browser-os")
+    const backup = buildFileSystemRepresentation("./public")
     const systemDir = { 
       'system':backup
     }
