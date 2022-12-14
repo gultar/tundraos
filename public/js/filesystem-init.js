@@ -11,9 +11,40 @@ if(fsBackupStr != undefined){
   }
 }
 
-FileSystem = new VirtualFileSystem("temp") //ADD FSBACKUP
-FileSystem.import(fsBackup)
+const saveState = () =>{
+  const exported = FileSystem.export()
+  
+  return localStorage.setItem("temp-fs", exported)
+}
 
-document.addEventListener('visibilitychange', function() {
-    saveState()
-});
+const refreshState = () =>{
+  try{
+    console.time('Refreshing FS')
+    // FileSystem = new VirtualFileSystem("temp")
+    const structure = FileSystem.export()
+    const reimported = FileSystem.import(structure)
+    console.timeEnd('Refreshing FS')
+  }catch(e){
+    console.log(e)
+  }
+}
+
+const init = () =>{
+  
+  FileSystem = new VirtualFileSystem("temp") //ADD FSBACKUP
+  FileSystem.import(fsBackup)
+  window.Filesystem = FileSystem
+
+  refresher()
+  document.addEventListener('visibilitychange', function() {
+      saveState()
+  });
+}
+
+const refresher = () =>{
+  setInterval(()=>{
+    refreshState()
+  }, 5000)
+}
+
+init()

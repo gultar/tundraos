@@ -156,6 +156,17 @@ class Directory{
         return false
     }
 
+    setFile(filename, newFile){
+        for(const file of this.contents){
+            if(file && file.name == filename){
+                file.content = newFile.content
+                return true
+            }
+        }
+
+        return false
+    }
+
     get(name){
         const isDirectory = this.hasDir(name)
         if(isDirectory) return this[name]
@@ -224,6 +235,8 @@ class VirtualFileSystem{
             cp:this.cp,
             mv:this.mv,
             autoCompletePath:this.autoCompletePath,
+            getFile:this.getFile,
+            editFile:this.editFile,
         }
     }
 
@@ -307,13 +320,13 @@ class VirtualFileSystem{
         const pathArray = this.fromPathToArray(path)
         const dirname = pathArray[pathArray.length - 1]
         const isWithinThisDir = pathArray.length == 1
-// debugger
+        
         const exists = this.workingDir.hasDir(dirname)
         if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
 
         if(isWithinThisDir){
-            this.workingDir[dirname] = {}//new Directory(dirname, this.workingDir)
-// debugger
+            this.workingDir[dirname] = new Proxy({}, parenter)
+
         }else{
             pathArray.pop()
             const pathToFile = this.fromArrayToPath(pathArray) 
@@ -322,7 +335,7 @@ class VirtualFileSystem{
             const exists = targetDirectory[dirname]
             if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
 
-            targetDirectory[dirname] = {}//new Directory(dirname, targetDirectory)
+            targetDirectory[dirname] = new Proxy({}, parenter)
         }
 
         return true
@@ -348,7 +361,7 @@ class VirtualFileSystem{
         return path
     }
 
-    touch(path, content){
+    touch(path, content, persistance=()=>{}){
         if(path === undefined) throw new Error('touch: missing file operand')
         const pathArray = this.fromPathToArray(path)
         const filename = pathArray[pathArray.length - 1]
@@ -359,9 +372,11 @@ class VirtualFileSystem{
 
         const exists = directory.hasFile(filename)
         if(exists) throw new Error(`touch: file ${filename} already exists`)
-
-        directory.contents.push(new File(filename, content))
+        const file = new File(filename, content)
+        directory.contents.push(file)
         
+        persistance(file)
+
         return true
     }
 
@@ -399,9 +414,10 @@ class VirtualFileSystem{
     }
 
     rm(...paths){
+        if(paths === undefined) throw new Error('rmdir: missing file operand')
         const results = []
         for(const path of paths){
-            if(path === undefined) throw new Error('rmdir: missing file operand')
+            
             const pathArray = this.fromPathToArray(path)
             const filename = pathArray[pathArray.length - 1]
             const isWithinThisDir = pathArray.length == 1
@@ -410,7 +426,8 @@ class VirtualFileSystem{
                 if(isElementToDeleteDirectory == true){
                     throw new Error(`rm: cannot remove '${path}': Is a directory`)
                 }
-                results.push(this.workingDir.removeFile(filename))
+                this.workingDir.removeFile(filename)
+                results.push({ removed:filename })
             }else{
                 pathArray.pop()
                 const pathToFile = this.fromArrayToPath(pathArray) 
@@ -419,7 +436,8 @@ class VirtualFileSystem{
                 if(isElementToDeleteDirectory == true){
                     throw new Error(`rm: cannot remove '${path}': Is a directory`)
                 }
-                results.push(targetDirectory.removeFile(filename))
+                targetDirectory.removeFile(filename)
+                results.push({ removed:filename })
             }
             
             
@@ -428,23 +446,39 @@ class VirtualFileSystem{
         return { removed:results }
     }
 
-    rmdir(path, args){
-        if(path === undefined) throw new Error('rmdir: missing file operand')
-        
-        const pathArray = this.fromPathToArray(path)
-        const dirname = pathArray[pathArray.length - 1]
-        const isWithinThisDir = pathArray.length == 1
-        
-        if(isWithinThisDir){
-            delete this.workingDir[dirname]
-        }else{
-            pathArray.pop()
-            const pathToDir = this.fromArrayToPath(pathArray) 
-            const targetDirectory = this.find(pathToDir)
-            delete targetDirectory[dirname]
+    rmdir(...paths){
+        if(paths === undefined) throw new Error('rmdir: missing file operand')
+        //should prompt for confirmation
+        if(paths == '*') paths = this.workingDir.getDirnames().filter(path => path != '..') 
+
+        const results = []
+        for(const path of paths){
+            
+            const pathArray = this.fromPathToArray(path)
+            const dirname = pathArray[pathArray.length - 1]
+            const isWithinThisDir = pathArray.length == 1
+            
+            if(isWithinThisDir){
+                delete this.workingDir[dirname]
+                results.push({ removed:dirname })
+            }else{
+                pathArray.pop()
+                const pathToDir = this.fromArrayToPath(pathArray) 
+                const targetDirectory = this.find(pathToDir)
+                delete targetDirectory[dirname]
+                results.push({ removed:dirname })
+            }
+
         }
 
-        return true
+        return { removed:results }
+        
+        
+    }
+
+    deleteAll(directory){
+        const dirnames = directory.getDirnames().filter(path => path != '..')
+
     }
 
     find(path){
@@ -498,6 +532,16 @@ class VirtualFileSystem{
         }else{
             return false
         }
+    }
+
+    getFile(filename){
+        return this.workingDir.getFile(filename)
+    }
+
+    editFile(filename, newContent){
+        const file = this.getFile(filename)
+        file.content = newContent
+        this.workingDir.setFile(filename, file)
     }
 
     walkBackToRootDir(currentDir, pathToRoot=[]){

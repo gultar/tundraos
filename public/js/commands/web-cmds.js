@@ -5,12 +5,12 @@ function turnToURLQueryText(args){
 }
 
 function runWeb(url){
+    
     if(url == "" && url.length == 0){
         url = "https://www.google.com/webhp?igu=1"
     }
-    new WinBox({ title: url, height:"90%", width:"90%", html:`
-    <iframe id="wiki-window" style="border:none;" src="${url}"></iframe>
-    ` });
+
+    new WinBox({ title: url, height:"90%", width:"90%", url:url});
 }
 
 function runLinguee(params=[]){
@@ -25,9 +25,7 @@ function runLinguee(params=[]){
 }
 
 function runTirex(){
-    new WinBox({ title: "Tirex Game", height:"90%", width:"90%", html:`
-    <iframe id="wiki-window" style="border:none;" src="./pages/tirex.html"></iframe>
-    ` });
+    new WinBox({ title: "Tirex Game", height:"90%", width:"90%", url:'./pages/tirex.html' });
 }
 
 function runLofi(){
@@ -43,6 +41,14 @@ function runMap(){
     new WinBox({ title: "Google Maps", height:"95%", width:"80%", html:maps  });
 }
 
-function runEditor(){
-    new WinBox({ title: "Google Maps", height:"95%", width:"80%", url:"./editor/editor.html" });
+function runTextEditor(){
+    
+
+  new WinBox({ title: "Google Maps", height:"95%", width:"80%", html:`
+  <script src="./js/external/bundle.js"></script>
+  <div data-tiny-editor>
+  <p>
+    Default Text Here
+  </p>
+</div>`  });
 }

@@ -28,6 +28,7 @@ class TerminalEmulator{
         "mkdir":"Create the DIRECTORY, if it does not already exist. Usage: mkdir directoryname/",
         "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
         "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname",
+        "whoami":"Displays information concerning host"
       },
       "settings":{
         "background":"Changes the background image. Usage: background http://url.url",
@@ -67,16 +68,18 @@ class TerminalEmulator{
       //Web Tools
       web:(args)=>runWeb(args),
       wiki:()=>runWeb(["https://wikipedia.org"]),
-      gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/Resultat.aspx"]),
+      gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/"]),
       iching:()=>runWeb(["https://gultar.github.io/iching/"]),//
       georatio:()=>runWeb(["https://georatio.com/"]),
       linguee:(args)=>runLinguee(args),
       tirex:()=>runTirex(),
-      test:()=>this.runTest(),
       map:()=>runMap(),
       lofi:()=>runLofi(),
       webamp:()=>runWebamp(),
-      editor:()=>runEditor(),
+      editor:async (args)=>await this.runEditor(args),
+      weather:async()=>await this.getWeather(),
+      whoami:()=>this.whoami(),
+      test:()=>this.testEditor(),
     }
   }
   
@@ -188,6 +191,24 @@ class TerminalEmulator{
     })
   }
 
+  async runEditor(args){
+    const path = args[0]
+    const file = await exec("getFile", [path])
+    let content = ""
+    if(file){
+      content = file.content
+    }else{
+      const newFile = await exec("touch", [path])
+    }
+
+    launchEditor(content, path)
+    return true
+  }
+
+  testEditor(){
+    runTextEditor()
+  }
+
   runFileManager(){
     const anchor = document.getElementById("filemanager")
     const temp = anchor.insertAdjacentHTML('beforeEnd', `
@@ -196,8 +217,14 @@ class TerminalEmulator{
     new WinBox({ title: "Window Title", mount:temp });
   }
 
-  runTest(){
-    makeFileExplorer()
+  async getWeather(){
+      const currentWeather = await getCurrentWeather()
+      
+      this.output(`<xmp>${JSON.stringify(currentWeather, null, 2)}</xmp>`)
+  }
+
+  whoami(){
+    this.output(navigator.userAgent)
   }
 
   async processCommand(commandLine){

@@ -1,5 +1,5 @@
 const fs = require("fs")
-const File = require('../../browser-os/js/classes/file.js')
+const File = require('../../public/js/classes/file.js')
 
 const rootFs = {
     "system":{
@@ -8,6 +8,7 @@ const rootFs = {
 }
 
 const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["system"]) {
+
     files = fs.readdirSync(dirPath)
 
   for(const file of files) {
@@ -19,12 +20,12 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["syste
             console.log('Adding directory ', dir)
             buildFileSystemRepresentation(dirPath + "/" + file, fsPosition[dir])
         } else {
-            console.log(`Adding file ${file}`)
+            console.log(`   Adding file ${file}`)
             const fileContent = fs.readFileSync(dirPath + "/" + file).toString()
             fsPosition.contents.push(new File(file, fileContent))
         }
   }
-
+  
   return fsPosition
 }
 

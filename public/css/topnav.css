@@ -99,3 +99,51 @@ li > a:only-child:after { content: ''; }
 	margin-right: 3px;
 	vertical-align: middle;
 }
+
+@media screen and (min-width : 320px) and (max-width : 500px) {
+	nav a {
+		line-height: 20px;
+	}
+
+	nav ul li{
+		padding:2px;
+	}
+	
+	nav ul ul {
+		position: relative;
+		top:0pt; 
+		left:0pt;
+		font-size:6pt;
+		width:20vh;
+	}
+
+	nav ul ul ul li {
+		position: relative;
+		top:0pt; 
+		left:0pt;
+		font-size:6pt;
+	}
+}
+
+@media screen and (max-width : 320px) {
+
+	nav ul li{
+		padding:2px;
+		height:20px;
+	}
+	
+	nav ul ul {
+		position: relative;
+		top:0pt; 
+		left:0pt;
+		font-size:6pt;
+		width:20vh;
+	}
+
+	nav ul ul ul li {
+		position: relative;
+		top:0pt; 
+		left:0pt;
+		font-size:6pt;
+	}
+}

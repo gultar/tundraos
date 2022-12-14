@@ -58,7 +58,7 @@ const runServer = (FileSystem) =>{
 
       //Implement an arg parser
       const result = await runCommand(commandString)
-      if(result.error){
+      if(result && result.error){
         socket.emit('shell-result', { error:result.error })
       }else{
         socket.emit('shell-result', result)

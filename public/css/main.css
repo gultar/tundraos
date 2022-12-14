@@ -1,9 +1,7 @@
   body{
     position:fixed;
-    /* background-image: url("../images/wallpaper.jpg"); */
-    /* background-color: var(--background); */
-    background:grey;
     color:white;
+    background:#404347;
     background-size:cover;
     background-repeat: no-repeat;
     background-position:left left;
@@ -13,6 +11,35 @@
     width:100%;
     font-family: Inconsolata, monospace;
     
+  }
+
+  .background {
+      
+    display
+    :
+     block
+    ;
+      
+    top
+    : 0;
+      
+    left
+    : 0;
+      
+    z-index
+    : 0;
+    }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   *{
@@ -29,6 +56,9 @@
   #page-wrapper{
     height:100%;
     width:100%;
+    background: linear-gradient(-45deg, #2c4f99, #365afc, #414141, #575757);
+    background-size: 400% 400%;
+    animation: gradient 180s ease infinite;
   }
 
   .terminal-window{

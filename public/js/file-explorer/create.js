@@ -2,20 +2,21 @@
 const makeFileExplorer = () =>{
     const explorerHTML = `<link rel="stylesheet" href="./js/file-explorer/style.css">
     
-    <div id="file-explorer-wrapper">
-        <nav class="file-menu" role="navigation">
-            <ul class="menu-item-list">
-                <li class="menu-item"><a href="#">File</a>
-                <ul class="dropdown">
-                    <li onclick="window.postMessage({ newFile:true })" class="dropdown-item hoverable"><a href="#">New File</a></li>
-                    <li onclick="window.postMessage({ newDir:true })" class="dropdown-item hoverable"><a href="#">New Directory</a></li>
-                    <li class="dropdown-item hoverable"><a href="#">Settings</a></li>
-                    <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
-                </ul>
-                </li>
+<div id="file-explorer-wrapper">
+    <nav class="file-menu" role="navigation">
+        <ul class="menu-item-list">
+            <li class="menu-item"><a href="#">File</a>
+            <ul class="dropdown">
+                <li onclick="window.postMessage({ newFile:true })" class="dropdown-item hoverable"><a href="#">New File</a></li>
+                <li onclick="window.postMessage({ newDir:true })" class="dropdown-item hoverable"><a href="#">New Directory</a></li>
+                <li class="dropdown-item hoverable"><a href="#">Settings</a></li>
+                <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
             </ul>
-        </nav>
-
+            </li>
+        </ul>
+    </nav>
+    <div id="side-bar">
+    </div>
     <div id="explorer">
 
     </div>
@@ -33,7 +34,7 @@ const makeFileExplorer = () =>{
       let currentDir = await exec("pwd")
       let newDirectoryCounter = 0
       let newFileCounter = 0
-      /**parent.changeContents('${element}') */
+      
       window.addEventListener("message", async (event) => {
         const message = event.data
         if(message.changeDir){
@@ -41,24 +42,69 @@ const makeFileExplorer = () =>{
             const changed = await exec("cd", [targetDir])
             // setCurrentDirContents(targetDir)
         }else if(message.newDir){
-            newDirectoryCounter++
-            const newDirname = `Newdirectory${newDirectoryCounter}`
-            const createdDir = await exec("mkdir", [newDirname])
+            createNewDirectory()
         }else if(message.newFile){
-            newFileCounter++
-            const newFile = `Newfile${newFileCounter}`
-            const createdFile = await exec("touch", [newFile])
+            createNewFile()
         }else if(message.refreshExplorer){
             refreshExplorer()
+        }else if(message.openFile){
+            const filename = message.openFile
+            const file = await exec("getFile", [filename])
+            launchEditor(file.content, filename)
         }
 
         refreshExplorer()
         
       }, false);
 
-      const createNewElement = (element, linebreak=false) =>{
+      let maxNewElementNumber = 500
+      const createNewDirectory = async (newDirNumber = 1) =>{
+        if(newDirNumber > maxNewElementNumber) throw new Error('Cannot create more new directories')
+        try{ 
+            const newDirname = `New_directory${newDirNumber}`
+            const hasDir = await exec("getDir", [newDirname])
+            
+            if(!hasDir){
+                const created = await exec('mkdir', [newDirname])
+                refreshExplorer()
+                newDirNumber = 0
+                return created
+            }else{
+                return await createNewDirectory(newDirNumber + 1)
+            }
+        }catch(e){
+            console.log(e)
+            return e
+        }
+      }
+
+      const createNewFile = async (newFileNumber = 1) =>{
+        if(newFileNumber > maxNewElementNumber) throw new Error('Cannot create more new files')
+        try{ 
+            const newFilename = `New_file${newFileNumber}`
+            const hasFile = await exec("getFile", [newFilename])
+            
+            if(!hasFile){
+                const created = await exec('touch', [newFilename])
+                refreshExplorer()
+                newFileNumber = 0
+                return created
+            }else{
+                return await createNewFile(newFileNumber + 1)
+            }
+        }catch(e){
+            console.log(e)
+            return e
+        }
+      }
+
+      const createNewElement = (element) =>{
         return `<div class="explorer-item-wrapper">  
-        <a onclick="window.postMessage({ changeDir:this.children[1].innerHTML })" class="explorer-item link">
+        <a onclick="window.postMessage({ ${(
+            element.includes("/") || element === ".." ? 
+            "changeDir:this.children[1].innerHTML" : 
+            "openFile:this.children[1].innerHTML"
+            )} })" class="explorer-item link">
             <img class="explorer-icon" src="./images/icons/${(element.includes("/") || element === ".." ? "folder":"file")}-medium.png" />
             <span class="element-name" onclick="">${element}</span>
         </a>

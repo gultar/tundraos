@@ -1,5 +1,14 @@
+*{
+    --number-of-explorer-items: 10
+}
+
 #file-explorer-wrapper{
     max-width:100%;
+    display:flex;
+    justify-content:flex-start;
+    flex-direction:row;
+    flex-wrap: wrap;
+    height: auto;
 }
 
 .file-menu {
@@ -22,7 +31,8 @@
 }
 
 #explorer{
-    display:flex;
+    display: grid;
+    grid-template-columns: repeat(var(--number-of-explorer-items), 15vh);
 }
 
 .explorer-item{
@@ -46,4 +56,22 @@
 
 #explorer {
     margin:10vh 5vh;
+}
+
+@media screen and (min-width : 500px) and (max-width : 1000px)  {
+    *{
+        --number-of-explorer-items: 8;
+    }
+}
+
+@media screen and (min-width : 320px) and (max-width : 500px)  {
+    *{
+        --number-of-explorer-items: 4;
+    }
+}
+
+@media screen and (max-width : 320px)  {
+    *{
+        --number-of-explorer-items: 3;
+    }
 }
