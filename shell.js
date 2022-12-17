@@ -1,6 +1,5 @@
-const { exec } = require('node:child_process')
-const VirtualFileSystem = require('./public/js/classes/virtualfilesystem.js')
-const { buildFileSystemRepresentation } = require('./src/filesystem/dir-build.js')
+const { exec, spawn } = require('node:child_process')
+const buildUserspace = require('./src/filesystem/build-userspace.js')
 const runServer = require('./server.js')
 const { NodeVM } = require('vm2')
 const fs = require('fs')
@@ -60,21 +59,31 @@ const node = (args) =>{
 `, 'vm.js');
 }
 
-const edit = (filename) =>{
+
+const edit = () =>{
   
 }
 
+const resolvePath = (virtualPath)=>{
+  const currentVirtualDir = FileSystem.pwd()
+  let actualDir = currentVirtualDir.replace('system', '')
+  return 'public' + actualDir + virtualPath 
+}
 
-const FileSystem = new VirtualFileSystem('fs')
-let commands = FileSystem.exposeCommands()
 
-FileSystem.help = help
-FileSystem.echo = echo
-FileSystem.clear = clear
-FileSystem.date = date
-FileSystem.node = node
-FileSystem.edit = edit
+let FileSystem = {}
+let commands = {}
+const makeFileSystem = (user='root') =>{
+  FileSystem = buildUserspace(user)
+  commands = FileSystem.exposeCommands()
 
+  FileSystem.help = help
+  FileSystem.echo = echo
+  FileSystem.clear = clear
+  FileSystem.date = date
+  FileSystem.node = node
+  FileSystem.edit = edit
+}
 
 const helpMessages = {
   "help":"Displays this message",
@@ -106,7 +115,7 @@ let autoComplete = function completer(line) {
       partial = subPath[subPath.length - 1]
       parentDirname = subPath.slice(0, subPath.length - 1).join("/")
       
-      const parentDirectory = FileSystem.goToDir(parentDirname)
+      const parentDirectory = FileSystem.find(parentDirname)
       completions = parentDirectory.getContentNames()
     }
     
@@ -131,18 +140,14 @@ let autoComplete = function completer(line) {
 
 }
 
-function parsePath(partialPath, cmd){
+function parsePath(partialPath){
   let relativePath = ""
-  let partialTarget = ""
 
   const partialPathHasContent = FileSystem.ls(partialPath)
-  console.log('Partial content', partialPathHasContent)
   if(partialPathHasContent && partialPathHasContent.length){
     console.log("\n", partialPathHasContent.join(" "))
     return true
   }
-
-  
 
   const hasSubPaths = partialPath.includes("/")
   if(hasSubPaths){
@@ -153,8 +158,8 @@ function parsePath(partialPath, cmd){
   }else{
     partialTarget = partialPath
   }
+  
   if(relativePath !== "") relativePath = relativePath + "/"
-  // const suggestions = await exec("autoCompletePath", [relativePath+partialTarget])
   
   if(suggestions.length > 1){
     // this.output(suggestions.join(" "))
@@ -168,14 +173,13 @@ function parsePath(partialPath, cmd){
   }
 }
 
-
-
-
-readline = ReadLine.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  completer:autoComplete
-})
+const startReadLine = () =>{
+  readline = ReadLine.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    completer:autoComplete
+  })
+}
 
 
 
@@ -189,29 +193,20 @@ const runFileSystemCommand = (cmd, args=[]) =>{
     return { error:e.message }
   }
 }
-let imported = false
-const importBackup = () =>{
-  if(!imported){
-    const backup = buildFileSystemRepresentation("./public")
-    const systemDir = { 
-      'system':backup
-    }
-    FileSystem.import(systemDir)
-    imported = true;
-  }
-  
-}
+
+
 let stopped = false
 const run = () =>{
+  
   if(!stopped){
-    importBackup()
-    readline.question("fs:>", (cmdString) => {
+    
+    readline.question(":>", (cmdString) => {
       input = cmdString.split(" ");
       const [ cmd, ...args ] = input
   
       if(FileSystem[cmd]){
         console.log(runFileSystemCommand(cmd, args));
-      }else if(cmd == 'server'){
+      }else if(cmd == 'server'){      
         runServer(FileSystem)
         readline.close()
         stopped = true;
@@ -227,4 +222,21 @@ const run = () =>{
   
 }
 
+const selectUser = () =>{
+  const args = process.argv
+  let positionUsername = -1
+  for(const arg of args){
+      if(arg === "--user" || arg === "-u"){
+          positionUsername = args.indexOf(arg)
+      }
+  }
+  
+  if(positionUsername > -1) return args[positionUsername + 1]
+  else return 'guest'
+}
+
+let username = selectUser()
+
+makeFileSystem(username)
+startReadLine()
 run()

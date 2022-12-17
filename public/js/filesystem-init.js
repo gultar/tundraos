@@ -1,5 +1,5 @@
 let FileSystem;
-let fsBackupStr = localStorage.getItem("temp-fs")
+let fsBackupStr = localStorage.getItem("filesystem")
 
 let fsBackup = undefined;
 if(fsBackupStr != undefined){
@@ -14,13 +14,12 @@ if(fsBackupStr != undefined){
 const saveState = () =>{
   const exported = FileSystem.export()
   
-  return localStorage.setItem("temp-fs", exported)
+  return localStorage.setItem("filesystem", exported)
 }
 
 const refreshState = () =>{
   try{
     console.time('Refreshing FS')
-    // FileSystem = new VirtualFileSystem("temp")
     const structure = FileSystem.export()
     const reimported = FileSystem.import(structure)
     console.timeEnd('Refreshing FS')
@@ -31,7 +30,7 @@ const refreshState = () =>{
 
 const init = () =>{
   
-  FileSystem = new VirtualFileSystem("temp") //ADD FSBACKUP
+  FileSystem = new VirtualFileSystem("guest") //ADD FSBACKUP
   FileSystem.import(fsBackup)
   window.Filesystem = FileSystem
 
@@ -42,9 +41,9 @@ const init = () =>{
 }
 
 const refresher = () =>{
-  setInterval(()=>{
-    refreshState()
-  }, 5000)
+  // setInterval(()=>{
+  //   refreshState()
+  // }, 5000)
 }
 
 init()

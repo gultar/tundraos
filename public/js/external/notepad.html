@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>ACE in Action</title>
+<style type="text/css" media="screen">
+    #editor { 
+        position: absolute;
+        top: 20px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+    .file-menu {
+            z-index:9;
+    }
+</style>
+<link rel="stylesheet" href="../../css/topnav.css">
+<script src="./js/external/jquery-2.1.1.min.js" type="text/javascript"></script>
+<script>
+    let editor;
+
+    const setEditorContent = (content)=>{
+        const editorContent = document.getElementById("editor")
+        editorContent.innerHTML = `<xmp>${content}</xmp>`
+    }
+
+    const save = () =>{
+        const content = getContent()
+        window.postMessage({ saveContent:content })
+    }
+
+    const startNotepad = (filename, content) =>{
+        setEditorContent(content)
+
+        const [ name, ...extensions ] = filename.split(".")
+        const lastExtension = extensions[extensions.length - 1]
+        let mode = getNameFromExtension(lastExtension)
+        let theme = 'monokai' //Read config file/json
+
+        if(!mode) mode = 'text'
+        if(!theme) theme = "monokai"
+
+        mode = mode.toLowerCase()
+        editor = ace.edit("editor");
+        editor.setTheme(`ace/theme/${theme}`);
+        editor.session.setMode(`ace/mode/${mode}`);
+        editor.commands.addCommand({
+            name: 'save',
+            bindKey: {win: 'Ctrl-S',  mac: 'Command-M'},
+            exec: async function(editor) {
+                save()
+            },
+        });
+        window.editorInstance = editor
+
+        return editor
+    }
+
+    const getContent = () =>{
+            return window.editorInstance.getValue()
+    }
+
+    window.setEditorContent = setEditorContent
+    window.getContent = getContent
+    window.startNotepad = startNotepad
+</script>
+</head>
+<body>
+
+  <div class="wrapper" >
+    <div style="display:block;">
+        <nav class="file-menu" role="navigation">
+            <ul class="menu-item-list">
+                <li class="menu-item"><a href="#">File</a>
+                <ul class="dropdown">
+                    <li onclick="save()" class="dropdown-item hoverable"><a href="#">Save</a></li>
+                    <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
+                </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div id="editor" style="margin-top:10px;">
+        
+    </div>
+  </div>
+
+    
+<script src="./src/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="./get-extension.js"></script>
+
+</body>
+</html>

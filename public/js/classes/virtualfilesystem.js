@@ -52,6 +52,18 @@ let parenter = {
     },
 }
 
+let persistanceInterface = {
+    isInterface:true,
+    touch:()=>{},
+    mkdir:()=>{},
+    rmdir:()=>{},
+    rm:()=>{},
+    editFile:()=>{},
+    cp:()=>{},
+    mv:()=>{},
+    cd:()=>{},
+}
+
 
 class File{
     constructor(name="", content=""){
@@ -141,6 +153,22 @@ class Directory{
         return [ ...dirnames, ...filenames ]
     }
 
+    getContents(){
+        const files = this.getFiles()
+        const dirnames = this.getDirnames().map(dirname => {
+            if(dirname !== "..")
+                return dirname + "/"
+            else
+                return dirname
+        })
+
+        let dirs = []
+        for(const dirname of dirnames){
+            dirs.push({ directory:true, name:dirname })
+        }
+        return [ ...dirs, ...files ]
+    }
+
     getDirectory(dirname){
         const isExistingDirectory = this.hasDir(dirname)
         if(isExistingDirectory) return this[dirname]
@@ -206,18 +234,24 @@ class Directory{
 
 
 class VirtualFileSystem{
-    constructor(username){
+    constructor(username, persistance=persistanceInterface){
         //All objects will be treated like potential directories
         this.username = username
         this.filesystem = new Proxy({}, parenter)
-        this.filesystem["/"] = {
+        this.filesystem["/"] = (!persistance.isInterface ? {} : {
             home:{
                 desktop:{},
                 documents:{},
+                downloads:{},
+                applications:{},
+                images:{}
             },
-            [username]:{},
-        }
+            sys:{
+                settings:{}
+            },
+        })
         this.workingDir = this.filesystem["/"] 
+        this.persistance = persistance
     }
 
     exposeCommands(){
@@ -237,6 +271,7 @@ class VirtualFileSystem{
             autoCompletePath:this.autoCompletePath,
             getFile:this.getFile,
             editFile:this.editFile,
+            // lookup:this.lookup,
         }
     }
 
@@ -290,6 +325,8 @@ class VirtualFileSystem{
             if(this.isDir(newWorkingDirectory)){
                 this.workingDir = newWorkingDirectory
             }
+
+            this.persistance.cd(this.pwd())
             
             return this.workingDir.name
             
@@ -299,7 +336,8 @@ class VirtualFileSystem{
         }
     }
 
-    ls(path, args){
+    ls(path, args=[]){
+        let [ fullContents, ...rest ] = args
         let directory = false
         if(path == undefined){
             directory = this.workingDir
@@ -308,23 +346,28 @@ class VirtualFileSystem{
             const isDirectory = this.isDir(directory)
             if(!isDirectory) throw new Error(`Command ls failed. ${path} is not a directory`)
         }
-        
-        const contents = (directory ? directory.getContentNames() : [])
+
+        let contents = [];
+        if(fullContents){
+            contents = (directory ? directory.getContents() : [])
+        }else{
+            contents = (directory ? directory.getContentNames() : [])
+        }
 
         return contents
     }
 
-    mkdir(path){
+    mkdir(path, contents=[]){
         if(path === undefined) throw new Error('touch: missing file operand')
         
         const pathArray = this.fromPathToArray(path)
         const dirname = pathArray[pathArray.length - 1]
         const isWithinThisDir = pathArray.length == 1
         
-        const exists = this.workingDir.hasDir(dirname)
-        if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
 
         if(isWithinThisDir){
+            const exists = this.workingDir.hasDir(dirname)
+            if(exists) throw new Error(`mkdir: directory ${dirname} already exists`)
             this.workingDir[dirname] = new Proxy({}, parenter)
 
         }else{
@@ -337,6 +380,8 @@ class VirtualFileSystem{
 
             targetDirectory[dirname] = new Proxy({}, parenter)
         }
+
+        this.persistance.mkdir(path)
 
         return true
     }
@@ -361,7 +406,7 @@ class VirtualFileSystem{
         return path
     }
 
-    touch(path, content, persistance=()=>{}){
+    touch(path, content){
         if(path === undefined) throw new Error('touch: missing file operand')
         const pathArray = this.fromPathToArray(path)
         const filename = pathArray[pathArray.length - 1]
@@ -375,23 +420,28 @@ class VirtualFileSystem{
         const file = new File(filename, content)
         directory.contents.push(file)
         
-        persistance(file)
+        this.persistance.touch(path, content)
 
         return true
     }
 
     cp(pathFrom, pathTo){
-        
+        let copied = false
         if(!pathFrom) throw new Error('Need to provide origin path of file to copy')
         if(!pathTo) throw new Error('Need to provide destination path of file to copy')
 
         const found = this.search(pathFrom)
         if(!found) throw new Error(`Could not find file ${pathFrom}`)
 
-        const { file } = found
-        if(!file) throw new Error(`-r not specified; omitting directory ${pathFrom}`)
+        const { file, directory } = found
+        if(!file && directory){
+            //throw new Error(`-r not specified; omitting directory ${pathFrom}`)
+            copied = this.mkdir(pathTo)
+        }else if(file && !directory){
+            copied = this.touch(pathTo, file.content)
+        }
 
-        const copied = this.touch(pathTo, file.content)
+        this.persistance.cp(pathFrom, pathTo)
 
         return copied
     }
@@ -399,16 +449,20 @@ class VirtualFileSystem{
     mv(pathFrom, pathTo){
         if(!pathFrom) throw new Error('Need to provide origin path of file to copy')
         if(!pathTo) throw new Error('Need to provide destination path of file to copy')
-
+        let copied = false
         const found = this.search(pathFrom)
         if(!found) throw new Error(`Could not find file ${pathFrom}`)
 
-        const { file } = found
-        if(!file) throw new Error(`-r not specified; omitting directory ${pathFrom}`)
+        const { file, directory } = found
+        if(!file && directory){
+            copied = this.mkdir(pathTo)
+            const removed = this.rmdir(pathFrom)
+        }else if(file && !directory){
+            copied = this.touch(pathTo, file.content)
+            const removed = this.rm(pathFrom)
+        }
 
-        const copied = this.touch(pathTo, file.content)
-
-        const removed = this.rm(pathFrom)
+        this.persistance.mv(pathFrom, pathTo)
 
         return copied
     }
@@ -443,6 +497,8 @@ class VirtualFileSystem{
             
         }
 
+        this.persistance.rm(...paths)
+
         return { removed:results }
     }
 
@@ -471,14 +527,11 @@ class VirtualFileSystem{
 
         }
 
+        this.persistance.rmdir(...paths)
+
         return { removed:results }
         
         
-    }
-
-    deleteAll(directory){
-        const dirnames = directory.getDirnames().filter(path => path != '..')
-
     }
 
     find(path){
@@ -516,32 +569,30 @@ class VirtualFileSystem{
         return currentDir
     }
 
-    whereis(itemName){
-        const found = this.search(itemName)
-        
-        if(found){
-            if(found.directory){
-                return this.getAbsolutePath(found.directory)
-            }else if(found.file){
-                const path = this.getAbsolutePath(found.containedIn)
-                return path+"/"+itemName
-            }else{
-                throw new Error(`${itemName} is not a file or a directory`)
-            }
-            
+    async whereis(itemName){
+        const found = await this.lookup(itemName)
+        if(!found) return false
+
+        if(found.directory){
+            return this.getAbsolutePath(found.directory)
+        }else if(found.file){
+            return this.getAbsolutePath(found.containedIn) + "/" + itemName
         }else{
             return false
         }
     }
 
-    getFile(filename){
-        return this.workingDir.getFile(filename)
-    }
-
-    editFile(filename, newContent){
-        const file = this.getFile(filename)
+    async editFile(filename, newContent){
+        const file = await this.getFile(filename)
+        console.log('Got file:', file)
+        if(!file) return false
         file.content = newContent
-        this.workingDir.setFile(filename, file)
+        console.log('New Content', newContent)
+        const saved = this.workingDir.setFile(filename, file)
+
+        this.persistance.editFile(filename, newContent)
+
+        return saved
     }
 
     walkBackToRootDir(currentDir, pathToRoot=[]){
@@ -633,6 +684,12 @@ class VirtualFileSystem{
         arrayOfDirectories = cleanUpEmptyArrayCells(arrayOfDirectories)
         return arrayOfDirectories
     }
+
+    getTarget(path){
+        let pathArray = this.fromPathToArray(path)
+        let target = pathArray[pathArray.length - 1]
+        return target
+    }
     
     splitPathIntoArray(path){
         if(path.includes("/")){
@@ -642,6 +699,37 @@ class VirtualFileSystem{
         }
     }
 
+    async getFile(path){
+        const found = await this.lookup(path)
+        if(found.file) return found.file
+        else return false
+    }
+
+    async lookup(path="/"){
+        const target = this.getTarget(path)
+
+        for await(const child of this.walk()){
+            if(child.name === target){
+                return { directory:child }
+            }else if(child.getFile(target)){
+                return { file:child.getFile(target), containedIn:child }
+            }
+        }
+
+        return false
+    }
+
+    *walk(currentDir=this.root()) {
+        yield currentDir
+        for (let dirname of currentDir.getDirnames()) {
+            if(dirname !== '..'){
+                let child = currentDir[dirname]
+                yield* this.walk(child);
+            }
+          }
+    }
+
+    //deprecated
     recursiveWalk(directory, modifierFunc=()=>{}){
         const children = directory.getChildDirectories()
         for(const child of children){
@@ -749,7 +837,6 @@ class VirtualFileSystem{
                 this.setDirectoryContent(directory[prop], structureEntry[prop])
             }
         }
-
         return true
     }
 

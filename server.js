@@ -8,31 +8,23 @@ const { Server } = require("socket.io")
 
 const runServer = (FileSystem) =>{
   
-  const runCommand = async (commandString, socket) =>{
+  const runCommand = async (cmd, args) =>{
     try{
-      let [ cmd, ...args ] = commandString.split(" ")
+      
       if(!args) args = []
+
       const availableCommands = FileSystem.exposeCommands()
       if(availableCommands[cmd]){
         const result = await FileSystem[cmd](...args)
+        
         return result
       }else{
         return { error:`Command ${cmd} unavailable` }
       }
+
     }catch(e){
       console.log(e)
       return { error:e.message }
-    }
-  }
-  
-  const runRealCommand = async (commandString) =>{
-    try {
-      const exec = require('util').promisify(require('child_process').exec);
-
-      return await exec(commandString).catch(e => e);
-
-    }catch (err){
-      console.error(err);
     }
   }
 
@@ -54,16 +46,13 @@ const runServer = (FileSystem) =>{
 
   const io = new Server(httpServer);
   io.on("connection", (socket)=>{
-    socket.on("shell-command", async (commandString)=>{
-
-      //Implement an arg parser
-      const result = await runCommand(commandString)
+    socket.on("shell-command", async (cmd, args)=>{
+      const result = await runCommand(cmd, args)
       if(result && result.error){
         socket.emit('shell-result', { error:result.error })
       }else{
-        socket.emit('shell-result', result)
+        socket.emit('shell-result', { cmd:cmd, args:args, result:result })
       }
-      
     })
 
   })

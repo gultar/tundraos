@@ -24,23 +24,20 @@ const makeFileExplorer = () =>{
 </div>`
     const fileExplorer = new WinBox({ title: "File Explorer", height:"95%", width:"80%", html:explorerHTML  });
     // 
-    (async ()=>{
+    (()=>{
         let currentDirContents = []
 
        const refreshExplorer = async () =>{
         let wd = await exec("pwd")
         setCurrentDirContents(wd)
        }
-      let currentDir = await exec("pwd")
-      let newDirectoryCounter = 0
-      let newFileCounter = 0
       
       window.addEventListener("message", async (event) => {
         const message = event.data
         if(message.changeDir){
             const targetDir = message.changeDir
             const changed = await exec("cd", [targetDir])
-            // setCurrentDirContents(targetDir)
+            
         }else if(message.newDir){
             createNewDirectory()
         }else if(message.newFile){
@@ -115,7 +112,7 @@ const makeFileExplorer = () =>{
         
         const explorerElement = document.getElementById("explorer")
         currentDirContents = await exec("ls",[])
-        
+        console.log(await exec("ls",["","full"]))
         let domToAdd = ""
         for await(const element of currentDirContents){
             domToAdd = domToAdd + createNewElement(element)

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height" />
+    <title>Ace Kitchen Sink</title>
+    <meta name="author" content="Fabian Jakobs">
+    <!--
+    Ace
+      version 1.14.0
+      commit  
+    -->
+
+    <link rel="stylesheet" href="demo/kitchen-sink/styles.css" type="text/css" media="screen" charset="utf-8">
+    
+    <script async="true" src="https://use.edgefonts.net/source-code-pro.js"></script>
+    
+
+    <link href="./doc/site/images/favicon.ico" rel="icon" type="image/x-icon">
+</head>
+<body>
+<div id="sidePanel" style="position:absolute;height:100%;">
+  <div class="toggleButton" id="optionToggle" role="button" aria-label="Hide Options" tabindex="0">
+    <div></div><div></div><div></div>
+  </div>
+  <div style="position: absolute; overflow: hidden; top:10px; bottom:0">
+  <div id="optionsPanel" style="width: 120%; height:100%; overflow-y: scroll">
+
+
+  </div>
+  </div>
+</div>
+  <div id="editor-container"></div>
+  
+  <script src="src/ace.js" data-ace-base="src" type="text/javascript" charset="utf-8"></script>
+  <script src="demo/kitchen-sink/demo.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    require("demo/kitchen-sink/demo");
+  </script>
+    
+  <script>
+        let editor;
+
+  const setEditorContent = (content)=>{
+      const editorContent = document.getElementById("editor")
+      editorContent.innerHTML = `<xmp>${content}</xmp>`
+  }
+
+  const startEditor = (filename, content) =>{
+      setEditorContent(content)
+      
+      // editor = ace.edit("editor");
+      // editor.setTheme("ace/theme/monokai");
+      // editor.session.setMode("ace/mode/javascript");
+      // editor.commands.addCommand({
+      //     name: 'save',
+      //     bindKey: {win: 'Ctrl-S',  mac: 'Command-M'},
+      //     exec: async function(editor) {
+      //         const content = getContent()
+      //         window.postMessage({ saveContent:content })
+      //     },
+      // });
+      // window.editorInstance = editor
+
+      // return editor
+  }
+
+  const getContent = () =>{
+          return window.editorInstance.getValue()
+  }
+
+window.setEditorContent = setEditorContent
+window.getContent = getContent
+window.startEditor = startEditor
+  </script>
+</body>
+</html>

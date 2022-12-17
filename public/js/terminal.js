@@ -42,7 +42,8 @@ class TerminalEmulator{
         "tirex":"Start the famous tirex game from Google",
         "lofi":"Opens up Lo Fi Girl's Youtube channel",
         "webamp":"Launches a Webamp Music Player window",
-        "editor":"Launches an Ace Editor window",
+        "notepad":"Launches a text editor window",
+        "code":"Launches a code editor window"
       }
     };
 
@@ -76,7 +77,8 @@ class TerminalEmulator{
       map:()=>runMap(),
       lofi:()=>runLofi(),
       webamp:()=>runWebamp(),
-      editor:async (args)=>await this.runEditor(args),
+      notepad:async (args)=>await this.runNotepad(args),
+      code:async (args)=>await this.runCodeEditor(args),
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
       test:()=>this.testEditor(),
@@ -170,43 +172,20 @@ class TerminalEmulator{
     return result
   }
 
-  whereis(args){
-    exec("whereis", args)
-    .then(result => {
-      this.output(result)
-    })
-  }
-
-  search(args){
-    exec("search", args)
-    .then(result => {
-      if(result){
-        if(result.directory){
-          this.output(FileSystem.getAbsolutePath(result.directory))
-        }else if(result.file){
-          const { file, containedIn } = result
-          this.output(FileSystem.getAbsolutePath(containedIn)+"/"+file.name)
-        }
-      }
-    })
-  }
-
-  async runEditor(args){
+  async runNotepad(args){
     const path = args[0]
     const file = await exec("getFile", [path])
     let content = ""
     if(file){
       content = file.content
-    }else{
-      const newFile = await exec("touch", [path])
     }
 
-    launchEditor(content, path)
+    launchNotepad(path, content, (file?"exists":false))
     return true
   }
 
   testEditor(){
-    runTextEditor()
+    new WinBox({ title: "Window Title", url:'./js/applications/kitchen-sink.html' })
   }
 
   runFileManager(){
