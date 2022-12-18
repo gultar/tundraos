@@ -584,10 +584,8 @@ class VirtualFileSystem{
 
     async editFile(filename, newContent){
         const file = await this.getFile(filename)
-        console.log('Got file:', file)
         if(!file) return false
         file.content = newContent
-        console.log('New Content', newContent)
         const saved = this.workingDir.setFile(filename, file)
 
         this.persistance.editFile(filename, newContent)

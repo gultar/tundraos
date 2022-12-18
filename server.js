@@ -29,19 +29,27 @@ const runServer = (FileSystem) =>{
   }
 
 
-  const app = express();
-  const httpServer = createServer(app)
+  const expressApp = express();
+  const httpServer = createServer(expressApp)
   const port = process.env.PORT || 8000;
-  const ioPort = 5000
-  app.use(express.static(__dirname + '/public'));
-  app.use(cors())
-  app.use(helmet.frameguard())
-  app.use(bodyParser.json());       // to support JSON-encoded bodies
-  app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  
+  expressApp.use(express.static(__dirname + '/public'));
+  expressApp.use(cors())
+  expressApp.use(helmet.frameguard())
+  expressApp.use(bodyParser.json());       // to support JSON-encoded bodies
+  expressApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
   })); 
-  app.get('/', function(req, res) {
+  expressApp.get('/', function(req, res) {
     res.sendFile(path.join(__dirname, '/index.html'));
+  });
+
+  expressApp.post('/command', async(req, res)=> {
+    const { cmd, args } = req.body
+    const result = await runCommand(cmd, args)
+    if(result.error) res.json({ error:result.error })
+    else res.json({ result:result })
+    // res.send(path.join(__dirname, '/index.html'));
   });
 
   const io = new Server(httpServer);

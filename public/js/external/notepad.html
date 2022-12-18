@@ -15,7 +15,8 @@
     }
 </style>
 <link rel="stylesheet" href="../../css/topnav.css">
-<script src="./js/external/jquery-2.1.1.min.js" type="text/javascript"></script>
+<script src="./jquery-2.1.1.min.js" type="text/javascript"></script>
+<script src="./get-extension.js"></script>
 <script>
     let editor;
 
@@ -30,7 +31,7 @@
     }
 
     const startNotepad = (filename, content) =>{
-        setEditorContent(content)
+        // setEditorContent(content)
 
         const [ name, ...extensions ] = filename.split(".")
         const lastExtension = extensions[extensions.length - 1]
@@ -51,6 +52,7 @@
                 save()
             },
         });
+        editor.setValue(content);
         window.editorInstance = editor
 
         return editor
@@ -58,6 +60,10 @@
 
     const getContent = () =>{
             return window.editorInstance.getValue()
+    }
+
+    const openSettings = () =>{
+        
     }
 
     window.setEditorContent = setEditorContent
@@ -77,6 +83,7 @@
                     <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
                 </ul>
                 </li>
+                
             </ul>
         </nav>
     </div>
@@ -84,10 +91,9 @@
         
     </div>
   </div>
-
+  
     
 <script src="./src/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="./get-extension.js"></script>
 
 </body>
 </html>

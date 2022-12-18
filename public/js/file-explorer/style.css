@@ -1,5 +1,5 @@
 *{
-    --number-of-explorer-items: 10
+    --number-of-explorer-items: 8
 }
 
 #file-explorer-wrapper{
@@ -60,7 +60,7 @@
 
 @media screen and (min-width : 500px) and (max-width : 1000px)  {
     *{
-        --number-of-explorer-items: 8;
+        --number-of-explorer-items: 6;
     }
 }
 

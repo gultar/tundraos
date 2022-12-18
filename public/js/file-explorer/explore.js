@@ -34,7 +34,6 @@ const makeFileExplorer = async () =>{
         html:explorerHTML,
         onclose:()=>{
             window.removeEventListener("message", handleExplorerMessage, true)
-            console.log('Removed')
             currentDirContents = []
             workingDir = ""
         }
@@ -81,17 +80,8 @@ const makeFileExplorer = async () =>{
         }else if(message.refreshExplorer){
             refreshExplorer()
         }else if(message.openFile){
-            const filename = message.openFile
             
-            const path = await exec('whereis', [filename])
-            const file = await exec("getFile", [path])
-            let fileExists = false
-            
-            if(file){
-                fileExists = true
-            }
-            
-            window.launchNotepad(filename, file.content, fileExists)
+            openFile(message.openFile)
         }
 
         refreshExplorer()

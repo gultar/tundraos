@@ -2,25 +2,18 @@ let isOpen = false
 const launchNotepad = (filename, content, exists=false) =>{
     if(isOpen) return false;
 
-    let editor = false;
-
     const save = async (filecontent) =>{
         const fileExists = await exec("getFile", [filename])
 
-        if(!fileExists){
-            return await exec("touch", [filename, filecontent])
-        }else{
-            return await exec("editFile", [filename, filecontent])
-
-        }
-
+        if(!fileExists) return await exec("touch", [filename, filecontent])
+        else return await exec("editFile", [filename, filecontent])
     }
 
     const winbox = new WinBox({ 
         title: "", 
         height:"95%", 
         width:"80%",
-        url:"./js/external/notepad.html",//"./pages/editor.html",
+        url:"./js/external/notepad.html",
     })
 
     setTimeout(()=>{

@@ -9,6 +9,14 @@ function changeBackground(args){
     }
 }
 
+function setWaveEffect(){
+    // $('#page-wrapper').css("background", "linear-gradient(-45deg, #2c4f99, #365afc, #414141, #575757)")
+    // $('#page-wrapper').css("background-size", "400% 400%")
+    const pageWrapper = document.getElementById('page-wrapper')
+    pageWrapper.style.animation = "gradient 180s ease infinite"
+    return true
+}
+
 function toggleParticles(){
   if(window.particles){
     window.particles = false;

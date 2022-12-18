@@ -1,7 +1,8 @@
 class File{
-    constructor(name="", content=""){
+    constructor(name="", content="", path=""){
         this.name = name
         this.content = content
+        this.path = path
     }
 
     setContent(content){

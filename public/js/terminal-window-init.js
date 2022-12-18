@@ -51,7 +51,9 @@ function createTerminalWindow(){
     terminal.style.width = "100%"
 }
 
-setInterval(()=>{
+const initTerminalClock = () =>{
+  setInterval(()=>{
     const date = new Date()
     $("#clock").text(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
-}, 1000)
+  }, 1000)
+}

@@ -26,8 +26,9 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["syste
         } else {
             
             console.log(`   Adding file ${file}`)
-            const fileContent = fs.readFileSync(dirPath + "/" + file).toString()
-            fsPosition.contents.push(new File(file, fileContent))
+            const path = dirPath + "/" + file
+            const fileContent = fs.readFileSync(path).toString()
+            fsPosition.contents.push(new File(file, fileContent, path))
         }
   }
   

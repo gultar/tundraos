@@ -28,7 +28,9 @@ class TerminalEmulator{
         "mkdir":"Create the DIRECTORY, if it does not already exist. Usage: mkdir directoryname/",
         "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
         "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname",
-        "whoami":"Displays information concerning host"
+        "whoami":"Displays information concerning host",
+        "reboot":"Reboots application",
+        "shutdown":"Closes application",
       },
       "settings":{
         "background":"Changes the background image. Usage: background http://url.url",
@@ -43,7 +45,6 @@ class TerminalEmulator{
         "lofi":"Opens up Lo Fi Girl's Youtube channel",
         "webamp":"Launches a Webamp Music Player window",
         "notepad":"Launches a text editor window",
-        "code":"Launches a code editor window"
       }
     };
 
@@ -64,9 +65,11 @@ class TerminalEmulator{
       rmdir:async(args)=>await this.runBash("rmdir",args),
       rm:async(args)=>await this.runBash("rm",args),
       whereis:async(args)=>await this.runBash("whereis", args),
-      //Style Settings
+      reboot:()=>this.reboot(),
+      shutdown:()=>this.shutdown(),
+      //Settings
       background:(args)=>changeBackground(args),
-      //Web Tools
+      //Applications
       web:(args)=>runWeb(args),
       wiki:()=>runWeb(["https://wikipedia.org"]),
       gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/"]),
@@ -78,10 +81,11 @@ class TerminalEmulator{
       lofi:()=>runLofi(),
       webamp:()=>runWebamp(),
       notepad:async (args)=>await this.runNotepad(args),
-      code:async (args)=>await this.runCodeEditor(args),
+      editor:async (args)=>await this.runNotepad(args), //Alias
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
-      test:()=>this.testEditor(),
+      view:async (args)=>await this.viewImage(args),
+      test:()=>this.testSomething()
     }
   }
   
@@ -140,6 +144,14 @@ class TerminalEmulator{
     }
   }
 
+  reboot(){
+    location.reload()
+  }
+
+  shutdown(){
+    window.close()
+  }
+
   echo(args){
     const message = args.join(" ")
     this.output(message)
@@ -184,8 +196,13 @@ class TerminalEmulator{
     return true
   }
 
-  testEditor(){
-    new WinBox({ title: "Window Title", url:'./js/applications/kitchen-sink.html' })
+  testSomething(){
+    
+    console.log('Window', window.location)
+  }
+
+  async viewImage(args){
+    // new WinBox({ title:"Image Viewer", url: })
   }
 
   runFileManager(){

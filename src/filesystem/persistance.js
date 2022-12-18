@@ -42,9 +42,10 @@ class Persistance{
     }
 
     cd(path){
+        path = path.replace('system', '')
         if(this.user == 'root'){
             //otherwise it can't find path within actual directory
-            path = path.replace('system', '')
+            
         }
         this.currentDir = path
     }

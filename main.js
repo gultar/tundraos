@@ -11,15 +11,16 @@ app.on('ready', () => {
     runServer(FileSystem)
 
     const win = new BrowserWindow({
-      width: 768,
-      height: 1024,
+      fullscreen:true,
+      frame: false,
       webPreferences: {
         nativeWindowOpen: true,
         devTools: true, // false if you want to remove dev tools access for the user
         contextIsolation: true,
         webviewTag: true, // https://www.electronjs.org/docs/api/webview-tag,
-        // preload: path.join(__dirname, "../preload.js"), // required for print function
+        preload: path.join(__dirname, "./public/js/preload.js"), // required for print function
       },
     });
-    win.loadURL('file://' + path.join(__dirname, 'public/index.html'))
+    console.log('Path', path.join(__dirname, "./public/js/preload.js"))
+    win.loadURL("http://localhost:8000/")
 });
