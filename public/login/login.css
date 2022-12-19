@@ -1,0 +1,102 @@
+body{
+    position:fixed;
+    color:white;
+    background:#404347;
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position:left left;
+    z-index:1;
+    margin:0;
+    height:100%;
+    width:100%;
+    text-align: center;
+    
+}
+
+#os-title{
+    font-size: x-large;
+    font-family: "Georgia", serif;
+}
+
+#login-wrapper{
+    /* display:block; */
+    height:100%;
+    width:100%;
+    background-repeat:no-repeat;
+    background-size:contain;
+    background: linear-gradient(-90deg, #2c4f99, #365afc, #414141, #575757);
+    background-size: 400% 400%;
+    -webkit-animation:gradient 20s ease infinite;
+    animation: gradient 120s ease infinite;
+
+}
+
+#login-window{
+    /* border: solid 3px black; */
+    font-family: Inconsolata, monospace;
+    padding:5px;
+    display:block;
+    width:200px;
+    height:220px;
+
+    background-color:#414141;
+    color:#48F2E3;
+    position:fixed;
+    top:34%;
+    left:43%;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.7);
+}
+
+#exit-options{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#exit-button{
+    cursor:pointer;
+}
+
+#reboot-button{
+    cursor:pointer;
+}
+
+@keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+@media screen and (max-width : 800px) {
+    body{
+      font-size:12pt !important;
+      background-size:100% 100%;
+      background-repeat: no-repeat;
+    }
+  
+    #login-window{
+        left:37%;
+    }
+}
+
+@media screen and (max-width : 670px) {
+    #login-window{ left:32%; }
+}
+
+@media screen and (max-width : 460px) {
+    #login-window{
+        left:26%;
+    }
+}
+
+@media screen and (max-width : 360px) {
+    #login-window{
+        left:20%;
+    }
+}

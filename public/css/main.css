@@ -14,21 +14,11 @@ body{
 }
   /*okay*/
 .background {
-    
-  display
-  :
-   block
-  ;
-    
-  top
-  : 0;
-    
-  left
-  : 0;
-    
-  z-index
-  : 0;
-  }
+  display:block;
+  top:0;
+  left:0;
+  z-index:0;
+}
 
 @keyframes gradient {
   0% {
@@ -50,7 +40,8 @@ body{
   --console-window-background:rgba(0,0,0,var(--window-tint));
   --terminal-font-size:8pt;
   --background:#45505f;
-  --winbox-background:transparent
+  --winbox-background:transparent;
+  --particle-color:#48F2E3;
 }
 
 #page-wrapper{

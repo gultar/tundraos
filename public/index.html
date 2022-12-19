@@ -14,6 +14,7 @@
     <script src="./js/external/webamp.bundle.js"></script>
     <script src="./js/classes/virtualfilesystem.js"></script>
     <script src="./js/commands/web-cmds.js"></script>
+    <script src="./js/applications/browser.js"></script>
     <script src="./js/commands/settings.js"></script>
     <script src="./js/applications/webamp.js"></script>
     <script src="./js/terminal.js"></script>
@@ -27,13 +28,42 @@
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
     <script src="./js/particlejs-init.js"></script>
-    <script src="./init-script.js" defer></script>
+    <script src="./js/init-script.js" defer></script>
 
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <title>Document</title>
 </head>
 <body>
     <script>
+        const getUsername = () =>{
+            // console.log(window.location.href, searchParams)
+            if(window.location.hostname == 'localhost'){
+                const [ url, searchParams ] = window.location.href.split("?")
+                const [ tokenAndValue, usernameAndValue ] = searchParams.split("&")
+                let [ usernameLabel, value ] = usernameAndValue.split("=")
+                value = value.replace("#", '')
+                return value
+            }else{
+                return 'guest'
+            }
+            
+        }
+        const logout = async () =>{
+            
+            
+            const [ url, searchParams ] = window.location.href.split("?")
+            const username = getUsername()
+            window.location.href = url
+            
+            if(window.location.hostname == 'localhost'){
+                const loggedOut = await Promise.resolve($.post("/logout", {
+                    logout:true,
+                    username:username
+                }))
+            }
+
+        }
+
         const reboot = () =>{
             const confirmed = confirm("Are you sure you want to reboot?")
             if(confirmed){
@@ -97,6 +127,7 @@
                             </li>
                             <li><a href="#"><img class="main-menu-icons" src="./images/icons/system.png" />System</a>
                                 <ul>
+                                    <li><a onclick="logout()">Logout</a></li>
                                     <li><a onclick="reboot()">Reboot</a></li>
                                     <li><a onclick="shutdown()">Shutdown</a></li>
                                 </ul>
@@ -113,6 +144,7 @@
 
         <div id="page-anchor"></div>
         <div id="filemanager"></div>
+
         <div id="webamp"></div>
         <div id="main-container">
             <div id="logo-container"> 
@@ -120,6 +152,9 @@
                 <img id="desktop-logo" src="./images/icons/desktop-logo-3.png" style="">
             </div>
             <canvas class="background"></canvas>
+        </div>
+        <div id="browser-view" style="width:100%; height:100%; visibility:hidden;">
+            
         </div>
     </div>
     <script type="text/javascript">

@@ -4,7 +4,7 @@ const makeFileExplorer = async () =>{
     let workingDir = ""
     let listener = false
 
-    const explorerHTML = `<link rel="stylesheet" href="./js/file-explorer/style.css">
+    const explorerHTML = `<link rel="stylesheet" href="./css/explorer.css">
     <div id="file-explorer-wrapper">
         <nav class="file-menu" role="navigation">
             <ul class="menu-item-list">
@@ -40,7 +40,7 @@ const makeFileExplorer = async () =>{
     })
 
     const handleExplorerMessage = async (event) => {
-        console.log('Message', event)
+        
         const message = event.data
         if(message.changeDir){
             
@@ -53,23 +53,9 @@ const makeFileExplorer = async () =>{
                 if(workingDir[workingDir.length - 1] != "/") workingDir = workingDir + "/"
 
             }else{
-                console.log('-------test----------')
-                console.log('targetDir', targetDir)
-                console.log('workingDir', workingDir)
-                console.log('await exec("pwd")',await exec('pwd'))
-                console.log('await exec("whereis", [targetDir])',await exec("whereis", [targetDir]))
-                console.log('-------test----------')
                 const exists = await exec("whereis", [targetDir])
                 if(exists){
                     workingDir = await exec("whereis", [targetDir])
-                    console.log('Set working dir', workingDir)
-                }else{
-                    console.log('NOT FOUND')
-                    console.log('targetDir', targetDir)
-                    console.log('workingDir', workingDir)
-                    console.log('await exec("pwd")',await exec('pwd'))
-                    console.log('await exec("whereis", [targetDir])',await exec("whereis", [targetDir]))
-                    console.log('NOT FOUND')
                 }
             }
 
@@ -97,27 +83,27 @@ const makeFileExplorer = async () =>{
      
      listener = window.addEventListener("message", handleExplorerMessage, true);
 
-   //   let maxNewElementNumber = 500
-   //   const createNewDirectory = async (newDirNumber = 1) =>{
-   //     if(newDirNumber > maxNewElementNumber) throw new Error('Cannot create more new directories')
-   //     try{ 
-   //         const newDirname = `New_directory${newDirNumber}`
-   //         const path = (workingDir === "/" ? workingDir + newDirname : workingDir + "/" + newDirname)
-   //         const hasDir = await exec("find", [path])
+     let maxNewElementNumber = 500
+     const createNewDirectory = async (newDirNumber = 1) =>{
+       if(newDirNumber > maxNewElementNumber) throw new Error('Cannot create more new directories')
+       try{ 
+           const newDirname = `New_directory${newDirNumber}`
            
-   //         if(!hasDir){
-   //             const created = await exec('mkdir', [path])
-   //             refreshExplorer()
-   //             newDirNumber = 0
-   //             return created
-   //         }else{
-   //             return await createNewDirectory(newDirNumber + 1)
-   //         }
-   //     }catch(e){
-   //         console.log(e)
-   //         return e
-   //     }
-   //   }
+           const path = (workingDir === "/" ? workingDir + newDirname : workingDir + "/" + newDirname)
+           const hasDir = await exec("whereis", [path])
+           if(!hasDir){
+               const created = await exec('mkdir', [path])
+               refreshExplorer()
+               newDirNumber = 0
+               return created
+           }else{
+               return await createNewDirectory(newDirNumber + 1)
+           }
+       }catch(e){
+           console.log(e)
+           return e
+       }
+     }
 
    //   const createNewFile = async (newFileNumber = 1) =>{
    //     if(newFileNumber > maxNewElementNumber) throw new Error('Cannot create more new files')
@@ -155,15 +141,15 @@ const makeFileExplorer = async () =>{
      const setCurrentDirContents = async (workingDir) =>{
        
        const explorerElement = document.getElementById("explorer")
-       console.log('Working', workingDir)
+       
        const contents = await exec("ls",[workingDir])
-       console.log('Contents', contents)
+       
        if(Array.isArray(contents)){
         currentDirContents = contents
        }
-       console.log('currentDirContents',currentDirContents)
+       
        if(currentDirContents.error){
-           console.log('Working', workingDir)
+        
            throw new Error(currentDirContents.error)
        }
 

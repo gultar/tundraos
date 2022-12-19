@@ -67,6 +67,7 @@ class TerminalEmulator{
       whereis:async(args)=>await this.runBash("whereis", args),
       reboot:()=>this.reboot(),
       shutdown:()=>this.shutdown(),
+      logout:()=>logout(),
       //Settings
       background:(args)=>changeBackground(args),
       //Applications
@@ -85,7 +86,8 @@ class TerminalEmulator{
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
       view:async (args)=>await this.viewImage(args),
-      test:()=>this.testSomething()
+      test:(args)=>this.testSomething(args),
+
     }
   }
   
@@ -196,9 +198,9 @@ class TerminalEmulator{
     return true
   }
 
-  testSomething(){
-    
-    console.log('Window', window.location)
+  testSomething(args){
+    const url = args[0]
+    launchBrowser(url)
   }
 
   async viewImage(args){
@@ -221,6 +223,7 @@ class TerminalEmulator{
 
   whoami(){
     this.output(navigator.userAgent)
+    this.output(`Username: ${getUsername()}`)
   }
 
   async processCommand(commandLine){

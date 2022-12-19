@@ -6,7 +6,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 const { createServer } = require("http")
 const crypto = require('crypto')
-const buildUserspace = require('./src/filesystem/build-userspace.js')
 
 const sha256 = (text) =>{
   return crypto
@@ -17,34 +16,16 @@ const sha256 = (text) =>{
 
 const authorizedUsers = {
   kerac:{
-    passwordHash:sha256("awd"),
-    tokenHash:"",
+    password:sha256("awd"),
+    token:"",
   },
   root:{
-    passwordHash : sha256("root"),
-    tokenHash:""
+
   }
 }
 
-const createNewUser = (username, password) =>{
-  if(authorizedUsers[username] !== undefined) return false
+const runServer = (FileSystem, origin={ http:true }) =>{
   
-  authorizedUsers[username] = {
-    passwordHash : sha256(password),
-    tokenHash:""
-  }
-
-  return true
-}
-
-const isValidPassword = (username, password) =>{
-  const user = authorizedUsers[username]
-  const isValidPassword = sha256(password) === user.passwordHash
-  return isValidPassword
-}
-
-const runServer = (FileSystem={}, origin={ http:true }) =>{
-
   const runCommand = async (cmd, args) =>{
     try{
       
@@ -69,23 +50,18 @@ const runServer = (FileSystem={}, origin={ http:true }) =>{
   const expressApp = express();
   const httpServer = createServer(expressApp)
   const port = process.env.PORT || 8000;
+  let pagePath = __dirname + '/public/login'
+  // expressApp.use(express.static(__dirname + '/public'));
+  // expressApp.use("/", (req, res, next)=>{
+  //   const query = req.query
+  //   if(query.token){
+  //     res.redirect("/log")
+  //   }
+  //   next()
+  // })
+
   
-  expressApp.get("/", (req, res)=>{
-    const query = req.query
-    if(!query.token){
-      return res.redirect("/log")
-    }
-
-    const { token, username } = query
-
-    FileSystem = buildUserspace(username)
-    
-    res.sendFile(__dirname + '/public/index.html')
-  })
-
-  expressApp.use('/',express.static(__dirname + '/public'));
-  expressApp.use("/log", express.static(__dirname + '/public/login'))
-  
+  expressApp.use(express.static(__dirname + '/public'));
   expressApp.use(cors())
   // expressApp.use(helmet.frameguard())
   expressApp.use(bodyParser.json());       // to support JSON-encoded bodies
@@ -99,35 +75,27 @@ const runServer = (FileSystem={}, origin={ http:true }) =>{
   expressApp.post("/login", (req, res)=>{
     const { username, password, timestamp } = req.body
 
-    if(!authorizedUsers[username]){
-      const newUser = createNewUser(username, password)
-    }
+    if(!authorizedUsers[username]) 
+      res.send({ error:'Unknown user '+username, status:401 }).end()
     
-    
-    if(!isValidPassword(username, password))
-      return res.send({ 
+    if(sha256(password) !== authorizedUsers[username].password)
+      res.send({ 
         error:`Password of user ${username} is invalid`, 
         status:401 
-      })
+      }).end()
 
     let code = `${username}${password}${timestamp}`
 
     let hexHash = sha256(code)
 
     authorizedUsers[username].token = hexHash
-    return res.json({ 
+    res.status(200).json({ 
         token:{
           hash:hexHash.toString("hex"),
           username:username,
           status:200,
         }
     })
-  })
-
-  expressApp.post("/logout", (req, res)=>{
-    const { username } = req.body
-    FileSystem = null;
-    console.log(`Logged out of user ${username}'s session`)
   })
 
   expressApp.post('/command', async(req, res)=> {

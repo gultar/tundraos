@@ -12,8 +12,8 @@ class Persistance{
             
         }
 
-        console.log('Basedir', this.baseDir)
         this.currentDir = "/"
+        
         if(user && !fs.existsSync(this.baseDir)){
             try{
                 fs.mkdirSync(this.baseDir)
@@ -25,8 +25,16 @@ class Persistance{
     }
 
     resolvePath(pathString){
+        pathString = pathString.replace('system', '')
+        this.currentDir = this.currentDir.replace('system', '')
+        this.baseDir = this.baseDir.replace('system', '')
+
         const paths = pathString.split("/").filter(path => path !== "")
+
+        
+
         let truePath = this.baseDir + this.currentDir
+        
         for(const path of paths){
             if(path !== ".."){
                 truePath = truePath + "/" + path
@@ -42,7 +50,7 @@ class Persistance{
     }
 
     cd(path){
-        path = path.replace('system', '')
+        
         if(this.user == 'root'){
             //otherwise it can't find path within actual directory
             

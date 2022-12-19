@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="./login.css">
+</head>
+<body>
+    <script src="./jquery-2.1.1.min.js"></script>
+    <div id="login-wrapper">
+        
+        <div id="login-window">
+            <p id="os-title">Aurora OS</p>
+            <label for="username">Username</label><input id="username" type="text" />
+            <label for="username">Password</label><input id="password" type="password" />
+            <br><br><button onclick="login()">Login</button>
+            <div id="exit-options">
+                <span id="exit-button"><a onclick='window.close()'>Exit</a></span>
+                <span id="reboot-button"><a onclick="location.reload()">Reboot</a></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const login = async () =>{
+            const usernameInput = document.getElementById("username")
+            const passwordInput = document.getElementById("password")
+            const username = usernameInput.value
+            const password = passwordInput.value
+
+            if(usernameInput.value === ""){
+                alert("You need to enter a username!")
+                return false
+            }
+
+            const loggedIn = await Promise.resolve($.post("http://localhost:8000/login", {
+                username:username,
+                password:password,
+                timestamp:Date.now()
+            }))
+            if(loggedIn.error){
+                alert(loggedIn.error)
+            }else{
+                const { token } = loggedIn
+                if(token){
+                    window.location = `/?token=${token.hash}&username=${username}`
+                }
+            }
+
+        }
+    </script>
+</body>
+</html>
