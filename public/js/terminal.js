@@ -89,6 +89,7 @@ class TerminalEmulator{
       view:async (args)=>await this.viewImage(args),
       test:(args)=>this.testSomething(args),
       explorer:(args)=>this.runExplorer(args),
+      browser:(args)=>this.startBrowser(args),
     }
   }
   
@@ -208,6 +209,11 @@ class TerminalEmulator{
 
   runExplorer(args){
     makeFileExplorer()
+  }
+
+  startBrowser(args){
+    const url = args[0]
+    launchBrowser(url)
   }
 
   async viewImage(args){

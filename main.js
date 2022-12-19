@@ -11,7 +11,7 @@ app.on('ready', () => {
     runServer(null, { electron:true })
 
     const win = new BrowserWindow({
-      // fullscreen:true,
+      fullscreen:true,
       frame: false,
       webPreferences: {
         nativeWindowOpen: true,
