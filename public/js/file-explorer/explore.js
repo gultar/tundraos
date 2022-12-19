@@ -87,11 +87,11 @@ const makeFileExplorer = async () =>{
      const createNewDirectory = async (newDirNumber = 1) =>{
        if(newDirNumber > maxNewElementNumber) throw new Error('Cannot create more new directories')
        try{ 
-           const newDirname = `New_directory${newDirNumber}`
+           const newDirname = `New_directory${newDirNumber}/`
            
            const path = (workingDir === "/" ? workingDir + newDirname : workingDir + "/" + newDirname)
-           const hasDir = await exec("whereis", [path])
-           if(!hasDir){
+           const contents = await exec("ls",[workingDir])
+           if(!contents.error && !contents.includes(newDirname)){
                const created = await exec('mkdir', [path])
                refreshExplorer()
                newDirNumber = 0
@@ -105,25 +105,26 @@ const makeFileExplorer = async () =>{
        }
      }
 
-   //   const createNewFile = async (newFileNumber = 1) =>{
-   //     if(newFileNumber > maxNewElementNumber) throw new Error('Cannot create more new files')
-   //     try{ 
-   //         const newFilename = `New_file${newFileNumber}`
-   //         const hasFile = await exec("getFile", [newFilename])
-           
-   //         if(!hasFile){
-   //             const created = await exec('touch', [newFilename])
-   //             refreshExplorer()
-   //             newFileNumber = 0
-   //             return created
-   //         }else{
-   //             return await createNewFile(newFileNumber + 1)
-   //         }
-   //     }catch(e){
-   //         console.log(e)
-   //         return e
-   //     }
-   //   }
+     const createNewFile = async (newFileNumber = 1) =>{
+       if(newFileNumber > maxNewElementNumber) throw new Error('Cannot create more new files')
+       try{ 
+           const newFilename = `New_file${newFileNumber}`
+           const hasFile = await exec("getFile", [newFilename])
+           const path = (workingDir === "/" ? workingDir + newFilename : workingDir + "/" + newFilename)
+           const contents = await exec("ls",[workingDir])
+           if(!contents.error && !contents.includes(newFilename)){
+               const created = await exec('touch', [path])
+               refreshExplorer()
+               newFileNumber = 0
+               return created
+           }else{
+               return await createNewFile(newFileNumber + 1)
+           }
+       }catch(e){
+           console.log(e)
+           return e
+       }
+     }
 
      const createNewElement = (element) =>{
        return `<div class="explorer-item-wrapper">  
@@ -143,7 +144,6 @@ const makeFileExplorer = async () =>{
        const explorerElement = document.getElementById("explorer")
        
        const contents = await exec("ls",[workingDir])
-       
        if(Array.isArray(contents)){
         currentDirContents = contents
        }

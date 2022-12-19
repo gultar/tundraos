@@ -343,6 +343,7 @@ class VirtualFileSystem{
             directory = this.workingDir
         }else{
             directory = this.find(path)
+
             const isDirectory = this.isDir(directory)
             if(!isDirectory) throw new Error(`Command ls failed. ${path} is not a directory`)
         }
@@ -561,6 +562,7 @@ class VirtualFileSystem{
                         currentDir = currentDir[dir]
                     }
                 }else{
+                    // return { error:`Directory ${dir} could not be found` }
                     throw new Error(`Directory ${dir} could not be found`)
                 }
             }
@@ -637,6 +639,7 @@ class VirtualFileSystem{
 
     findMatchingPartialValues(partialValue, setOfValues){
         const options = []
+        const matchingSegment = ""
         for(let value of setOfValues){
           const contains = value.substr(0, partialValue.length) == partialValue
           if(contains){

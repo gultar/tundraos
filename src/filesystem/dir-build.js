@@ -1,17 +1,32 @@
 const fs = require("fs")
 const File = require('../../public/js/classes/file.js')
 
-const rootFs = {
-    "system":{
-        contents:[]
-    },
-    contents:[]
+// const rootFs = {
+//     "system":{
+//         contents:[]
+//     },
+//     contents:[]
+// }
+
+class RootFS{
+    constructor(){
+        this.system = {
+            contents:[]
+        },
+        this.contents = []
+    }
 }
 
-const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["system"]) {
-    // console.log('Dirpath', dirPath)
+const log = (...text) =>{
+    console.log(`[BUILD:>]`, ...text)
+}
+
+let totalDirectories = 0
+let totalFiles = 0
+
+const buildFileSystemRepresentation = function(dirPath, fsPosition=new RootFS().system) {
+    
     files = fs.readdirSync(dirPath)
-    // console.log(files)
     fsPosition.contents = []
 
   for(const file of files) {
@@ -21,18 +36,23 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=rootFs["syste
             fsPosition[dir] = {
                 contents:[]
             }
-            console.log('Adding directory ', dir)
+            log('Adding directory ', dir)
+            totalDirectories++
             buildFileSystemRepresentation(dirPath + "/" + file, fsPosition[dir])
         } else {
             
-            console.log(`   Adding file ${file}`)
+            log(`\\_Adding file ${file}`)
             const path = dirPath + "/" + file
             const fileContent = fs.readFileSync(path).toString()
+            totalFiles++
             fsPosition.contents.push(new File(file, fileContent, path))
         }
   }
-  
   return fsPosition
 }
 
-module.exports = { buildFileSystemRepresentation }
+const getBuildStats = () =>{
+    return { totalDirectories:totalDirectories, totalFiles:totalFiles }
+}
+
+module.exports = { buildFileSystemRepresentation, getBuildStats }

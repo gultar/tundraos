@@ -5,11 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-
+    <link rel="stylesheet" href="./jquery-ui.min.js">
+    <link rel="stylesheet" href="./jquery-ui.structure.min.css">
+    <link rel="stylesheet" href="./jquery-ui.theme.min.css">
     <link rel="stylesheet" href="./login.css">
 </head>
 <body>
     <script src="./jquery-2.1.1.min.js"></script>
+    <script src="./jquery-ui.min.js"></script>
+
     <div id="login-wrapper">
         
         <div id="login-window">
@@ -23,8 +27,14 @@
             </div>
         </div>
     </div>
-
+    <div id="dialog-message" title="ERROR">
+            
+    </div>
     <script>
+        const popup = (...text) =>{
+            $("#dialog-message").append(...text)
+            $( "#dialog-message" ).dialog();
+        }
         const login = async () =>{
             const usernameInput = document.getElementById("username")
             const passwordInput = document.getElementById("password")
@@ -32,7 +42,7 @@
             const password = passwordInput.value
 
             if(usernameInput.value === ""){
-                alert("You need to enter a username!")
+                popup("You need to enter a username!")
                 return false
             }
 
@@ -42,7 +52,7 @@
                 timestamp:Date.now()
             }))
             if(loggedIn.error){
-                alert(loggedIn.error)
+                popup(loggedIn.error)
             }else{
                 const { token } = loggedIn
                 if(token){
@@ -52,5 +62,6 @@
 
         }
     </script>
+    
 </body>
 </html>

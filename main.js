@@ -8,10 +8,10 @@ const buildUserspace = require('./src/filesystem/build-userspace.js')
 // const FileSystem = buildUserspace("root")
 
 app.on('ready', () => {
-    runServer({}, { electron:true })
+    runServer(null, { electron:true })
 
     const win = new BrowserWindow({
-      fullscreen:true,
+      // fullscreen:true,
       frame: false,
       webPreferences: {
         nativeWindowOpen: true,

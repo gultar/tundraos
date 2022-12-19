@@ -1,11 +1,15 @@
 const VirtualFileSystem = require('../../public/js/classes/virtualfilesystem.js')
-const {buildFileSystemRepresentation} = require('./dir-build.js')
+const { buildFileSystemRepresentation, getBuildStats } = require('./dir-build.js')
 const Persistance = require('./persistance.js')
 const fs = require('fs')
 
 let FileSystem = {}
 
 const buildUserspace = (username='root') =>{
+
+    const log = (...text) =>{
+        console.log(`[${username}:>]`, ...text)
+    }
 
     class Userspace{
         constructor(userspacePath){
@@ -64,7 +68,7 @@ const buildUserspace = (username='root') =>{
     }
     
     let userDir = buildFileSystemRepresentation(userspacePath)
-    
+    log(getBuildStats())
     let persistance = new Persistance(username)
     
     FileSystem = new VirtualFileSystem(username, persistance)

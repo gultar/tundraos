@@ -65,6 +65,7 @@ class TerminalEmulator{
       rmdir:async(args)=>await this.runBash("rmdir",args),
       rm:async(args)=>await this.runBash("rm",args),
       whereis:async(args)=>await this.runBash("whereis", args),
+      '#':(args)=>this.runRoot(args),
       reboot:()=>this.reboot(),
       shutdown:()=>this.shutdown(),
       logout:()=>logout(),
@@ -87,7 +88,7 @@ class TerminalEmulator{
       whoami:()=>this.whoami(),
       view:async (args)=>await this.viewImage(args),
       test:(args)=>this.testSomething(args),
-
+      explorer:(args)=>this.runExplorer(args),
     }
   }
   
@@ -186,6 +187,13 @@ class TerminalEmulator{
     return result
   }
 
+  async runRoot(args){
+    const command = args.join(" ")
+    let result = await runRootCommand(command)
+    this.output(`<pre>${result}</pre>`)
+    return result
+  }
+
   async runNotepad(args){
     const path = args[0]
     const file = await exec("getFile", [path])
@@ -198,9 +206,8 @@ class TerminalEmulator{
     return true
   }
 
-  testSomething(args){
-    const url = args[0]
-    launchBrowser(url)
+  runExplorer(args){
+    makeFileExplorer()
   }
 
   async viewImage(args){

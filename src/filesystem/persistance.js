@@ -1,6 +1,10 @@
 const fs = require('fs')
 const fsx = require('fs-extra')
 
+const log = (...text) =>{
+    console.log("[FS:>]", ...text)
+}
+
 class Persistance{
     constructor(user=""){
         console.log('User', user)
@@ -11,12 +15,13 @@ class Persistance{
             this.baseDir = `./public`
             
         }
-
+        console.log('Base dir', this.baseDir)
         this.currentDir = "/"
         
         if(user && !fs.existsSync(this.baseDir)){
             try{
                 fs.mkdirSync(this.baseDir)
+                log(`Created user ${user} filesystem directory`)
             }catch(e){
                 console.log(e)
                 throw e
@@ -56,12 +61,13 @@ class Persistance{
             
         }
         this.currentDir = path
+        log(`Set working directory : ${path}`)
     }
 
     touch(path, content=""){
-        console.log(path, content)
         try{
             const newFile = fs.writeFileSync(this.resolvePath(path), content)
+            log(`Created new file ${path}:`, newFile)
         }catch(e){
             console.log(e)
         }
@@ -70,6 +76,7 @@ class Persistance{
     mkdir(path){
         try{
             const newDir = fs.mkdirSync(this.resolvePath(path))
+            log(`Created new directory ${path}:`, newDir)
         }catch(e){
             console.log(e)
         }
@@ -79,9 +86,11 @@ class Persistance{
         try{
             const isDirectory = fs.lstatSync(this.resolvePath(pathFrom)).isDirectory()
             if(isDirectory){
-                fs.cpSync(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
+                const copied = fs.cpSync(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
+                log(`Copied directory ${pathFrom} recursively to ${pathTo}`, copied)
             }else{
                 const copied = fs.copyFileSync(this.resolvePath(pathFrom), this.resolvePath(pathTo))
+                log(`Copied file ${pathFrom} to ${pathTo}`, copied)
             }
             
         }catch(e){
@@ -97,11 +106,14 @@ class Persistance{
                 const copied = fsx.copy(this.resolvePath(pathFrom), this.resolvePath(pathTo))
                 .then(res => {
                     fs.rmSync(this.resolvePath(pathFrom), { recursive:true })
+                    log(`Moved directory ${pathFrom} recursively to ${pathTo}`)
                 })
                 
             }else{
                 const copied = fs.copyFileSync(this.resolvePath(pathFrom), this.resolvePath(pathTo))
                 const sourceRemoved = fs.rmSync(this.resolvePath(pathFrom))
+
+                log(`Moved file ${pathFrom} to ${pathTo}`)
             }
 
         }catch(e){
@@ -112,12 +124,14 @@ class Persistance{
     rm(...paths){
         for(const path of paths){
             const sourceRemoved = fs.rmSync(this.resolvePath(path))
+            log(`Deleted file ${path}`, sourceRemoved)
         }
     }
 
     rmdir(...paths){
         for(const path of paths){
             const sourceRemoved = fs.rmSync(this.resolvePath(path), { recursive:true })
+            log(`Deleted directory ${path}:`, sourceRemoved)
         }
     }
 
@@ -125,6 +139,7 @@ class Persistance{
         try{
             console.log('Resolved path Edit File', this.resolvePath(filename))
             const edited = fs.writeFileSync(this.resolvePath(filename), newContent)
+            log(`Edited file ${filename}'s content: ${edited}`)
         }catch(e){
             console.log(e)
         }

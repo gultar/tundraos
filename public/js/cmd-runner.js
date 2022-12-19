@@ -21,9 +21,22 @@ const runFileSystemCommand = (cmd, args=[]) =>{
   }
 }
 
+const runRootCommand = async (commandStr) =>{
+  const {error, result} = await Promise.resolve($.post("http://localhost:8000/rootcmd", {
+        command:commandStr
+  }));
+
+  if(error) return error
+  else return result
+}
+
 const exec = async (cmd, args=[]) =>{
   if(window.location.hostname == "localhost" || window.isElectron){
-    return await execServerCommand(cmd, [...args])//execRemoteCommand(cmd, [...args])
+    if(cmd === "#"){
+      return await runRootCommand(args[0])
+    }
+    else
+    return await execServerCommand(cmd, [...args])
   }else{
     return runFileSystemCommand(cmd, [...args])
   }

@@ -27,7 +27,7 @@ const launchNotepad = (filename, content, exists=false) =>{
             if(message.saveContent){
               const filecontent = getContent()
               const saved = await save(filecontent)
-              alert(`Saved file ${filename}: ${saved}`)
+              popup(`Saved file ${filename}: ${saved}`)
             }
         })
 
