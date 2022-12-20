@@ -1,0 +1,109 @@
+.terminal-window{
+    margin: 0;
+    font-size: var(--terminal-font-size);
+    background: transparent;
+    color: var(--terminal-font-color);
+    overflow:auto;
+    display:block; 
+    position:absolute; 
+    z-index:9;
+  }
+  
+  p{
+    margin-block-start: 0 !important;
+    margin-block-end: 0 !important;
+  }
+  
+  .terminal-display{
+    height:88%;
+    overflow:auto;
+  }
+  
+  
+  ::selection {
+    background: #1e65fd;
+    color:white;
+  }
+  
+  .container {
+    padding: 0em 1em 1em 1em;
+    height:90%;
+    width:90%;
+  }
+  
+  .output {
+    clear: both;
+    width: 100%;
+  }
+  .output h3 {
+    margin: 0;
+  }
+  .output pre {
+    margin: 0;
+  }
+  
+  .input-line {
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: horizontal;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: horizontal;
+    box-align: stretch;
+    clear: both;
+  }
+  .input-line > div:nth-child(2) {
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
+  }
+  
+  .prompt {
+    white-space: nowrap;
+    color: #96b38a;
+    margin-right: 7px;
+    display: -webkit-box;
+    -webkit-box-pack: center;
+    -webkit-box-orient: vertical;
+    display: -moz-box;
+    -moz-box-pack: center;
+    -moz-box-orient: vertical;
+    display: box;
+    box-pack: center;
+    box-orient: vertical;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  .cmdline {
+    outline: none;
+    background-color: transparent;
+    margin: 0;
+    width: 100%;
+    font: inherit;
+    border: none;
+    color: inherit;
+  }
+  .ls-files p span{
+    line-height:20px;
+  }
+  .help-line{
+    line-height:10px !important;
+  }
+  .help-cmd{
+    text-decoration: underline;
+  }
+  
+  .terminal-window:before {
+    content: "";
+    position: absolute;
+    top: 30px;
+    bottom: 30px;
+    left: 30px;   
+    right: 30px;
+    z-index: 1;
+    border-radius: 6px;
+    width:90%;
+  }

@@ -1,15 +1,6 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 @import url(https://fonts.googleapis.com/css?family=Bree+Serif);
-
-*{
-	--height:30px;
-	--height-minus:-30px;
-	--width:170px;
-	--hover-color:#57ff0a;
-	--nav-background-color:black;
-	--nav-font-color:#ffffff;
-	--nav-font-size:8pt;
-}
+@import url("./variables.css");
 
 .clock-container{
 	display:inline-block;
@@ -33,6 +24,15 @@ nav {
 	display:flex;
 	justify-content: space-between;
 	box-shadow: 0 10px 10px -10px rgba(0,0,0,.5);
+	z-index: 10;
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none; 
+}
+
+.menu-block{
+	border:2px solid black;
 }
 
 nav ul {

@@ -1,0 +1,39 @@
+:root{
+    /*Desktop Styling
+    linear-gradient(-60deg, #2c4f99, #365afc, #414141, #575757);
+    */
+    --first-gradient:#2c4f99;
+    --second-gradient:#365afc;
+    --third-gradient:#414141;
+    --fourth-gradient:#575757;
+    --gradient-angle:-60deg;
+    --wave-gradient:linear-gradient(var(--gradient-angle),var(--first-gradient),var(--second-gradient),var(--third-gradient),var(--fourth-gradient));
+    /*Terminal styling*/
+    --terminal-font-color:#57ff0a;
+    --console-window-background:rgba(0,0,0,var(--window-tint));
+    --terminal-font-size:8pt;
+    /*Basic Window Styling*/
+    --window-height: 300px;
+    --window-width: 500px;
+    --window-tint: 0.5;
+    --background:#45505f;
+    --context-menu-background:#232527;
+    --winbox-background:transparent;
+    /*Particle effect*/
+    --particle-color:#48F2E3;
+    /*Nav*/
+    --height:30px;
+	--height-minus:-30px;
+	--width:170px;
+	--hover-color:#57ff0a;
+	--nav-background-color:rgb(20, 20, 20);
+	--nav-background-color2:#232527;
+	--nav-font-color:#ffffff;
+	--nav-font-size:8pt;
+    /*Explorer*/
+    --number-of-explorer-items: 8;
+    --explorer-background-color: rgb(57, 64, 71);
+    --size-of-item: 12vh;
+    --height-of-item:21vh;
+    --distance-apart: 1vh;
+  }

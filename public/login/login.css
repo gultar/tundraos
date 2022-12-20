@@ -24,7 +24,7 @@ body{
     width:100%;
     background-repeat:no-repeat;
     background-size:contain;
-    background: linear-gradient(-90deg, #2c4f99, #365afc, #414141, #575757);
+    background: linear-gradient(-60deg, #2c4f99, #365afc, #414141, #575757);
     background-size: 400% 400%;
     -webkit-animation:gradient 20s ease infinite;
     animation: gradient 120s ease infinite;

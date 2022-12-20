@@ -1,0 +1,19 @@
+.wb-header{
+    background: var(--console-window-background) !important;
+}
+.wb-title{
+    font-size: 9pt;
+}
+.winbox{
+    background-color:var(--winbox-background) !important;
+}
+.wb-body{
+    background: var(--console-window-background) !important;
+}
+
+
+@media screen and (min-width : 320px) and (max-width : 500px){
+    .winbox{
+        max-width:100%;
+      }
+}

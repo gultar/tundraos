@@ -9,16 +9,18 @@
     <link rel="stylesheet" href="./css/external/jquery-ui.min.js">
     <link rel="stylesheet" href="./css/external/jquery-ui.structure.min.css">
     <link rel="stylesheet" href="./css/external/jquery-ui.theme.min.css">
+    <link rel="stylesheet" href="./css/external/jquery.contextMenu.min.css">
     <script src="./js/external/winbox.bundle.min.js"></script>
     <script src="./js/external/jquery-2.1.1.min.js"></script>
+    <script src="./js/external/jquery.contextMenu.min.js"></script>
     <script  src="./js/external/jquery-ui.min.js"></script>
     <script src="./js/external/boxicons.js"></script>
     <script src="./js/external/ace.min.js"></script>
     <script src="./js/external/webamp.bundle.js"></script>
     <script src="./js/classes/virtualfilesystem.js"></script>
-    <script src="./js/commands/web-cmds.js"></script>
     <script src="./js/applications/browser.js"></script>
     <script src="./js/applications/browser-history.js" ></script>
+    <script src="./js/commands/web-cmds.js"></script>
     <script src="./js/commands/settings.js"></script>
     <script src="./js/applications/webamp.js"></script>
     <script src="./js/terminal.js"></script>
@@ -41,7 +43,7 @@
 <body>
     <script>
         const getUsername = () =>{
-            // console.log(window.location.href, searchParams)
+            //Probably useless
             if(window.location.hostname == 'localhost'){
                 const [ url, searchParams ] = window.location.href.split("?")
                 const [ tokenAndValue, usernameAndValue ] = searchParams.split("&")
@@ -53,6 +55,9 @@
             }
             
         }
+
+
+
         const logout = async () =>{
             
             
@@ -70,31 +75,52 @@
         }
 
         const reboot = () =>{
-            const confirmed = confirm("Are you sure you want to reboot?")
-            if(confirmed){
-                location.reload()
-            }else{
-                return
-            }
-            
+            $("#dialog-message").html(`<span>Are you sure you want to reboot?</span>`)
+            $( "#dialog-message" ).dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    Yes: function() {
+                        $( this ).dialog( "close" );
+                        if(location.hostname === 'localhost')
+                            location.href = location.origin
+                        else
+                            location.reload()
+                    },
+                    No: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
         }
 
         const shutdown = () =>{
-            const confirmed = confirm("Are you sure you want to shutdown?")
-            if(confirmed){
-                window.close()
-            }else{
-                return
-            }
-            
+            $("#dialog-message").html(`<span>Are you sure you want to shutdown?</span>`)
+            $( "#dialog-message" ).dialog({
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    Yes: function() {
+                        $( this ).dialog( "close" );
+                        window.close()
+                    },
+                    No: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
         }
     </script>
     <div id="page-wrapper" class="flex">
-        
-        <nav id="topnav" class=".topnav">
+        <div id="color-focus"></div>
+        <nav id="topnav">
             <ul >
                 <li class="nav-item-group">
-                    <li><a href="#">Menu</a>
+                    <li><a href="#" >Menu</a>
                         <ul>
                             <li><a href="#" onClick="createTerminalWindow()"><img class="main-menu-icons" src="./images/icons/terminal.png" />Console</a></li>
                             <li><a href="#"><img class="main-menu-icons" src="./images/icons/settings.png" />Settings</a></li>
@@ -153,8 +179,7 @@
         <div id="webamp"></div>
         <div id="main-container">
             <div id="logo-container"> 
-                <!-- style="display:block;padding:20px;background: rgba(0, 0, 0, 0.6);box-shadow: 0 0 0 5px rgb(45, 52, 63);border-radius: 50%;position:fixed;top:40%;left:44%;" -->
-                <img id="desktop-logo" src="./images/icons/desktop-logo-3.png" style="">
+                <img id="desktop-logo" src="./images/icons/constellation-3.png">
             </div>
             <canvas class="background"></canvas>
         </div>
@@ -164,23 +189,59 @@
         <div id="dialog-message" title="System Message">
             
         </div>
-        
+        <span class="context-menu-one btn btn-neutral">right click me</span>
     </div>
     <script type="text/javascript">
+
+        
+        (()=>{
+            $.contextMenu({
+                    selector: '#page-wrapper', 
+                    callback: function(key, options) {
+                        var m = "clicked: " + key;
+                        window.console && console.log(m) || popup(m); 
+                    },
+                    items: {
+                        "edit": {name: "Edit", icon: "edit"},
+                        "cut": {name: "Cut", icon: "cut"},
+                        'copy': {name: "Copy", icon: "copy"},
+                        "paste": {name: "Paste", icon: "paste"},
+                        "delete": {name: "Delete", icon: "delete"},
+                        "sep1": "---------",
+                        "quit": {name: "Quit", icon: function(){
+                            return 'context-menu-icon context-menu-icon-quit';
+                        }}
+                    }
+                });
+
+                $('#page-wrapper').on('click', function(e){
+                    console.log('clicked', this);
+                }) 
+        })()
+
+
         const popup = (...text) =>{
-            $("#dialog-message").append(...text)
+            $("#dialog-message").html(...text)
             $( "#dialog-message" ).dialog();
         }
 
-        function disableF5(e) { if ((e.which || e.keyCode) == 116 || (e.which || e.keyCode) == 82) e.preventDefault(); };
+        function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
         
+        //Forces user to "reboot" instead of refreshing
         $(document).ready(function(){
              $(document).on("keydown", (e)=>{
-                // console.log('Muppet')
-                // disableF5(e)
+                disableF5(e)
              });
+        });
+
+        //prevent dragging start menu elements
+        $("nav a").on('dragstart drop', function(e){
+            console.log('STOP DRAG')
+            e.preventDefault();
+            return false;
         });
     </script>
 
 </body>
 </html>
+

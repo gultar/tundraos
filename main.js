@@ -6,14 +6,22 @@ const runServer = require('./server.js')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 
 // const FileSystem = buildUserspace("root")
+let fullscreen = true
+if(process.argv.includes("--no-full")){
+  fullscreen = false
+}
 
 app.on('ready', () => {
+
     runServer(null, { electron:true })
 
     const win = new BrowserWindow({
-      fullscreen:true,
+      fullscreen:fullscreen,
+      kiosk: fullscreen,
+      autoHideMenuBar: true,
       frame: false,
       webPreferences: {
+        
         nativeWindowOpen: true,
         devTools: true, // false if you want to remove dev tools access for the user
         contextIsolation: true,

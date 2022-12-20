@@ -271,7 +271,7 @@ class VirtualFileSystem{
             autoCompletePath:this.autoCompletePath,
             getFile:this.getFile,
             editFile:this.editFile,
-            // lookup:this.lookup,
+            exists:this.exists,
         }
     }
 
@@ -342,6 +342,8 @@ class VirtualFileSystem{
         if(path == undefined){
             directory = this.workingDir
         }else{
+            
+
             directory = this.find(path)
 
             const isDirectory = this.isDir(directory)
@@ -546,11 +548,17 @@ class VirtualFileSystem{
         if(path === ".") return this.workingDir        
         if(path === this.workingDir.name) return this.workingDir
 
+
         const isDirectChild = this.workingDir[path]
         if(isDirectChild) return this.workingDir[path]
 
-        //Do not move working directory, just follow the path
         let currentDir = this.workingDir
+
+        const isAbsolutePath = path[0] === '/'
+        if(isAbsolutePath){
+            currentDir = this.root()
+        }
+        
         
         const dirnames = this.fromPathToArray(path)
         for(const dir of dirnames){
@@ -569,6 +577,14 @@ class VirtualFileSystem{
         }
         
         return currentDir
+    }
+
+    async exists(path){
+        if(!path) throw new Error('exists: Must provide valid path')
+
+        const found = await this.getDir(path)
+        if(found) return true
+        else return false
     }
 
     async whereis(itemName){

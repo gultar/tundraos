@@ -5,12 +5,12 @@ function turnToURLQueryText(args){
 }
 
 function runWeb(url){
-    
-    if(url == "" && url.length == 0){
-        url = "https://www.google.com/webhp?igu=1"
-    }
+    launchBrowser(url)
+    // if(url == "" && url.length == 0){
+    //     url = "https://www.google.com/webhp?igu=1"
+    // }
 
-    new WinBox({ title: url, height:"90%", width:"90%", url:url});
+    // new WinBox({ title: url, height:"90%", width:"90%", url:url});
 }
 
 function runLinguee(params=[]){
@@ -29,11 +29,12 @@ function runTirex(){
 }
 
 function runLofi(){
-    const lofi = `<iframe width="560" height="315" src="https://www.youtube.com/embed/jfKfPfyJRdk"
-     title="YouTube video player" frameborder="0" 
-     allow="accelerometer; autoplay; clipboard-write; encrypted-media; 
-     gyroscope; picture-in-picture" allowfullscreen></iframe>`
-     new WinBox({ title: "Lofi Girl", height:"90%", width:"90%", html:lofi });
+    launchBrowser('https://www.youtube.com/watch?v=jfKfPfyJRdk&ab_channel=LofiGirl')
+    // const lofi = `<iframe width="560" height="315" src="https://www.youtube.com/embed/jfKfPfyJRdk"
+    //  title="YouTube video player" frameborder="0" 
+    //  allow="accelerometer; autoplay; clipboard-write; encrypted-media; 
+    //  gyroscope; picture-in-picture" allowfullscreen></iframe>`
+    //  new WinBox({ title: "Lofi Girl", height:"90%", width:"90%", html:lofi });
 }
 
 function runMap(){
@@ -41,15 +42,4 @@ function runMap(){
     new WinBox({ title: "Google Maps", height:"95%", width:"80%", html:maps  });
 }
 
-function runTextEditor(){
-    
-
-  new WinBox({ title: "Google Maps", height:"95%", width:"80%", html:`
-  <script src="./js/external/bundle.js"></script>
-  <div data-tiny-editor>
-  <p>
-    Default Text Here
-  </p>
-</div>`  });
-}
 
