@@ -50,6 +50,15 @@ const buildUserspace = (username='root') =>{
     }
     
     let userspacePath = `./public/userspaces/${username}`
+
+    if(!fs.existsSync("./public/userspaces")){
+        try{
+            fs.mkdirSync("./public/userspaces")
+        }catch(e){
+            console.log(e)
+            throw e
+        }
+    }
     
     if(!fs.existsSync(userspacePath)){
         try{
