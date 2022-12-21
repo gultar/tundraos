@@ -14,7 +14,7 @@ body{
   margin:0;
   height:100%;
   width:100%;
-  font-family: Inconsolata, monospace;
+  font-family: var(--default-font);
   overflow: hidden;
 }
   /*okay*/

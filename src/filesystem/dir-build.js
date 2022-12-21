@@ -20,27 +20,40 @@ let totalFiles = 0
 
 const buildFileSystemRepresentation = function(dirPath, fsPosition=new RootFS().system) {
     
-    files = fs.readdirSync(dirPath)
+    try{
+        files = fs.readdirSync(dirPath)
+    }catch(e){
+        console.log('DIR BUILD ERROR', e)
+        files = []
+    }
     fsPosition.contents = []
 
   for(const file of files) {
+    try{
+        const isDirectory = fs.statSync(dirPath + "/" + file).isDirectory()
         
-        if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+        if (isDirectory) {
             const dir = file
             fsPosition[dir] = {
                 contents:[]
             }
-            log('Adding directory ', dir)
+            log(`Adding directory ${dirPath + "/" + dir}`)
             totalDirectories++
             buildFileSystemRepresentation(dirPath + "/" + file, fsPosition[dir])
         } else {
             
-            log(`\\_Adding file ${file}`)
+            
             const path = dirPath + "/" + file
-            const fileContent = fs.readFileSync(path).toString()
+            const fileContent = ""//fs.readFileSync(path).toString()
             totalFiles++
-            fsPosition.contents.push(new File(file, fileContent, path))
+            const newFile = new File(file, fileContent, path)
+            fsPosition.contents.push(newFile)
+            log(`\\_Adding file ${path}`)
         }
+
+    }catch(e){
+        console.log('DIR BUILD statSync ERROR',e)
+    }
   }
   return fsPosition
 }

@@ -213,7 +213,7 @@ class MinimalTerminal{
   
       commandBuffer.push(wordBuffer.join(" "))
       wordBuffer = []
-  
+      this.addCurrentLineToConsole();
       for(const line of commandBuffer){
         let [ cmd, ...args ] = this.parseArguments(line);
         if(Object.hasOwn(this.commands, cmd)){
@@ -261,6 +261,7 @@ class MinimalTerminal{
         // Save shell history.
         if(this.containsChainOp(this.cmdLine_.value))return await this.processCommand(this.cmdLine_.value)
         else{
+          this.addCurrentLineToConsole();
           const result = await this.makeCommandReady(cmd, args)
           this.resetLine()
           return result

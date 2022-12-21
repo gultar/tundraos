@@ -144,6 +144,25 @@ class Persistance{
             console.log(e)
         }
     }
+
+    getFileContent(path){
+        return new Promise(resolve=>{
+                fs.readFile(path, 'utf8', (err, content)=>{
+                    if(err){
+                        log('Error occured while reading file: ')
+                        log(err)
+                        log("-----------------------------------")
+                        resolve(false)
+                    }else{
+                        log(`Read file ${path}'s content`)
+                        resolve(content)
+                    }
+
+                })
+
+        })
+        
+    }
 }
 
 module.exports = Persistance

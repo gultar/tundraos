@@ -58,30 +58,18 @@ let persistanceInterface = {
     mkdir:()=>{},
     rmdir:()=>{},
     rm:()=>{},
-    editFile:(filename, newContent)=>{
-        if(localStorage){
-            localStorage.setItem(filename, newContent)
-        }
-    },
+    editFile:()=>{},
     cp:()=>{},
     mv:()=>{},
     cd:()=>{},
-    getFileContent:(path)=>{
-        if(localStorage){
-            const fileString = localStorage.getItem(path)
-            if(!fileString) return false 
-            
-            const file = JSON.parse(fileString)
-            return file.content
-        }
-    }
 }
 
 
 class File{
-    constructor(name="", content=""){
+    constructor(name="", content="", path=""){
         this.name = name
         this.content = content
+        this.path = path
     }
 
     setContent(content){
@@ -283,7 +271,6 @@ class VirtualFileSystem{
             mv:this.mv,
             autoCompletePath:this.autoCompletePath,
             getFile:this.getFile,
-            getFileContent:this.getFileContent,
             editFile:this.editFile,
             exists:this.exists,
         }
@@ -563,6 +550,7 @@ class VirtualFileSystem{
         if(path === "/") return this.root()
         if(path === ".." && this.isRootDir(this.workingDir)) return this.workingDir
         if(path === ".") return this.workingDir        
+        if(path === this.workingDir.name) return this.workingDir
 
 
         const isDirectChild = this.workingDir[path]
@@ -620,11 +608,11 @@ class VirtualFileSystem{
         const file = await this.getFile(filename)
         if(!file) return false
         file.content = newContent
-        // const saved = this.workingDir.setFile(filename, file)
+        const saved = this.workingDir.setFile(filename, file)
 
         this.persistance.editFile(filename, newContent)
 
-        return true
+        return saved
     }
 
     walkBackToRootDir(currentDir, pathToRoot=[]){
@@ -732,33 +720,10 @@ class VirtualFileSystem{
         }
     }
 
-    // async getFile(path){
-    //     const found = await this.lookup(path)
-    //     if(found.file) return found.file
-    //     else return false
-    // }
-
     async getFile(path){
         const found = await this.lookup(path)
-        if(found.file){
-            const { file } = found
-            const content = await this.persistance.getFileContent(file.path)
-            console.log('CONTENT:::', content)
-            return {
-                name:file.name,
-                path:file.path,
-                content:content
-            }
-        }
+        if(found.file) return found.file
         else return false
-    }
-
-    async getFileContent(virtualPath){
-        const file = await this.getFile(virtualPath)
-        if(!file) return false
-
-        const content = await this.persistance.getFileContent(file.path)
-        return content
     }
 
     async lookup(path="/"){

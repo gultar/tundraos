@@ -1,4 +1,4 @@
-
+@import url("./variables.css");
 .context-menu-separator{
     border-bottom:1px solid black !important;
 }
@@ -11,16 +11,17 @@
     border: 2px solid black !important;
     background-color:var(--context-menu-background) !important;
     padding:0 !important;
+    font-family: var(--default-font);
 }
 
 .context-menu-item {
     background-color:var(--context-menu-background) !important;
+
 }
-  
-.context-menu-item:hover{
-    background-color:var(--terminal-font-color) !important;
-}
+
   
 .context-menu-item span{
-    color:  whitesmoke !important;
+    color:var(--particle-color) !important;
+    font-family: Inconsolata, monospace !important;
+    font-size: 5pt !important;
 }

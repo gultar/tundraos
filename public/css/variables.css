@@ -2,6 +2,7 @@
     /*Desktop Styling
     linear-gradient(-60deg, #2c4f99, #365afc, #414141, #575757);
     */
+    --default-font:Inconsolata, monospace;
     --first-gradient:#2c4f99;
     --second-gradient:#365afc;
     --third-gradient:#414141;

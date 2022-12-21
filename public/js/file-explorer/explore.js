@@ -15,6 +15,7 @@ const makeFileExplorer = async (x=0, y=0, opts) =>{
         <script src="./js/external/jquery-2.1.1.min.js"></script>
         <script src="./js/external/jquery-ui.min.js"></script>
         <script src="./js/external/boxicons.js"></script>
+        
         <nav class="file-menu" role="navigation">
             <ul class="menu-item-list">
                 <li class="menu-item"><a href="#">File</a>
@@ -83,10 +84,8 @@ const makeFileExplorer = async (x=0, y=0, opts) =>{
         const message = event.data
         if(message.changeDir){
             const targetDir = message.changeDir
-            console.log('TargetDir', targetDir)
             changeDirectory(targetDir)
         }else if(message.setDir){
-            console.log('SET SIR', message.setDir)
             workingDir = message.setDir
             refreshExplorer()
         }else if(message.newDir){
@@ -161,17 +160,29 @@ const makeFileExplorer = async (x=0, y=0, opts) =>{
        }
      }
 
-     const createNewElement = (element) =>{
-       return `<div class="explorer-item-wrapper">  
-       <a onclick="window.postMessage({ ${(
-           element.includes("/") || element === ".." ? 
-           "changeDir:this.children[1].innerHTML" : 
-           "openFile:this.children[1].innerHTML"
-           )} })" class="explorer-item link">
-           <img class="explorer-icon" src="./images/icons/${(element.includes("/") || element === ".." ? "folder":"file")}-medium.png" />
-           <span class="element-name" onclick="">${element}</span>
-       </a>
-       </div>`
+     const createNewElement = (element, path) =>{
+       if(path === "/") path = ""
+
+       return `
+        <div class="explorer-item-wrapper" 
+            ${ element.includes("/") ? "ondragover='dragover(event)'" : "" }>  
+                <a  data-path="${path}${element}" 
+                    data-workingdir="/${path}"
+                    data-name="${element}" onclick="window.postMessage({ ${(
+                element.includes("/") || element === ".." ? 
+                "changeDir:this.dataset.name" : 
+                "openFile:this.dataset.name"
+                )} });window.postMessage({ goto:this.dataset.path, workingDir:this.dataset.workingdir })" class="explorer-item link">
+                <img 
+                    ${ element.includes("/") ? "ondrop='drop(event)'" : "" }
+                    ondragend='console.log("dropped this")'
+                    class="explorer-icon" 
+                    src="./images/icons/${(element.includes("/") || element === ".." ? "folder":"file")}-medium.png"
+                    draggable='true' ondrag='dragstart(event)' 
+                />
+                <span class="element-name" onclick="">${element}</span>
+            </a>
+        </div>`
      }
 
     //  const setSideBarContent = (contents) =>{
@@ -210,14 +221,15 @@ const makeFileExplorer = async (x=0, y=0, opts) =>{
        let domToAdd = ""
 
        for await(const element of currentDirContents){
-           domToAdd = domToAdd + createNewElement(element)
+           domToAdd = domToAdd + createNewElement(element, workingDir)
        }
        
        explorerElement.innerHTML = domToAdd
+       
        return domToAdd
      }
 
-     const changeDirectory = async (targetDir) =>{
+     const changeDirectory = (targetDir) =>{
         if(targetDir == '..' && workingDir !== "/"){
 
             let pathArray = workingDir.split("/").filter(entry => entry != "")
@@ -230,17 +242,28 @@ const makeFileExplorer = async (x=0, y=0, opts) =>{
             workingDir = "/"
 
         }else{
-            
-            const exists = await exec("exists", [ workingDir + targetDir ])
-            console.log('Exists', workingDir + targetDir, exists)
-            if(exists){
+
+            if(workingDir === "/" && targetDir === "..")
+                workingDir = "/"
+            else if(workingDir == "system/..")
+                workingDir = "/"
+            else if(workingDir !== "/" && targetDir === "..")
+                targetDir = targetDir + "/"   
+            else
                 workingDir = workingDir + targetDir
-            }
+
+            console.log('New working dir', workingDir)
         }
      }
-     
+
+     const drop = (event) =>{
+        event.preventDefault()
+
+        console.log('Drop event',event)
+    }
      
      refreshExplorer()
+
 
 }
 

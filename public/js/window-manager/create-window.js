@@ -17,11 +17,17 @@ const createWindow = (opts) =>{
     } 
 }
 
-const minimizeAllWindows = () =>{
+const minimizeAllWindows = (force=false) =>{
     for(const windowName in window.openWindows){
         const instance = window.openWindows[windowName]
-        instance.minimize(!instance.min)
+        //!instance.min
+        const state = (force?true:!instance.min)
+        instance.minimize(state)
     }
+}
+
+const revertWindowStates = () =>{
+
 }
 
 const saveWindowState = () =>{

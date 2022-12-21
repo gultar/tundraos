@@ -22,16 +22,17 @@
     <script src="./js/applications/browser.js"></script>
     <script src="./js/applications/browser-history.js" ></script>
     <script src="./js/commands/web-cmds.js"></script>
-    <script src="./js/commands/settings.js"></script>
+    <script src="./js/settings/settings.js"></script>
     <script src="./js/applications/webamp.js"></script>
-    <script src="./js/terminal.js"></script>
-    <script src="./js/terminal-window-init.js"></script>
+    <script src="./js/terminal/terminal.js"></script>
+    <script src="./js/terminal/terminal-window-init.js"></script>
     <script src="./js/applications/editor.js"></script>
     <script src="./js/file-explorer/open-file.js"></script>
     <script src="./js/file-explorer/view-image.js"></script>
     <script src="./js/file-explorer/explore.js"></script>
+    <script src="./js/file-explorer/draggable.js"></script>
     <script src="./js/filesystem-init.js"></script>
-    <script src="./js/cmd-runner.js"></script>
+    <script src="./js/commands/execute.js"></script>
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
     <script src="./js/particlejs-init.js"></script>
@@ -195,9 +196,6 @@
         </div>
     </div>
     <script type="text/javascript">
-        $('#page-wrapper').on('click', function(e){
-                    console.log('clicked', this);
-        }) 
 
         makeDesktopMenu()
 

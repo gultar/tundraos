@@ -188,16 +188,18 @@ class TerminalEmulator{
     const effect = args[0]
     const radius = args[1]
     if(radius){
-      document.documentElement.style
-        .setProperty('--halo-radius', radius);
+      this.output(`Wave effect activated with radius ${radius}`)
+      toggleMouseHaloEffect("force", radius)
     }
 
     if(effect == 'wave'){
       this.output(`Wave effect activated ${toggleWaveEffect()}`)
     }else if(effect == 'halo'){
       this.output(`Halo effect activated ${toggleMouseHaloEffect()}`)
+    }else if(effect == "particles"){
+      toggleParticles()
+      this.output(`Particle effect actived ${window.particles.paused?false:true}`)
     }
-
 
   }
 
@@ -234,6 +236,14 @@ class TerminalEmulator{
   startBrowser(args){
     const url = args[0]
     launchBrowser(url)
+  }
+
+  async testSomething(args){
+    const wd = await exec("pwd")
+    const filename = args[0]
+    const path = `${wd}/${filename}`
+    const content = await exec("getFileContent", [path])
+    this.output(content)
   }
 
   runFileManager(){
@@ -291,7 +301,6 @@ class TerminalEmulator{
           return async (resultPrevious, nextCmd, cmd, args) =>{
             return await nextCmd(args, cmd)
           }
-          break;
       }
     }
 
@@ -557,7 +566,7 @@ class TerminalEmulator{
       //Displays past or current command, depending on cursor position
       if (e.key == "ArrowUp" || e.key == "ArrowDown") {
         this.cmdLine_.value = this.history_[this.histpos_] ? this.history_[this.histpos_] : this.histtemp_;
-        this.cmdLine_.value = this.cmdLine_.value; // Sets cursor to end of input.
+        // this.cmdLine_.value = this.cmdLine_.value; // Sets cursor to end of input.
       }
     }
   }

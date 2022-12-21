@@ -56,7 +56,7 @@ function toggleWaveEffect(){
     
 }
 
-function toggleMouseHaloEffect(){
+function toggleMouseHaloEffect(force, radius){
 
   const pageWrapper= document.querySelector("html");
   const haloIsActive = document.getElementsByClassName("mouse-halo");
@@ -67,10 +67,19 @@ function toggleMouseHaloEffect(){
     pageWrapper.style.setProperty("--y", e.clientY - y);
     console.log('Screen', x, y)
   }
+
   
-  if(haloIsActive.length > 0){
+  if(haloIsActive.length > 0 || force){
+    
+    if(radius){
+      document.documentElement.style.setProperty('--halo-radius', radius);
+    }else{
+      document.documentElement.style.setProperty('--halo-radius', 1000);
+    }
+
     pageWrapper.classList.replace("mouse-halo","no-halo");
     pageWrapper.removeEventListener("mousemove", followMouse)
+
     return false
   }else{
     pageWrapper.classList.add("mouse-halo");
@@ -83,11 +92,19 @@ function toggleMouseHaloEffect(){
 }
 
 function toggleParticles(){
-  if(window.particles){
-    window.particles = false;
+  const particleCanvas = document.querySelector(".background")
+  if(!window.particles.paused){
+    
+    particleCanvas.style.visibility = "hidden"
+    window.particles.pauseAnimation()
+    window.particles.paused = true
   }else{
-    initParticles()
+    
+    particleCanvas.style.visibility = "visible"
+    window.particles.resumeAnimation()
+    window.particles.paused = false
   }
+  
 }
 
 function changeWindowStyle(){
