@@ -1,5 +1,5 @@
 
-const makeFileExplorer = async () =>{
+const makeFileExplorer = async (x=0, y=0, opts) =>{
     let currentDirContents = []
     let workingDir = ""
     
@@ -59,10 +59,17 @@ const makeFileExplorer = async () =>{
     </div>`
 
     
-    const fileExplorer = new WinBox({ 
+    const fileExplorer = createWindow({ 
         title: "File Explorer", 
         height:"95%", 
         width:"80%", 
+        x:x,
+        y:y,
+        launcher:{
+            //enables start at boot
+            name:"makeFileExplorer",
+            params:[x, y, opts]
+        },
         html:explorerHTML,
         onclose:()=>{
             window.removeEventListener("message", handleExplorerMessage, true)
@@ -71,7 +78,7 @@ const makeFileExplorer = async () =>{
         }
     })
 
-    const handleExplorerMessage = async (event) => {
+    const handleExplorerMessage = (event) => {
         
         const message = event.data
         if(message.changeDir){
@@ -205,7 +212,7 @@ const makeFileExplorer = async () =>{
        for await(const element of currentDirContents){
            domToAdd = domToAdd + createNewElement(element)
        }
-    //    setSideBarContent(contents)
+       
        explorerElement.innerHTML = domToAdd
        return domToAdd
      }
@@ -217,6 +224,10 @@ const makeFileExplorer = async () =>{
             pathArray.pop()
             workingDir = pathArray.join("/")
             if(workingDir[workingDir.length - 1] != "/") workingDir = workingDir + "/"
+
+        }if(targetDir == '..' && workingDir === "/"){
+
+            workingDir = "/"
 
         }else{
             
@@ -232,3 +243,5 @@ const makeFileExplorer = async () =>{
      refreshExplorer()
 
 }
+
+window.makeFileExplorer = makeFileExplorer

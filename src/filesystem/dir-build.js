@@ -1,12 +1,6 @@
 const fs = require("fs")
-const File = require('../../public/js/classes/file.js')
+const File = require('../../public/js/filesystem/file.js')
 
-// const rootFs = {
-//     "system":{
-//         contents:[]
-//     },
-//     contents:[]
-// }
 
 class RootFS{
     constructor(){

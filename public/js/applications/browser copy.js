@@ -9,71 +9,62 @@ const launchBrowser = (url) =>{
 
     const browserView = document.getElementById("browser-view")
     let browserDOM = ""
+    let menuDOM = `
+    <link rel="stylesheet" href="./css/browser.css">  
+    <div id="browser-menu" style="min-width:125%;">
+        <div id="navigation-buttons">
+            <span class="button"><a id="back-button" onclick="back();return false;"></a></span>
+                | 
+            <span class="button" ><a id="forward-button" onclick="forward();return false;"></a></span>
+        </div>
+        <div id="url-container">
+            <input id="url-bar" type="text" placeholder="http://google.com" value="${url}">
+            <button id="url-button" onclick="addNewURL(document.getElementById('url-bar').value)"> -GO- </button>
+        </div>
+        <span class="button" id="settings-button"><a onclick="console.log('settings')"><img src="./images/icons/settings.png"></a></span>
+    </div>
+    `
 
     if(window.isElectron){
         browserDOM = `
-        <webview class="responsive-webview" id="webview-${browserNumber}" src="${url}" autosize="on" style="display:flex; min-width:100%; min-height:95%" >
+        <webview class="responsive-webview" id="webview" src="${url}" autosize="on" style="display:flex; min-width:125%; min-height:118%" >
         </webview>
         `
     }
     else{
-        browserDOM = `<iframe class="responsive-webview" id="webview-${browserNumber}" src="${url}" autosize="on"></iframe>`
+        browserDOM = `<iframe class="responsive-webview" id="webview" src="${url}" autosize="on"></iframe>`
     }
-
-    let menuDOM = `
-    <link rel="stylesheet" href="./css/browser.css">  
-    <div id="browser-container-${browserNumber}" class="browser-container">
-        <div class="browser-menu" style="min-width:100%;">
-            <div class="navigation-buttons">
-                <span class="button"><a class="back-button" onclick="window.postMessage({ back:'browser-${browserNumber}' });return false"></a></span>
-                    | 
-                <span class="button" ><a class="forward-button" onclick="window.postMessage({ forward:'browser-${browserNumber} });return false"></a></span>
-            </div>
-            <div class="url-container">
-                <input id="url-bar-${browserNumber}" class="url-bar" type="text" placeholder="http://google.com" value="${url}">
-                <button id="url-button" onclick="addNewURL(document.getElementById('url-bar-${browserNumber}').value)"> -GO- </button>
-            </div>
-            <span class="button" class="settings-button"><a onclick="console.log('settings')"><img src="./images/icons/settings.png"></a></span>
-        </div>
-        ${browserDOM}
-    </div>
-    `
-    let oldState = browserView.innerHTML
-    browserView.innerHTML = oldState + menuDOM
     
-    const browserContainer = document.querySelector(`#browser-container-${browserNumber}`)
-
-    const getURLValue = () =>{
-        return document.getElementById('url-bar-'+browserNumber).value
-    }
+    browserView.innerHTML = menuDOM + browserDOM
 
     const pressEnterSubmit = (e)=>{
         if(e.key == "Enter"){
-            addNewURL(getURLValue())
+            addNewURL(document.getElementById('url-bar').value)
         }
     }
 
-    browserContainer.addEventListener("keypress", pressEnterSubmit)
+    browserView.addEventListener("keypress", pressEnterSubmit)
     
-    window.addEventListener("message", (event)=>{
-        const message = event.data
-        if(message.back){
-            if(message.back == `browser-${browserNumber}`)
-                back()
-        }else if(message.forward){
-            if(message.forward == `browser-${browserNumber}`)
-                forward()
-            
-        }
+    browserView.style.visibility = 'visible'
+    const browserWindow = new WinBox({
+        height:"80%",
+        width:"80%", 
+        title:"Browser", 
+        mount:browserView, 
+        onclose:()=>{
+            browserView.style.visibility = 'hidden'
+            browserView.innerHTML = ""
+            browserView.removeEventListener("keypress", pressEnterSubmit)
+        } 
     })
 
     let history = []
     let backStack = []
     let forwardStack = []
-    
+    let current = ""
     let isBackEvent = false;
     let isForwardEvent = false;
-    let webview = document.getElementById("webview-"+browserNumber)
+    let webview = document.getElementById("webview")
 
     const startPageWatcher = () =>{
 
@@ -90,6 +81,7 @@ const launchBrowser = (url) =>{
 
         }
         
+        webview = document.getElementById("webview")
         if(window.isElectron){
             //webview tag
             webview.addEventListener('did-finish-load', (e) => {
@@ -117,7 +109,7 @@ const launchBrowser = (url) =>{
 
     const setURL = (url) => {
         console.log('Setting URL', url)
-        document.getElementById('url-bar-'+browserNumber).value = url.trim()
+        document.getElementById('url-bar').value = url.trim()
     }
 
     const visit = (url, index="none") =>{
@@ -180,16 +172,6 @@ const launchBrowser = (url) =>{
         visit(`https://www.google.com/search?q=${question}`)
     }
 
-    const browserWindow = new WinBox({
-        height:"80%",
-        width:"80%", 
-        title:"Browser", 
-        mount:browserContainer, 
-        onclose:()=>{
-            browserView.innerHTML = oldState
-            browserContainer.removeEventListener("keypress", pressEnterSubmit)
-        } 
-    })
     startPageWatcher()
     
 }

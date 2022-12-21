@@ -31,22 +31,29 @@ const createConsole = (id) =>{
    return id
  }
 
-function createTerminalWindow(){
+function createTerminalWindow(x=0, y=0, opts){
     if(activeTerminals.length > 20) throw new Error('Cannot open more than 20 terminals')
     const id = spawnTerminalContainer()
     createConsole(id);
     const terminal = document.getElementById("terminal-window-"+id)
     terminal.style.visibility = "visible"
 
-    const termWindow = new WinBox({ 
-        x:0,
-        y:0,
+    const termWindow = createWindow({ 
+        x:x,
+        y:y,
+        label:"terminal-window-"+id,
+        launcher:{
+          name:"createTerminalWindow",
+          params:[x, y, opts]
+        },
         title: "", 
         mount: terminal,
         onclose:()=>{
             terminal.remove();
-        }
+            terminal.style.visibility = "hidden"
+        },
     });
+
     terminal.style.height = "100%"
     terminal.style.width = "100%"
 }

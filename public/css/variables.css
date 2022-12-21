@@ -21,6 +21,8 @@
     --winbox-background:transparent;
     /*Particle effect*/
     --particle-color:#48F2E3;
+    /*Background effect*/
+    --halo-radius:1000;
     /*Nav*/
     --height:30px;
 	--height-minus:-30px;
@@ -34,6 +36,6 @@
     --number-of-explorer-items: 8;
     --explorer-background-color: rgb(57, 64, 71);
     --size-of-item: 12vh;
-    --height-of-item:21vh;
+    --height-of-item:15vh;
     --distance-apart: 1vh;
   }

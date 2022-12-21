@@ -15,7 +15,7 @@ body{
   height:100%;
   width:100%;
   font-family: Inconsolata, monospace;
-  
+  overflow: hidden;
 }
   /*okay*/
 .background {
@@ -29,19 +29,15 @@ body{
   height:100%;
   width:100%;
   position: relative;
-  /* background: linear-gradient(var(--gradient-angle),var(--first-gradient),var(--second-gradient),var(--third-gradient),var(--fourth-gradient)); */
-  /* background: linear-gradient(-60deg, #2c4f99, #365afc, #414141, #575757);
-  background-size: 400% 400%;*/
-  /* animation: gradient 120s ease infinite;  */
 }
 
 .mouse-halo::after {
   content: "";
   position: absolute;
-  top: calc(var(--y, 0) * 1px - 100px);
-  left: calc(var(--x, 0) * 1px - 100px);
-  width: 200px;
-  height: 200px;
+  top: calc(var(--y, 0) * 1px - var(--halo-radius) * 1px);
+  left: calc(var(--x, 0) * 1px - var(--halo-radius) * 1px);
+  width: calc(var(--halo-radius)* 2px);
+  height: calc(var(--halo-radius)* 2px);
   background: radial-gradient(rgba(62, 119, 241, 0.6), transparent 80%);
   border-radius: 50%;
   opacity: 0;

@@ -12,7 +12,7 @@ const openFile = async (filename) =>{
         
         window.viewImage(file)
     }else{
-        window.launchNotepad(filename, file.content)
+        window.launchEditor(filename, file.content)
     }
     
 }

@@ -321,7 +321,7 @@ class VirtualFileSystem{
                 path = this.removeDirectoryMarker(path)
             }
             
-            const newWorkingDirectory = this.getDir(path)
+            const newWorkingDirectory = this.find(path)
             if(this.isDir(newWorkingDirectory)){
                 this.workingDir = newWorkingDirectory
             }
@@ -411,12 +411,15 @@ class VirtualFileSystem{
 
     touch(path, content){
         if(path === undefined) throw new Error('touch: missing file operand')
+        
         const pathArray = this.fromPathToArray(path)
         const filename = pathArray[pathArray.length - 1]
         if(this.workingDir[filename]) throw new Error(`touch: cannot overwrite directory ${filename}`)
         
         const directory = this.findContainingDir(path)
         if(!directory) throw new Error(`touch: could not find containing directory ${path}`)
+
+        if(directory.name == '/') throw new Error("touch: file creation at root not permitted")
 
         const exists = directory.hasFile(filename)
         if(exists) throw new Error(`touch: file ${filename} already exists`)

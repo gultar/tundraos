@@ -31,12 +31,14 @@ class TerminalEmulator{
         "whoami":"Displays information concerning host",
         "reboot":"Reboots application",
         "shutdown":"Closes application",
+        "editor":"Opens up a file explorer window"
       },
       "settings":{
         "background":"Changes the background image. Usage: background http://url.url",
       },
       "applications":{
-        "web":"Opens up an iframe browser window",
+        "browser":"Launches a simple Web browser",
+        "web":"*An alias of browser*",
         "wiki":"Opens up a wikipedia page, or another website (not all of them work)",
         "gdt":"Opens up the Grand dictionnaire terminologique",
         "linguee":"Searches on Linguee for a translation of the text provided",
@@ -44,7 +46,7 @@ class TerminalEmulator{
         "tirex":"Start the famous tirex game from Google",
         "lofi":"Opens up Lo Fi Girl's Youtube channel",
         "webamp":"Launches a Webamp Music Player window",
-        "notepad":"Launches a text editor window",
+        "editor":"Launches a text editor window"
       }
     };
 
@@ -71,8 +73,10 @@ class TerminalEmulator{
       logout:()=>logout(),
       //Settings
       background:(args)=>changeBackground(args),
+      effect:(args)=>this.setEffect(args),
       //Applications
-      web:(args)=>runWeb(args),
+      web:(args)=>this.startBrowser(args),
+      browser:(args)=>this.startBrowser(args),
       wiki:()=>runWeb(["https://wikipedia.org"]),
       gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/"]),
       iching:()=>runWeb(["https://gultar.github.io/iching/"]),//
@@ -82,14 +86,13 @@ class TerminalEmulator{
       map:()=>runMap(),
       lofi:()=>runLofi(),
       webamp:()=>runWebamp(),
-      notepad:async (args)=>await this.runNotepad(args),
-      editor:async (args)=>await this.runNotepad(args), //Alias
+      editor:async (args)=>await this.runEditor(args), //Alias
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
       view:async (args)=>await this.viewImage(args),
       test:(args)=>this.testSomething(args),
       explorer:(args)=>this.runExplorer(args),
-      browser:(args)=>this.startBrowser(args),
+      
     }
   }
   
@@ -181,6 +184,23 @@ class TerminalEmulator{
     return text
   }
 
+  setEffect(args){
+    const effect = args[0]
+    const radius = args[1]
+    if(radius){
+      document.documentElement.style
+        .setProperty('--halo-radius', radius);
+    }
+
+    if(effect == 'wave'){
+      this.output(`Wave effect activated ${toggleWaveEffect()}`)
+    }else if(effect == 'halo'){
+      this.output(`Halo effect activated ${toggleMouseHaloEffect()}`)
+    }
+
+
+  }
+
   async runBash(cmd, args){
     let result = await exec(cmd, args)
     let formattedResult = (typeof result == 'object' ? JSON.stringify(result, null, 2) : result)
@@ -195,7 +215,7 @@ class TerminalEmulator{
     return result
   }
 
-  async runNotepad(args){
+  async runEditor(args){
     const path = args[0]
     const file = await exec("getFile", [path])
     let content = ""
@@ -203,7 +223,7 @@ class TerminalEmulator{
       content = file.content
     }
 
-    launchNotepad(path, content, (file?"exists":false))
+    launchEditor(path, content, (file?"exists":false))
     return true
   }
 
@@ -214,10 +234,6 @@ class TerminalEmulator{
   startBrowser(args){
     const url = args[0]
     launchBrowser(url)
-  }
-
-  async viewImage(args){
-    // new WinBox({ title:"Image Viewer", url: })
   }
 
   runFileManager(){
@@ -300,6 +316,8 @@ class TerminalEmulator{
     commandBuffer.push(wordBuffer.join(" "))
     wordBuffer = []
 
+    // this.addCurrentLineToConsole()
+
     for(const line of commandBuffer){
       let [ cmd, ...args ] = this.parseArguments(line);
       if(Object.hasOwn(this.commands, cmd)){
@@ -347,7 +365,10 @@ class TerminalEmulator{
       // Save shell history.
       if(this.containsChainOp(this.cmdLine_.value))return await this.processCommand(this.cmdLine_.value)
       else{
+        this.addCurrentLineToConsole()
         const result = await this.makeCommandReady(cmd, args)
+        
+        
         this.resetLine()
         return result
       }
@@ -485,6 +506,7 @@ class TerminalEmulator{
 
   addCurrentLineToConsole(){
     const line = this.cmdLine_.parentNode.parentNode.cloneNode(true);
+    console.log('Line', line)
     line.removeAttribute('id')
     line.classList.add('line');
     const input = line.querySelector(this.cmdLineId);

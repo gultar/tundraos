@@ -1,12 +1,16 @@
 .wb-header{
     background: var(--console-window-background) !important;
 }
+
 .wb-title{
     font-size: 9pt;
 }
+
 .winbox{
     background-color:var(--winbox-background) !important;
+    container-type: inline-size;
 }
+
 .wb-body{
     background: var(--console-window-background) !important;
 }

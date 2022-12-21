@@ -1,4 +1,4 @@
-const VirtualFileSystem = require('../../public/js/classes/virtualfilesystem.js')
+const VirtualFileSystem = require('../../public/js/filesystem/virtualfilesystem.js')
 const { buildFileSystemRepresentation, getBuildStats } = require('./dir-build.js')
 const Persistance = require('./persistance.js')
 const fs = require('fs')

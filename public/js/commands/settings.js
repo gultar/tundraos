@@ -43,15 +43,17 @@ function toggleWaveEffect(){
       pageWrapper.style.background = "var(--wave-gradient)"
       pageWrapper.style.backgroundSize = "400% 400%"
       pageWrapper.style.animation = "gradient 120s ease infinite"
+      return true
     }
     else{
       pageWrapper.style.background = ""
       pageWrapper.style.backgroundSize = ""
       pageWrapper.style.animation = ""
+      return false
     }
 
 
-    return true
+    
 }
 
 function toggleMouseHaloEffect(){
@@ -69,9 +71,11 @@ function toggleMouseHaloEffect(){
   if(haloIsActive.length > 0){
     pageWrapper.classList.replace("mouse-halo","no-halo");
     pageWrapper.removeEventListener("mousemove", followMouse)
+    return false
   }else{
     pageWrapper.classList.add("mouse-halo");
     pageWrapper.addEventListener("mousemove", (e)=>followMouse(e));
+    return true
   }
 
 

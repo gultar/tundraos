@@ -3,7 +3,7 @@ const initScript = () =>{
     initTerminalClock()
     verifyIfElectronApp()
     setUsernameAsGlobal()
-    toggleMouseHaloEffect()
+    // toggleMouseHaloEffect()
     // toggleWaveEffect()
     // toggleCirculatingWaveEffect()
 }

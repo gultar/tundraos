@@ -1,5 +1,5 @@
 let isOpen = false
-const launchNotepad = (filename, content, exists=false) =>{
+const launchEditor = (filename, content, exists=false) =>{
     if(isOpen) return false;
 
     const save = async (filecontent) =>{
@@ -37,4 +37,4 @@ const launchNotepad = (filename, content, exists=false) =>{
 
 }
 
-window.launchNotepad = launchNotepad
+window.launchEditor = launchEditor
