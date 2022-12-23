@@ -15,13 +15,14 @@
     <script src="./js/external/jquery-2.1.1.min.js"></script>
     <script src="./js/external/jquery.contextMenu.min.js"></script>
     <script  src="./js/external/jquery-ui.min.js"></script>
+    <script src="./js/external/socket.io.min.js"></script>
     <script src="./js/external/boxicons.js"></script>
     <script src="./js/external/ace.min.js"></script>
     <script src="./js/external/webamp.bundle.js"></script>
     <script src="./js/filesystem/virtualfilesystem.js"></script>
     <script src="./js/applications/browser.js"></script>
     <script src="./js/applications/browser-history.js" ></script>
-    <script src="./js/commands/web-cmds.js"></script>
+    <script src="./js/commands/web-shortcuts.js"></script>
     <script src="./js/settings/settings.js"></script>
     <script src="./js/applications/webamp.js"></script>
     <script src="./js/terminal/terminal.js"></script>
@@ -31,13 +32,14 @@
     <script src="./js/file-explorer/view-image.js"></script>
     <script src="./js/file-explorer/explore.js"></script>
     <script src="./js/file-explorer/draggable.js"></script>
-    <script src="./js/filesystem-init.js"></script>
+    <script src="./js/filesystem/filesystem-init.js"></script>
     <script src="./js/commands/execute.js"></script>
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
-    <script src="./js/particlejs-init.js"></script>
+    <script src="./js/settings/particlejs-init.js"></script>
     <script src="./js/init-script.js" defer></script>
-    <script src="./js/context-menu/desktop-menu.js"></script>
+    <script src="./js/context/desktop-menu.js"></script>
+    <script src="./js/context/context-window.js"></script>
     <script src="./js/window-manager/create-window.js"></script> 
 
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
@@ -63,7 +65,6 @@
 
         const logout = async () =>{
             
-            
             const [ url, searchParams ] = window.location.href.split("?")
             const username = getUsername()
             window.location.href = url
@@ -78,46 +79,28 @@
         }
 
         const reboot = () =>{
-            $("#dialog-message").html(`<span>Are you sure you want to reboot?</span>`)
-            $( "#dialog-message" ).dialog({
-                resizable: false,
-                height: "auto",
-                width: 400,
-                modal: true,
-                buttons: {
-                    Yes: function() {
-                        $( this ).dialog( "close" );
-                        window.openWindows = {}
-                        if(location.hostname === 'localhost')
-                            location.href = location.origin
-                        else
-                            location.reload()
-                    },
-                    No: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            });
+            confirmation({
+                message:"Are you sure you want to reboot?",
+                yes:()=>{
+                    window.openWindows = {}
+                    if(location.hostname === 'localhost')
+                        location.href = location.origin
+                    else
+                        location.reload()
+                },
+                no:()=>{}
+            })
         }
 
         const shutdown = () =>{
-            $("#dialog-message").html(`<span>Are you sure you want to shutdown?</span>`)
-            $( "#dialog-message" ).dialog({
-                resizable: false,
-                height: "auto",
-                width: 400,
-                modal: true,
-                buttons: {
-                    Yes: function() {
-                        $( this ).dialog( "close" );
-                        window.openWindows = {}
-                        window.close()
-                    },
-                    No: function() {
-                        $( this ).dialog( "close" );
-                    }
-                }
-            });
+            confirmation({
+                message:"Are you sure you want to shutdown?",
+                yes:()=>{
+                    window.openWindows = {}
+                    window.close()
+                },
+                no:()=>{}
+            })
         }
     </script>
     <div id="page-wrapper" class="flex">
@@ -181,13 +164,15 @@
         <div id="page-anchor"></div>
         <div id="filemanager"></div>
 
-        <div id="webamp"></div>
+        
         <div id="main-container">
             <div id="logo-container"> 
                 <img id="desktop-logo" src="./images/icons/constellation-3.png">
             </div>
             <canvas class="background"></canvas>
+            <div id="webamp"></div>
         </div>
+        
         <div id="browser-view" style="width:80%; height:80%;">
             
         </div>
@@ -198,11 +183,6 @@
     <script type="text/javascript">
 
         makeDesktopMenu()
-
-        const popup = (...text) =>{
-            $("#dialog-message").html(...text)
-            $( "#dialog-message" ).dialog();
-        }
 
         function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
         
@@ -220,14 +200,6 @@
             return false;
         });
 
-        // window.onbeforeunload = ()=>{
-        //     console.log('Save state')
-        //     saveWindowState()
-        // }
-
-        // setTimeout(()=>{
-        //     loadWindowState()
-        // }, 200)
     </script>
 
 </body>

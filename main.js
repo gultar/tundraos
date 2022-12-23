@@ -1,18 +1,27 @@
 'use strict';
 
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 const runServer = require('./server.js')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 
-// const FileSystem = buildUserspace("root")
 let fullscreen = true
 if(process.argv.includes("--no-full")){
   fullscreen = false
 }
 
-app.on('ready', () => {
+if(process.argv.includes("--silent-build")){
+  process.silentBuild = true
+}
 
+if(process.argv.includes("--silent")){
+  process.silent = true
+}
+
+
+console.log(process.argv)
+app.on('ready', () => {
+    
     runServer(null, { electron:true })
 
     const win = new BrowserWindow({

@@ -1,3 +1,5 @@
-const runFileSystemTest = require('./public/js/classes/virtualfilesystem.test.js')
+const runFileSystemTest = require('./public/js/filesystem/virtualfilesystem.test.js')
+
+
 
 runFileSystemTest()

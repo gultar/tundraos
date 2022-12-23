@@ -8,6 +8,9 @@ const { createServer } = require("http")
 const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 
+
+let stdioServerStarted = false
+
 const log = (...text) =>{
   console.log("[SERVER:>]", ...text)
 }
@@ -20,12 +23,12 @@ const sha256 = (text) =>{
 }
 
 const authorizedUsers = {
-  kerac:{
-    passwordHash:sha256("awd"),
-    tokenHash:"",
-  },
   root:{
     passwordHash : sha256("root"),
+    tokenHash:""
+  },
+  guest:{
+    passwordHash: sha256("guest"),
     tokenHash:""
   }
 }
@@ -69,7 +72,6 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
     }
   }
 
-
   const expressApp = express();
   const httpServer = createServer(expressApp)
   const port = process.env.PORT || 8000;
@@ -87,7 +89,7 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
     }else{
       
       if(FileSystem === null) FileSystem = buildUserspace(username)
-      
+
       res.sendFile(__dirname + '/public/index.html')
       
     }
@@ -144,11 +146,14 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
     if(process.env.activeUser === "root"){
       try{
         const { command } = req.body
-        console.log('command.substr(0, 3) == "cd "', command.substr(0, 3) == "cd ")
+        
         if(command.substr(0, 3) == "cd "){
           const path = command.substr(3)
           process.chdir(path)
           return res.send({ result:process.cwd(), error:false })
+        }else if(command.substr(0, 3) === 'node'){
+          
+          return res.send({ result:stdout, error:stderr })
         }else{
           const { stdout, stderr } = await exec(command);
           console.log('stdout:', stdout);
@@ -186,7 +191,7 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
     else res.json({ result:result })
   });
 
-  expressApp.get("/origin", async(req, res)=>{
+  expressApp.get("/origin", (req, res)=>{
     res.send(origin)
   })
   

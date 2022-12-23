@@ -11,12 +11,31 @@
     overflow: scroll;
 }
 
+#explorer-window-container{
+    display:block;
+    width:100%;
+    margin-top:6vh;
+}
+
 #explorer-window{
-    margin-top:30px;
+    margin-top:0;
     width:100%;
     height:95%;
     display:flex;
     justify-content: flex-start;
+}
+
+#navigation-bar-container{
+    display: flex;
+    width: 95%;
+    margin-top: 1vh;
+}
+
+#navigation-bar-container input{
+    display:inline-block;
+    width:80%;
+    margin-left: 5vh;
+    margin-right: 5vh;
 }
 
 #side-bar{

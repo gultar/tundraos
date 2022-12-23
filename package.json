@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "electron": "electron .",
+    "electron": "electron . --silent-build",
     "dev": "electron . --no-full"
   },
   "keywords": [],
@@ -24,6 +24,7 @@
     "mime": "^3.0.0",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20",
+    "socket.io": "^4.5.4",
     "vanilla-context-menu": "^1.4.2",
     "vm2": "^3.9.11"
   },

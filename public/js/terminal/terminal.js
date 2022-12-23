@@ -1,4 +1,4 @@
-class TerminalEmulator{
+class Terminal{
   constructor(id){
     this.id = id
     this.cmdLineId = `#cmdline-${this.id}`
@@ -8,10 +8,12 @@ class TerminalEmulator{
     this.terminalWindowId = `#terminal-window-${this.id}`
     this.terminalWindow = document.querySelector(this.terminalWindowId);
     this.pageAnchor = document.querySelector("#page-anchor");
+    this.prompt = document.querySelector(`#prompt-${this.id}`)
     this.dateElement = {}
     this.history_ = [];
     this.histpos_ = 0;
     this.histtemp_ = 0;
+    this.mode = "terminal"
     this.listPossibilities = false
     this.helpMsgs = {
       "system":{
@@ -29,12 +31,12 @@ class TerminalEmulator{
         "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
         "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname",
         "whoami":"Displays information concerning host",
-        "reboot":"Reboots application",
-        "shutdown":"Closes application",
-        "editor":"Opens up a file explorer window"
+        "reboot":"Reboots/refreshes system",
+        "shutdown":"Shuts down system",
       },
       "settings":{
         "background":"Changes the background image. Usage: background http://url.url",
+        "effect":"Choose between 'wave', 'halo', and 'particle' and see the result"
       },
       "applications":{
         "browser":"Launches a simple Web browser",
@@ -99,7 +101,11 @@ class TerminalEmulator{
   init(){
     this.defineKeyEventListeners();
     this.initTerminalMsg();
-    
+    this.setPromptDecoration()
+  }
+
+  setPromptDecoration(decoration=`[${window.username}@sh]`){
+    this.prompt.innerHTML = decoration
   }
 
   initTerminalMsg(){
@@ -211,11 +217,55 @@ class TerminalEmulator{
   }
 
   async runRoot(args){
-    const command = args.join(" ")
-    let result = await runRootCommand(command)
-    this.output(`<pre>${result}</pre>`)
-    return result
+    if(args.length == 0){
+      //run true-shell mode
+      console.log('Is root mode')
+      const cancel = (this.mode == "true-shell")
+      console.log('Cancel?', cancel)
+      this.enterTrueShellMode(cancel)
+    }else{
+      const command = args.join(" ")
+      let result = await runRootCommand(command)
+      this.output(`<pre>${result}</pre>`)
+      return result
+    }
   }
+
+  // enterTrueShellMode(cancel){
+  //   if(!cancel){
+  //     console.log('Enters ')
+  //     this.mode = "true-shell"
+  //     this.setPromptDecoration(`[${window.username}@#]`)
+  //     this.ioTrueShell = io('http://localhost:3000')
+      
+  //     this.ioTrueShell.on('connect', ()=>{
+  //       console.log('Connected')
+  //     })
+  
+  //     this.ioTrueShell.on('stdout', (data)=>{
+  //       console.log('Stdout', data)
+  //       this.output(`<pre>${data}</pre>`)
+  //     })
+  
+  //     this.ioTrueShell.on('stderr', (data)=>{
+  //       console.log('Stderr', data)
+  //       this.output(`<pre>${data}</pre>`)
+  //     })
+  
+  //     this.ioTrueShell.on('close', ()=>{
+  //       this.output("Execution terminated")
+  //       this.ioTrueShell.close()
+  //       delete this.ioTrueShell
+  //     })
+
+  //   }else{
+  //     console.log('Exits')
+  //     this.mode = "terminal"
+  //     this.setPromptDecoration(`[${window.username}@sh]`)
+  //     this.ioTrueShell.disconnect()
+  //     this.ioTrueShell = false
+  //   }
+  // }
 
   async runEditor(args){
     const path = args[0]
@@ -238,12 +288,19 @@ class TerminalEmulator{
     launchBrowser(url)
   }
 
-  async testSomething(args){
-    const wd = await exec("pwd")
-    const filename = args[0]
-    const path = `${wd}/${filename}`
-    const content = await exec("getFileContent", [path])
-    this.output(content)
+  testSomething(args){
+    // const wd = await exec("pwd")
+    // const filename = args[0]
+    // const path = `${wd}/${filename}`
+    // const content = await exec("getFileContent", [path])
+    // this.output(content)
+    window.api.invoke('myfunc')
+    .then(function(res) {
+        console.log(res); // will print "This worked!" to the browser console
+    })
+    .catch(function(err) {
+        console.error(err); // will print "This didn't work!" to the browser console.
+    });
   }
 
   runFileManager(){
@@ -265,7 +322,7 @@ class TerminalEmulator{
     this.output(`Username: ${getUsername()}`)
   }
 
-  async processCommand(commandLine){
+  async processMultipleCommands(commandLine){
     //parse command line using chaining operators
     //loop through all segments
 
@@ -372,11 +429,11 @@ class TerminalEmulator{
       await this.parsePath(args, cmd)
     } else if (e.key == "Enter") { // enter
       // Save shell history.
-      if(this.containsChainOp(this.cmdLine_.value))return await this.processCommand(this.cmdLine_.value)
+      if(this.containsChainOp(this.cmdLine_.value))return await this.processMultipleCommands(this.cmdLine_.value)
       else{
+        
         this.addCurrentLineToConsole()
         const result = await this.makeCommandReady(cmd, args)
-        
         
         this.resetLine()
         return result
@@ -406,6 +463,27 @@ class TerminalEmulator{
       return { error:e }
     }
   }
+
+  // runTrueShellCommand(cmd, args){
+  //   return new Promise(resolve=>{
+  //     if(cmd == "#" || cmd == "exit"){
+  //       this.enterTrueShellMode(true)
+  //       return true
+  //     }
+  
+  //     const command = `${cmd} ${args.join(" ")}`
+      
+  //     let stdinEnabled = false
+      
+  //     if(!stdinEnabled)window.ipcRenderer.send('command', command.trim())
+  //     else window.ipcRenderer.send('stdin', command.trim())
+      
+  //     window.ipcRenderer.on('exit', (code)=>{
+  //       stdinEnabled = false
+  //     })
+  //     stdinEnabled = true
+  //   })
+  // }
 
   enterNewLine(){
     this.addCurrentLineToConsole();
@@ -448,6 +526,11 @@ class TerminalEmulator{
   }
 
   async parsePath(args=[], cmd){
+
+    // if(args.length == 0){
+    //   const currentDirContent = await exec("ls")
+    //   this.output(currentDirContent.join("<br>"))
+    // }
     
     for(const arg of args){
       const argIndex = args.indexOf(arg)
@@ -463,7 +546,7 @@ class TerminalEmulator{
   
       const partialPathHasContent = await exec("ls", [partialPath])
       if(partialPathHasContent && partialPathHasContent.length){
-        this.output(partialPathHasContent.join(" "))
+        this.output(partialPathHasContent.join("<br>"))
       }
   
       const hasSubPaths = partialPath.includes("/")
@@ -492,9 +575,12 @@ class TerminalEmulator{
         
       }else{
         const current = await exec("ls")
-        this.output(current.join(" "))
+        this.output(current.join("<br>"))
       }
     }
+
+    this.cmdLine_.scrollIntoView()
+    
   }
 
   autoCompletePath(cmd, partialPath){
@@ -575,4 +661,6 @@ class TerminalEmulator{
     return `<span class'help-line' style="display:flex;justify-content:flex-start;"><b class='help-cmd' style="display:inline-block;width:25%;">${commandName}</b><span style="display:inline-block;">${message}</span></span>`
   }
 }
+
+window.Terminal = Terminal
 

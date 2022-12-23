@@ -212,6 +212,8 @@ const run = () =>{
         stopped = true;
       }else if(cmd == 'electron'){
         exec("npm run electron")
+      }else if(cmd == 'exit'){
+        process.exit(0)
       }else{
         console.log(`ERROR: command ${cmd} unknown`);
       }

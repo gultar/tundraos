@@ -52,13 +52,13 @@ body{
 #logo-container{
   display:block;
   padding:20px;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 0 0 4px rgba(45, 52, 63, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 4px rgba(45, 52, 63, 0.5);
   border-radius: 50%;
   position:fixed;
-  top:44%;
+  top:40%;
   left:43%;
-  z-index: 1;
+  z-index: 0;
 }
 
 

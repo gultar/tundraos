@@ -6,14 +6,15 @@ const log = (...text) =>{
 }
 
 class Persistance{
-    constructor(user=""){
+    constructor(user="", rootDir=".", userspaceDir="./public/userspaces/"){
         console.log('User', user)
         this.user = user
-        this.baseDir = `./public/userspaces/${user}`
+        this.rootDir = rootDir
+        this.userspaceDir = userspaceDir
+        this.baseDir = `${userspaceDir}${user}`
         
         if(user == 'root'){
-            this.baseDir = `./public`
-            
+            this.baseDir = this.rootDir//`./public` 
         }
         console.log('Base dir', this.baseDir)
         this.currentDir = "/"
@@ -61,11 +62,13 @@ class Persistance{
             
         }
         this.currentDir = path
-        log(`Set working directory : ${path}`)
+        // log(`Set working directory : ${path}`)
     }
 
     touch(path, content=""){
         try{
+            console.log('Virtual path', path)
+            console.log('Writing to path', this.resolvePath(path))
             const newFile = fs.writeFileSync(this.resolvePath(path), content)
             log(`Created new file ${path}:`, newFile)
         }catch(e){
@@ -139,9 +142,12 @@ class Persistance{
         try{
             console.log('Resolved path Edit File', this.resolvePath(filename))
             const edited = fs.writeFileSync(this.resolvePath(filename), newContent)
-            log(`Edited file ${filename}'s content: ${edited}`)
+            log(`Edited file ${filename}'s content`)
+
+            return true
         }catch(e){
             console.log(e)
+            return { error: e.message }
         }
     }
 
@@ -162,6 +168,17 @@ class Persistance{
 
         })
         
+    }
+
+    getFileContentSync(path){
+        try{
+            const contentBuffer = fs.readFileSync(path)
+            log(`Read file ${path}'s content`)
+            return contentBuffer.toString()
+        }catch(e){
+            console.log(e)
+            return false
+        }
     }
 }
 

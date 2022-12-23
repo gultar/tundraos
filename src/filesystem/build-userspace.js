@@ -73,7 +73,7 @@ const buildUserspace = (username='root') =>{
     }
     
     if(username == 'root'){
-        userspacePath = './public'
+        userspacePath = "."//'./public'
     }
     
     log("Standy as I attempt to load the file system")
@@ -84,7 +84,7 @@ const buildUserspace = (username='root') =>{
     
     let persistance = new Persistance(username)
     
-    FileSystem = new VirtualFileSystem(username, persistance)
+    FileSystem = new VirtualFileSystem(username, persistance, userspacePath)
     
     FileSystem.import({ system:userDir })
     

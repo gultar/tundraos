@@ -9,11 +9,12 @@
     <link rel="stylesheet" href="./jquery-ui.structure.min.css">
     <link rel="stylesheet" href="./jquery-ui.theme.min.css">
     <link rel="stylesheet" href="./login.css">
+    <script src="./jquery-2.1.1.min.js"></script>
+    <script src="./jquery-ui.min.js"></script>
 </head>
 <body>
 
-    <script src="./jquery-2.1.1.min.js"></script>
-    <script src="./jquery-ui.min.js"></script>
+
 
     <div id="login-wrapper">
         
@@ -21,7 +22,7 @@
             <p id="os-title">Northern OS</p>
             <label for="username">Username</label><input id="username" type="text" />
             <label for="username">Password</label><input id="password" type="password" />
-            <br><br><button onclick="login()">Login</button>
+            <br><br><button id="login-button" onclick="login()">Login</button>
             <div id="exit-options">
                 <span id="exit-button"><a onclick='window.close()'>Exit</a></span>
                 <span id="reboot-button"><a onclick="location.reload()">Reboot</a></span>
@@ -32,57 +33,62 @@
             
     </div>
     <script>
-        const popup = (...text) =>{
-            $("#dialog-message").append(...text)
-            $( "#dialog-message" ).dialog();
-        }
+
         const login = async () =>{
+            
             const usernameInput = document.getElementById("username")
             const passwordInput = document.getElementById("password")
             const username = usernameInput.value
             const password = passwordInput.value
-
-            if(usernameInput.value === ""){
+            
+            if(usernameInput.value == ""){
                 popup("You need to enter a username!")
                 return false
             }
 
-            const loggedIn = await Promise.resolve($.post("http://localhost:8000/login", {
-                username:username,
-                password:password,
-                timestamp:Date.now()
-            }))
-            if(loggedIn.error){
-                popup(loggedIn.error)
-            }else{
-                const { token } = loggedIn
-                if(token){
-                    window.location = `/?token=${token.hash}&username=${username}`
+            try{
+                const loggedIn = await Promise.resolve($.post("http://localhost:8000/login", {
+                    username:username,
+                    password:password,
+                    timestamp:Date.now()
+                }))
+                if(loggedIn.error){
+                    popup(loggedIn.error)
+                }else{
+                    const { token } = loggedIn
+                    if(token){
+                        window.location = `/?token=${token.hash}&username=${username}`
+                    }
                 }
+            }catch(e){
+                console.log(e)
+                popup(e.responseJSON.error)
             }
 
-        }
-    </script>
-    <script>
-        
+            
 
-        $(function() {
-            
+        }
+
+        const popup = (...text) =>{
+            $("#dialog-message").html(...text)
+            $( "#dialog-message" ).dialog();
+        }
+
+        function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
+        
+        $(document).ready(function(){
+            $(document).on("keydown", (e)=>{
+                disableF5(e)
                 
-                function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
-            
-                $(document).ready(function(){
-                    $(document).on("keydown", (e)=>{
-                        disableF5(e)
-                    });
-                });
+                if(e.key == "Enter"){
+                    e.preventDefault()
+                    login()
+                }
+            });
         });
 
 
-
-
     </script>
-    
 </body>
 </html>
 

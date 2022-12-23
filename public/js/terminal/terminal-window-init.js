@@ -1,9 +1,7 @@
 const createConsole = (id) =>{
-     $('.prompt').html('[user@sh] ');
-         
-     // Initialize a new terminal object
-     const term = new TerminalEmulator(id);
-     term.init();
+    // Initialize a new terminal object
+    const term = new Terminal(id);
+    term.init();
  }
 
  const activeTerminals = []

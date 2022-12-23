@@ -59,15 +59,25 @@ let persistanceInterface = {
     rmdir:()=>{},
     rm:()=>{},
     editFile:(filename, newContent)=>{
-        if(localStorage){
+        if(typeof localStorage !== 'undefined'){
             localStorage.setItem(filename, newContent)
         }
     },
     cp:()=>{},
     mv:()=>{},
     cd:()=>{},
+    resolvePath:(path)=>{return path},
     getFileContent:(path)=>{
-        if(localStorage){
+        if(typeof localStorage !== 'undefined'){
+            const fileString = localStorage.getItem(path)
+            if(!fileString) return false 
+            
+            const file = JSON.parse(fileString)
+            return file.content
+        }
+    },
+    getFileContentSync:(path)=>{
+        if(typeof localStorage !== 'undefined'){
             const fileString = localStorage.getItem(path)
             if(!fileString) return false 
             
@@ -79,9 +89,10 @@ let persistanceInterface = {
 
 
 class File{
-    constructor(name="", content=""){
+    constructor(name="", content="", path=""){
         this.name = name
         this.content = content
+        this.path = path
     }
 
     setContent(content){
@@ -247,7 +258,7 @@ class Directory{
 
 
 class VirtualFileSystem{
-    constructor(username, persistance=persistanceInterface){
+    constructor(username, persistance=persistanceInterface, basePath="."){
         //All objects will be treated like potential directories
         this.username = username
         this.filesystem = new Proxy({}, parenter)
@@ -265,6 +276,7 @@ class VirtualFileSystem{
         })
         this.workingDir = this.filesystem["/"] 
         this.persistance = persistance
+        this.basePath = basePath
     }
 
     exposeCommands(){
@@ -356,7 +368,6 @@ class VirtualFileSystem{
         if(path == undefined){
             directory = this.workingDir
         }else{
-            
 
             directory = this.find(path)
 
@@ -381,6 +392,10 @@ class VirtualFileSystem{
         const dirname = pathArray[pathArray.length - 1]
         const isWithinThisDir = pathArray.length == 1
         
+        const nameValidator = /^(\w+\.?)*\w+$/
+        if(nameValidator.test(dirname) === false){
+            throw new Error('Directory name can only contain alphanumerical characters')
+        }
 
         if(isWithinThisDir){
             const exists = this.workingDir.hasDir(dirname)
@@ -408,13 +423,18 @@ class VirtualFileSystem{
         const pathArray = this.fromPathToArray(path)
         const filename = pathArray[pathArray.length - 1]
         
-        const directory = this.findContainingDir(path)
+        pathArray.pop()
+        const pathToFile = pathArray.join("/")
+        
+        const directory = this.find(pathToFile)
         if(!directory) throw new Error(`cat: could not find directory of file ${path}`)
 
         const file = directory.getFile(filename)
-        if(!file) return undefined
+        if(!file) return false
+
+        const content = this.persistance.getFileContentSync(path)
         
-        return file.content
+        return content
     }
 
     pwd(){
@@ -423,21 +443,27 @@ class VirtualFileSystem{
         return path
     }
 
-    touch(path, content){
+    touch(path, content=""){
         if(path === undefined) throw new Error('touch: missing file operand')
         
         const pathArray = this.fromPathToArray(path)
         const filename = pathArray[pathArray.length - 1]
         if(this.workingDir[filename]) throw new Error(`touch: cannot overwrite directory ${filename}`)
+
+        // const nameValidator = /^(\w+\.?)*\w+$/
+        // if(nameValidator.test(filename) === false){
+        //     throw new Error('File name can only contain alphanumerical characters')
+        // }
         
         const directory = this.findContainingDir(path)
         if(!directory) throw new Error(`touch: could not find containing directory ${path}`)
 
-        if(directory.name == '/') throw new Error("touch: file creation at root not permitted")
-
         const exists = directory.hasFile(filename)
         if(exists) throw new Error(`touch: file ${filename} already exists`)
-        const file = new File(filename, content)
+
+        const realPath = this.persistance.resolvePath(path)
+        
+        const file = new File(filename, content, realPath)
         directory.contents.push(file)
         
         this.persistance.touch(path, content)
@@ -466,7 +492,7 @@ class VirtualFileSystem{
         return copied
     }
 
-    mv(pathFrom, pathTo){
+    async mv(pathFrom, pathTo){
         if(!pathFrom) throw new Error('Need to provide origin path of file to copy')
         if(!pathTo) throw new Error('Need to provide destination path of file to copy')
         let copied = false
@@ -476,10 +502,16 @@ class VirtualFileSystem{
         const { file, directory } = found
         if(!file && directory){
             copied = this.mkdir(pathTo)
-            const removed = this.rmdir(pathFrom)
+            if(copied !== false){
+                this.rmdir(pathFrom)
+            }
         }else if(file && !directory){
-            copied = this.touch(pathTo, file.content)
-            const removed = this.rm(pathFrom)
+            const content = await this.getFileContent(pathFrom)
+            copied = this.touch(pathTo, content)
+            if(copied !== false){
+                this.rm(pathFrom)
+            }
+            
         }
 
         this.persistance.mv(pathFrom, pathTo)
@@ -586,7 +618,6 @@ class VirtualFileSystem{
                         currentDir = currentDir[dir]
                     }
                 }else{
-                    // return { error:`Directory ${dir} could not be found` }
                     throw new Error(`Directory ${dir} could not be found`)
                 }
             }
@@ -598,7 +629,7 @@ class VirtualFileSystem{
     async exists(path){
         if(!path) throw new Error('exists: Must provide valid path')
 
-        const found = await this.getDir(path)
+        const found = await this.find(path)
         if(found) return true
         else return false
     }
@@ -619,12 +650,10 @@ class VirtualFileSystem{
     async editFile(filename, newContent){
         const file = await this.getFile(filename)
         if(!file) return false
-        file.content = newContent
+        // file.content = newContent
         // const saved = this.workingDir.setFile(filename, file)
 
-        this.persistance.editFile(filename, newContent)
-
-        return true
+        return this.persistance.editFile(filename, newContent)
     }
 
     walkBackToRootDir(currentDir, pathToRoot=[]){
@@ -732,18 +761,11 @@ class VirtualFileSystem{
         }
     }
 
-    // async getFile(path){
-    //     const found = await this.lookup(path)
-    //     if(found.file) return found.file
-    //     else return false
-    // }
-
     async getFile(path){
         const found = await this.lookup(path)
         if(found.file){
             const { file } = found
-            const content = await this.persistance.getFileContent(file.path)
-            console.log('CONTENT:::', content)
+            const content = await this.persistance.getFileContentSync(file.path)
             return {
                 name:file.name,
                 path:file.path,

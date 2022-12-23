@@ -12,7 +12,7 @@ class RootFS{
 }
 
 const log = (...text) =>{
-    console.log(`[BUILD:>]`, ...text)
+    if(!process.silentBuild) console.log(`[build:>]`, ...text)
 }
 
 let totalDirectories = 0
@@ -23,7 +23,7 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=new RootFS().
     try{
         files = fs.readdirSync(dirPath)
     }catch(e){
-        console.log('DIR BUILD ERROR', e)
+        log('DIR BUILD ERROR', e)
         files = []
     }
     fsPosition.contents = []
@@ -52,7 +52,7 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=new RootFS().
         }
 
     }catch(e){
-        console.log('DIR BUILD statSync ERROR',e)
+        log('DIR BUILD statSync ERROR',e)
     }
   }
   return fsPosition

@@ -1,18 +1,62 @@
 
-const VirtualFileSystem = require('./virtualfilesystem.js')
-const assert = require('assert');
-const filesystem = new VirtualFileSystem("test")
 
+const assert = require('assert');
+const VirtualFileSystem = require('./virtualfilesystem.js')
+let files = {}
+let persistanceInterface = {
+
+  isInterface:true,
+  touch:(path, content)=>{
+    const pathArray = path.split("/")
+    const filename = pathArray[pathArray.length - 1]
+    files[filename] = {
+      name:filename,
+      content:content,
+    }
+  },
+  mkdir:()=>{},
+  rmdir:()=>{},
+  rm:()=>{},
+  editFile:(filename, newContent)=>{
+    const file = files[filename]
+    file.content = newContent
+  },
+  cp:()=>{},
+  mv:()=>{},
+  cd:()=>{},
+  resolvePath:(path)=>{return path},
+  getFileContent:(path)=>{
+    const pathArray = path.split("/")
+    const filename = pathArray[pathArray.length - 1]
+    
+    const file = files[filename]
+    if(!file) return false
+
+    return file.content
+      
+  },
+  getFileContentSync:(path)=>{
+    const pathArray = path.split("/")
+    const filename = pathArray[pathArray.length - 1]
+    const file = files[filename]
+    if(!file) return false
+
+    return file.content
+  }
+}
+
+const filesystem = new VirtualFileSystem("guest", persistanceInterface, ".")
+//directory.moreDirectory.andMore.andMoreAndMore
 filesystem.root().directory = {
   moreDirectory:{
     andMore:{
-          andMoreAndMore:{}
-      }
-  },
+      andMoreAndMore:{}
+    }
+  }
 }
 
 const runFileSystemTest = () =>{
-  
+
   describe('Virtual File System Validations methods', ()=> {
     const root = filesystem.root()
     describe('root()', ()=> {
@@ -122,6 +166,7 @@ const runFileSystemTest = () =>{
 
     describe("mkdir()", ()=>{
       it("Should create a new directory", ()=>{
+        
         const isCreated = filesystem.mkdir("newDir")
         assert.equal(isCreated, true)
       })
@@ -131,6 +176,7 @@ const runFileSystemTest = () =>{
       })
       it("Should create a new directory in child directory", ()=>{
         filesystem.cd("home")
+        
         const isCreated = filesystem.mkdir("../directory/anotherDir")
         assert.equal(isCreated, true)
         const anotherDir = filesystem.wd().parent().directory.anotherDir
@@ -255,21 +301,18 @@ const runFileSystemTest = () =>{
     describe("cat()", ()=>{
       it("Should output file content", ()=>{
         filesystem.cd("/")
-        filesystem.touch("smallfile")
-        const file = filesystem.wd().getFile("smallfile")
-        file.content = "This is a file"
+        filesystem.touch("smallfile","This is a file")
         assert.equal(filesystem.cat("smallfile"), "This is a file")
       })
 
       it("Should output content of file in child directory", ()=>{
         filesystem.cd("/")
-        filesystem.touch("home/bigfile")
-        filesystem.wd().home.getFile("bigfile").content = "This is a biiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiig file" 
-        assert.equal(filesystem.cat("home/bigfile"), "This is a biiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiig file")
+        filesystem.touch("directory/bigfile","This is a biiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiig file")
+        assert.equal(filesystem.cat("directory/bigfile"), "This is a biiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiig file")
       })
 
       it("Should output content of file in parent directory", ()=>{
-        filesystem.cd("/home")
+        filesystem.cd("/directory")
         assert.equal(filesystem.cat("../smallfile"), "This is a file")
       })
     })
