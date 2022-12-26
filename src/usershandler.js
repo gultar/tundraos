@@ -1,8 +1,5 @@
 const fs = require("fs");
 const bcrypt = require('bcrypt')
-const VirtualFileSystem = require('./filesystem/virtualfilesystem.js')
-
-const filesystems = {}
 
 const validateLogin = async ({ username, password }) =>{
 
@@ -72,35 +69,25 @@ const addUserToAccountFile = ({ username, hash, timestamp, rounds}) =>{
   
     const written = fs.writeFileSync("./accounts.json",JSON.stringify(accounts))
     return written
-  }
+}
   
-  const getAccountsFromFile = () =>{
+const getAccountsFromFile = () =>{
     const accountsFileString = fs.readFileSync("./accounts.json").toString()
     const accounts = JSON.parse(accountsFileString)
     return accounts
-  }
+}
   
-  const userExists = (username) =>{
+const userExists = (username) =>{
     const accounts = getAccountsFromFile()
     return (accounts[username] ? true : false)
-  }
+}
   
-  const getUser = (username) =>{
+const getUser = (username) =>{
     const accounts = getAccountsFromFile()
     console.log(accounts)
     return accounts[username]
-  }
-  
-  const loadUserFileSystems = () =>{
-    const accounts = getAccountsFromFile()
-  
-    for(const username of Object.keys(accounts)){
-      filesystems[username] = new VirtualFileSystem(username)
-      console.log(`Created virtual file system for user ${username}`)
-    }
-  
-    return true
-  }
+}
+
 
 module.exports = {
     validateLogin,
@@ -111,6 +98,4 @@ module.exports = {
     getAccountsFromFile,
     userExists,
     getUser,
-    loadUserFileSystems,
-    filesystems,
 } 

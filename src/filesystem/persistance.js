@@ -1,13 +1,17 @@
 const fs = require('fs')
+const fsa = require("fs").promises
+const { writeFile } = fsa
 const fsx = require('fs-extra')
 
 const log = (...text) =>{
-    console.log("[FS:>]", ...text)
+    console.log("[persistance:>]", ...text)
 }
+
+let mountPoint = "system"
 
 class Persistance{
     constructor(user="", rootDir=".", userspaceDir="./public/userspaces/"){
-        console.log('User', user)
+        // console.log('User', user)
         this.user = user
         this.rootDir = rootDir
         this.userspaceDir = userspaceDir
@@ -16,7 +20,7 @@ class Persistance{
         if(user == 'root'){
             this.baseDir = this.rootDir//`./public` 
         }
-        console.log('Base dir', this.baseDir)
+        // console.log('Base dir', this.baseDir)
         this.currentDir = "/"
         
         if(user && !fs.existsSync(this.baseDir)){
@@ -28,49 +32,42 @@ class Persistance{
                 throw e
             }
         }
+
+        mountPoint = process.MOUNT_POINT || 'system'
     }
 
     resolvePath(pathString){
-        pathString = pathString.replace('system', '')
-        this.currentDir = this.currentDir.replace('system', '')
-        this.baseDir = this.baseDir.replace('system', '')
-
-        const paths = pathString.split("/").filter(path => path !== "")
-
         
-
+        pathString = pathString.replace(mountPoint, '')
+        this.currentDir = this.currentDir.replace(mountPoint, '').replace('//', '/')
+        this.baseDir = this.baseDir.replace(mountPoint, '')
+        const paths = pathString.split("/").filter(path => path !== "")
+        
         let truePath = this.baseDir + this.currentDir
         
         for(const path of paths){
             if(path !== ".."){
                 truePath = truePath + "/" + path
-                truePath = truePath.replace("//", "/")
             }else{
                 truePath = truePath.split("/")
                 truePath.pop()
                 truePath = truePath.join("/")
             }
+
+            truePath = truePath.replace("//", "/")
         }
 
         return truePath
     }
 
     cd(path){
-        
-        if(this.user == 'root'){
-            //otherwise it can't find path within actual directory
-            
-        }
         this.currentDir = path
-        // log(`Set working directory : ${path}`)
     }
 
-    touch(path, content=""){
+    async touch(path, content=" "){
         try{
-            console.log('Virtual path', path)
-            console.log('Writing to path', this.resolvePath(path))
-            const newFile = fs.writeFileSync(this.resolvePath(path), content)
-            log(`Created new file ${path}:`, newFile)
+            await fsx.outputFile(this.resolvePath(path), content, { encoding: 'utf-8' })
+            return true
         }catch(e){
             console.log(e)
         }
@@ -85,14 +82,14 @@ class Persistance{
         }
     }
 
-    cp(pathFrom, pathTo){
+    async cp(pathFrom, pathTo){
         try{
             const isDirectory = fs.lstatSync(this.resolvePath(pathFrom)).isDirectory()
             if(isDirectory){
-                const copied = fs.cpSync(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
+                const copied = await fs.cp(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
                 log(`Copied directory ${pathFrom} recursively to ${pathTo}`, copied)
             }else{
-                const copied = fs.copyFileSync(this.resolvePath(pathFrom), this.resolvePath(pathTo))
+                const copied = await fsa.copyFile(this.resolvePath(pathFrom), this.resolvePath(pathTo))
                 log(`Copied file ${pathFrom} to ${pathTo}`, copied)
             }
             
@@ -101,7 +98,7 @@ class Persistance{
         }
     }
 
-    mv(pathFrom, pathTo){
+    async mv(pathFrom, pathTo){
         try{
             const isDirectory = fs.lstatSync(this.resolvePath(pathFrom)).isDirectory()
             if(isDirectory){
@@ -113,8 +110,8 @@ class Persistance{
                 })
                 
             }else{
-                const copied = fs.copyFileSync(this.resolvePath(pathFrom), this.resolvePath(pathTo))
-                const sourceRemoved = fs.rmSync(this.resolvePath(pathFrom))
+                const copied = await fsa.copyFile(this.resolvePath(pathFrom), this.resolvePath(pathTo))
+                const sourceRemoved = await fsa.rm(this.resolvePath(pathFrom))
 
                 log(`Moved file ${pathFrom} to ${pathTo}`)
             }
@@ -138,48 +135,42 @@ class Persistance{
         }
     }
 
-    editFile(filename, newContent){
+    async editFile(filename, newContent){
         try{
-            console.log('Resolved path Edit File', this.resolvePath(filename))
-            const edited = fs.writeFileSync(this.resolvePath(filename), newContent)
+            const edited = await fsa.writeFile(this.resolvePath(filename), newContent)
             log(`Edited file ${filename}'s content`)
 
             return true
         }catch(e){
             console.log(e)
-            return { error: e.message }
+            throw new Error(e)
         }
     }
 
-    getFileContent(path){
-        return new Promise(resolve=>{
-                fs.readFile(path, 'utf8', (err, content)=>{
-                    if(err){
-                        log('Error occured while reading file: ')
-                        log(err)
-                        log("-----------------------------------")
-                        resolve(false)
-                    }else{
-                        log(`Read file ${path}'s content`)
-                        resolve(content)
-                    }
-
-                })
-
-        })
-        
-    }
-
-    getFileContentSync(path){
+    async getFileContent(path){
         try{
-            const contentBuffer = fs.readFileSync(path)
-            log(`Read file ${path}'s content`)
-            return contentBuffer.toString()
+            const content = await fsa.readFile(path)
+            
+            return content.toString()
         }catch(e){
             console.log(e)
-            return false
-        }
+            throw new Error(e)
+            // return { error:e.message }
+        }       
     }
+
+    // getFileContentSync(path){
+    //     try{
+    //         const contentBuffer = fs.readFileSync(this.resolvePath(path))
+    //         console.log('this.resolvePath(path)', this.resolvePath(path))
+    //         console.log('path', path)
+    //         log(`Read file ${path}'s content`)
+    //         return contentBuffer.toString()
+    //     }catch(e){
+    //         console.log(e)
+    //         return false
+    //     }
+    // }
 }
 
 module.exports = Persistance

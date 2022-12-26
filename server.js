@@ -8,9 +8,6 @@ const { createServer } = require("http")
 const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 
-
-let stdioServerStarted = false
-
 const log = (...text) =>{
   console.log("[SERVER:>]", ...text)
 }
@@ -50,7 +47,11 @@ const isValidPassword = (username, password) =>{
   return isValidPassword
 }
 
-const runServer = (FileSystem=null, origin={ http:true }) =>{
+let FileSystem = null
+
+const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system" }) =>{
+
+  
 
   const runCommand = async (cmd, args) =>{
     try{
@@ -60,6 +61,27 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
       const availableCommands = FileSystem.exposeCommands()
       if(availableCommands[cmd]){
         const result = await FileSystem[cmd](...args)
+        
+        return result
+      }else{
+        return { error:`Command ${cmd} unavailable` }
+      }
+
+    }catch(e){
+      log(e)
+      return { error:e.message }
+    }
+  }
+
+  const execute = async (cmd, args, pointerId) =>{
+    try{
+      
+      if(!args) args = []
+
+      const availableCommands = FileSystem.exposeCommands()
+      if(availableCommands[cmd]){
+        const pointer = FileSystem.getPointer(pointerId)
+        const result = await pointer[cmd](...args)
         
         return result
       }else{
@@ -88,7 +110,10 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
       return res.redirect("/log")
     }else{
       
-      if(FileSystem === null) FileSystem = buildUserspace(username)
+      if(FileSystem === null){
+        FileSystem = buildUserspace(username)
+        process.FileSystem = FileSystem
+      }
 
       res.sendFile(__dirname + '/public/index.html')
       
@@ -171,7 +196,10 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
   expressApp.post("/changeUser", (req, res)=>{
     const { username } = req.body
     FileSystem = null;
-    if(FileSystem === null) FileSystem = buildUserspace(username)
+    if(FileSystem === null){
+      FileSystem = buildUserspace(username) 
+      process.FileSystem = FileSystem
+    }
   })
 
   expressApp.post("/logout", (req, res)=>{
@@ -191,6 +219,18 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
     else res.json({ result:result })
   });
 
+  expressApp.post('/execute', async(req, res)=> {
+    const { cmd, args, pointerId } = req.body
+    const result = await execute(cmd, args, pointerId)
+    if(result.error) res.json({ error:result.error })
+    else res.json({ result:result })
+  });
+
+  expressApp.get("/makepointer", (req, res)=>{
+    const { id } = FileSystem.createPointer()
+    res.send({ pointerId:id })
+  })
+
   expressApp.get("/origin", (req, res)=>{
     res.send(origin)
   })
@@ -198,6 +238,10 @@ const runServer = (FileSystem=null, origin={ http:true }) =>{
   httpServer.listen(port, ()=>{
     log('HTTP Server listening on '+port)
   });
+
+
+
+
     
 }
 module.exports = runServer 

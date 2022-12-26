@@ -1,5 +1,3 @@
-
-
 const makeDesktopMenu = () =>{
     console.log(new VanillaContextMenu({
         scope: document.querySelector('#page-wrapper'),
@@ -20,8 +18,9 @@ const makeDesktopMenu = () =>{
             { 
                 label: 'Open Explorer', 
                 iconHTML: `<img src="./images/icons/file-explorer.png" height="20px" width="20px"></i>`,
-                callback: ()=>{
-                    makeFileExplorer()
+                callback: (e)=>{
+                    
+                    new FileExplorer()
                 }, 
             },
             'hr',

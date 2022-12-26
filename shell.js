@@ -2,11 +2,12 @@ const { exec, spawn } = require('node:child_process')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 const runServer = require('./server.js')
 const { NodeVM } = require('vm2')
-const fs = require('fs')
 const ReadLine = require('readline')
+const Termit = require("termit");
 
 let input = []
 let readline = {}
+const mountPoint = process.MOUNT_POINT || "system"
 
 const help = (cmd)=>{
   if(cmd){
@@ -59,15 +60,9 @@ const node = (args) =>{
 `, 'vm.js');
 }
 
-
-const edit = () =>{
-  
-}
-
-const resolvePath = (virtualPath)=>{
-  const currentVirtualDir = FileSystem.pwd()
-  let actualDir = currentVirtualDir.replace('system', '')
-  return 'public' + actualDir + virtualPath 
+const resolvePath = (virtualPath=FileSystem.pwd())=>{
+  let actualDir = virtualPath.replace(mountPoint, '.')
+  return actualDir
 }
 
 
@@ -83,6 +78,13 @@ const makeFileSystem = (user='root') =>{
   FileSystem.date = date
   FileSystem.node = node
   FileSystem.edit = edit
+
+  commands.help = help
+  commands.echo = echo
+  commands.clear = clear
+  commands.date = date
+  commands.node = node
+  commands.edit = edit
 }
 
 const helpMessages = {
@@ -96,14 +98,17 @@ const helpMessages = {
   "cat":"Concatenate FILE(s) to standard output.",
   "mkdir":"Create the DIRECTORY, if it does not already exist.",
   "touch":"Creates an empty file if it does not already exist.",
-  "rmdir":"Remove the DIRECTORY, if it is empty."
+  "rmdir":"Remove the DIRECTORY, if it is empty.",
+  "electron":"Starts the electron graphical environment",
+  "server":"Starts the OS supporting server",
+  "exit":"Exits this shell"
 }
 
 let autoComplete = function completer(line) {
   const [ cmd, ...args ] = line.split(" ")
   const commandNames = Object.keys(commands)
   const cmdIsComplete = commandNames.includes(cmd)
-
+  
   let completions = FileSystem.wd().getContentNames()
   if(cmdIsComplete){
     let parentDirname = ""
@@ -162,7 +167,7 @@ function parsePath(partialPath){
   if(relativePath !== "") relativePath = relativePath + "/"
   
   if(suggestions.length > 1){
-    // this.output(suggestions.join(" "))
+    console.log(suggestions.join(" "))
   }else if(suggestions.length === 1){
 
     // this.cmdLine_.value = `${cmd} ${relativePath}${suggestions[0]}`
@@ -181,9 +186,6 @@ const startReadLine = () =>{
   })
 }
 
-
-
-
 const runFileSystemCommand = (cmd, args=[]) =>{
   try{
     const commandResult = FileSystem[cmd](...args)
@@ -194,24 +196,31 @@ const runFileSystemCommand = (cmd, args=[]) =>{
   }
 }
 
+const edit = (...args) =>{
+  let virtualPath = args[0]
+  let path = resolvePath(virtualPath)
+}
+
 
 let stopped = false
 const run = () =>{
   
   if(!stopped){
     
-    readline.question(":>", (cmdString) => {
+    readline.question(":>", async (cmdString) => {
       input = cmdString.split(" ");
       const [ cmd, ...args ] = input
   
       if(FileSystem[cmd]){
-        console.log(runFileSystemCommand(cmd, args));
+        console.log(await runFileSystemCommand(cmd, args));
       }else if(cmd == 'server'){      
         runServer(FileSystem)
         readline.close()
         stopped = true;
       }else if(cmd == 'electron'){
         exec("npm run electron")
+      }else if(cmd == 'edit'){
+        edit(args)
       }else if(cmd == 'exit'){
         process.exit(0)
       }else{

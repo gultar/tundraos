@@ -4,8 +4,11 @@ const Persistance = require('./persistance.js')
 const fs = require('fs')
 
 let FileSystem = {}
+let persistance = {}
+let PointerPool = {}
 
 const buildUserspace = (username='root') =>{
+    let mountPoint = process.MOUNT_POINT || "system"
 
     const log = (...text) =>{
         console.log(`[${username}:>]`, ...text)
@@ -51,6 +54,7 @@ const buildUserspace = (username='root') =>{
     
     let userspacePath = `./public/userspaces/${username}`
 
+
     if(!fs.existsSync("./public/userspaces")){
         try{
             fs.mkdirSync("./public/userspaces")
@@ -71,23 +75,27 @@ const buildUserspace = (username='root') =>{
             throw e
         }
     }
-    
+
     if(username == 'root'){
-        userspacePath = "."//'./public'
+        userspacePath = "."
     }
     
     log("Standy as I attempt to load the file system")
     
     let userDir = buildFileSystemRepresentation(userspacePath)
     
-    
-    
-    let persistance = new Persistance(username)
+    persistance = new Persistance(username)
     
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)
+
+    const filesystemStructure = { 
+        [mountPoint]:userDir,
+        vars:{} 
+    }
     
-    FileSystem.import({ system:userDir })
+    FileSystem.import(filesystemStructure)
     
+
     log('File system loaded successfully')
     log(getBuildStats())
 

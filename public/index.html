@@ -10,37 +10,49 @@
     <link rel="stylesheet" href="./css/external/jquery-ui.structure.min.css">
     <link rel="stylesheet" href="./css/external/jquery-ui.theme.min.css">
     <link rel="stylesheet" href="./css/external/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="./css/external/simplemde.min.css">
+    <!-- External scripts -->
     <script src="./js/external/winbox.bundle.min.js"></script>
-    <script src="https://unpkg.com/vanilla-context-menu@1.4.1/dist/vanilla-context-menu.js"></script>
+    <script src="./js/external/vanilla-context-menu.js"></script>
     <script src="./js/external/jquery-2.1.1.min.js"></script>
     <script src="./js/external/jquery.contextMenu.min.js"></script>
     <script  src="./js/external/jquery-ui.min.js"></script>
-    <script src="./js/external/socket.io.min.js"></script>
-    <script src="./js/external/boxicons.js"></script>
-    <script src="./js/external/ace.min.js"></script>
-    <script src="./js/external/webamp.bundle.js"></script>
-    <script src="./js/filesystem/virtualfilesystem.js"></script>
-    <script src="./js/applications/browser.js"></script>
-    <script src="./js/applications/browser-history.js" ></script>
+    <script src="./js/external/socket.io.min.js"></script> 
+    <script src="./js/external/boxicons.js"></script> <!-- Icons -->
+    <script src="./js/external/ace.min.js"></script> <!-- Code editor -->
+    <script src="./js/external/simplemde.min.js"></script>
+    <script src="./js/external/lightning-fs.min.js"></script>
+    <script src="./js/external/index.umd.min.js"></script>
+    <script src="./js/external/js-file-downloader.min.js"></script>
+    <!-- <script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
+    <script src="https://unpkg.com/isomorphic-git@beta"></script> -->
+    <!-- Filesystem related scripts -->
+    <script src="./js/filesystem/filesystem.bundle.js"></script>
+    <script src="./js/commands/execute.js"></script>
+    <!-- Browser related scripts -->
+    <script src="./js/browser/browser.js"></script>
     <script src="./js/commands/web-shortcuts.js"></script>
+    <!-- Settings and configurations -->
     <script src="./js/settings/settings.js"></script>
-    <script src="./js/applications/webamp.js"></script>
+    <!-- Terminal/Shell scripts -->
     <script src="./js/terminal/terminal.js"></script>
     <script src="./js/terminal/terminal-window-init.js"></script>
+    <!-- Code editor scripts -->
     <script src="./js/applications/editor.js"></script>
-    <script src="./js/file-explorer/open-file.js"></script>
-    <script src="./js/file-explorer/view-image.js"></script>
-    <script src="./js/file-explorer/explore.js"></script>
+    <!-- File explorer scripts -->
     <script src="./js/file-explorer/draggable.js"></script>
-    <script src="./js/filesystem/filesystem-init.js"></script>
-    <script src="./js/commands/execute.js"></script>
+    <script src="./js/file-explorer/explorer.js"></script>
+    <!-- Applications and visual effects -->
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
     <script src="./js/settings/particlejs-init.js"></script>
-    <script src="./js/init-script.js" defer></script>
+    <!-- Desktop tools -->
     <script src="./js/context/desktop-menu.js"></script>
     <script src="./js/context/context-window.js"></script>
     <script src="./js/window-manager/create-window.js"></script> 
+    <!-- Init scripts -->
+    
+    <script src="./js/init-script.js" defer></script>
 
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <title>Document</title>
@@ -162,8 +174,12 @@
         </nav>
 
         <div id="page-anchor"></div>
-        <div id="filemanager"></div>
+        <div id="filemanager">
+            
+        </div>
+        <div id="editor-container">
 
+        </div>
         
         <div id="main-container">
             <div id="logo-container"> 
@@ -173,12 +189,9 @@
             <div id="webamp"></div>
         </div>
         
-        <div id="browser-view" style="width:80%; height:80%;">
-            
-        </div>
-        <div id="dialog-message" title="System Message">
-            
-        </div>
+        <div id="browser-view" style="width:80%; height:80%;"></div>
+        <div id="dialog-message" title="System Message"></div>
+
     </div>
     <script type="text/javascript">
 
@@ -187,20 +200,20 @@
         function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
         
         //Forces user to "reboot" instead of refreshing
-        $(document).ready(function(){
-             $(document).on("keydown", (e)=>{
-                disableF5(e)
-             });
-        });
+        // $(document).ready(function(){
+        //      $(document).on("keydown", (e)=>{
+        //         disableF5(e)
+        //      });
+        // });
 
         //prevent dragging start menu elements
         $("nav a").on('dragstart drop', function(e){
-            console.log('STOP DRAG')
             e.preventDefault();
             return false;
         });
 
     </script>
+
 
 </body>
 </html>

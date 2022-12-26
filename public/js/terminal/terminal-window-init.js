@@ -1,13 +1,9 @@
-const createConsole = (id) =>{
-    // Initialize a new terminal object
-    const term = new Terminal(id);
-    term.init();
- }
-
+//  const Terminal = require('./terminal')
  const activeTerminals = []
 
  const spawnTerminalContainer = ()=>{
-   const id = Date.now()
+  //Assign a new directory pointer id everytime a terminal window is created
+   const id = Date.now() 
    const domElement = `
    <div id="terminal-window-${id}" class="terminal-window" style="">
      <div id="container-${id}" class="container">
@@ -29,31 +25,42 @@ const createConsole = (id) =>{
    return id
  }
 
-function createTerminalWindow(x=0, y=0, opts){
+async function createTerminalWindow(x=0, y=0, opts){
     if(activeTerminals.length > 20) throw new Error('Cannot open more than 20 terminals')
-    const id = spawnTerminalContainer()
-    createConsole(id);
-    const terminal = document.getElementById("terminal-window-"+id)
-    terminal.style.visibility = "visible"
+    
+    const terminalId = spawnTerminalContainer()
+    const directoryPointerId = await getNewPointerId(terminalId)
+    const term = new Terminal(terminalId, directoryPointerId);
+    term.init();
+    
+
+    const terminalDOM = document.getElementById("terminal-window-"+terminalId)
+    terminalDOM.style.visibility = "visible"
 
     const termWindow = createWindow({ 
         x:x,
         y:y,
-        label:"terminal-window-"+id,
+        label:"terminal-window-"+terminalId,
         launcher:{
           name:"createTerminalWindow",
           params:[x, y, opts]
         },
         title: "", 
-        mount: terminal,
+        mount: terminalDOM,
         onclose:()=>{
-            terminal.remove();
-            terminal.style.visibility = "hidden"
+            terminalDOM.remove();
+            terminalDOM.style.visibility = "hidden"
+            term.close()
         },
     });
 
-    terminal.style.height = "100%"
-    terminal.style.width = "100%"
+    terminalDOM.style.height = "100%"
+    terminalDOM.style.width = "100%"
+
+    if(location.hostname == 'localhost'){
+      
+    }
+
 }
 
 const initTerminalClock = () =>{
@@ -62,3 +69,6 @@ const initTerminalClock = () =>{
     $("#clock").text(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
   }, 1000)
 }
+
+// module.exports = createTerminalWindow
+// module.exports = initTerminalClock

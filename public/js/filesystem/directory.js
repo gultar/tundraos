@@ -1,6 +1,6 @@
 class Directory{
     
-    constructor(name, parent, contents=[]){
+    constructor(name, parent){
         this[".."] = parent
         this.name = name
         this.contents = []
@@ -69,6 +69,22 @@ class Directory{
         return [ ...dirnames, ...filenames ]
     }
 
+    getContents(){
+        const files = this.getFiles()
+        const dirnames = this.getDirnames().map(dirname => {
+            if(dirname !== "..")
+                return dirname + "/"
+            else
+                return dirname
+        })
+
+        let dirs = []
+        for(const dirname of dirnames){
+            dirs.push({ directory:true, name:dirname })
+        }
+        return [ ...dirs, ...files ]
+    }
+
     getDirectory(dirname){
         const isExistingDirectory = this.hasDir(dirname)
         if(isExistingDirectory) return this[dirname]
@@ -81,6 +97,17 @@ class Directory{
                 return file
             }
         }
+        return false
+    }
+
+    setFile(filename, newFile){
+        for(const file of this.contents){
+            if(file && file.name == filename){
+                file.content = newFile.content
+                return true
+            }
+        }
+
         return false
     }
 

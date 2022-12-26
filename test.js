@@ -1,5 +1,3 @@
-const runFileSystemTest = require('./public/js/filesystem/virtualfilesystem.test.js')
-
-
+const runFileSystemTest = require('./public/js/filesystem/test/virtualfilesystem.test.js')
 
 runFileSystemTest()

@@ -1,49 +1,37 @@
-let FileSystem;
-let fsBackupStr = localStorage.getItem("filesystem")
-
-let fsBackup = undefined;
-if(fsBackupStr != undefined){
-  try{
-    fsBackup = JSON.parse(fsBackupStr)
-    
-  }catch(e){
-    console.log(e)
-  }
-}
-
 const saveState = () =>{
   const exported = FileSystem.export()
-  
+  console.log('Exported', exported)
   return localStorage.setItem("filesystem", exported)
 }
 
-const refreshState = () =>{
-  try{
-    console.time('Refreshing FS')
-    const structure = FileSystem.export()
-    const reimported = FileSystem.import(structure)
-    console.timeEnd('Refreshing FS')
-  }catch(e){
-    console.log(e)
-  }
-}
-
 const init = () =>{
+  let fsBackupStr = localStorage.getItem("filesystem")
+
+  let fsBackup = undefined;
+  if(fsBackupStr != undefined){
+    try{
+      fsBackup = JSON.parse(fsBackupStr)
+      
+    }catch(e){
+      console.log(e)
+      fsBackup = {}
+    }
+  }
   
-  FileSystem = new VirtualFileSystem("guest") //ADD FSBACKUP
+  const VirtualFileSystem = require('./virtualfilesystem')
+  const persistance = require('./localstorage-persistance')
+  FileSystem = new VirtualFileSystem("guest",persistance) //ADD FSBACKUP
   FileSystem.import(fsBackup)
   window.Filesystem = FileSystem
 
-  refresher()
   document.addEventListener('visibilitychange', function() {
       saveState()
   });
 }
 
-const refresher = () =>{
-  // setInterval(()=>{
-  //   refreshState()
-  // }, 5000)
-}
+window.addEventListener("load", (event) => {
+  console.log("page is fully loaded");
+  init()
+});
 
-init()
+window.saveState = saveState

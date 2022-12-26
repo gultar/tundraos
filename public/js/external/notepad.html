@@ -27,11 +27,11 @@
 
     const save = () =>{
         const content = getContent()
+        //message is received in ./public/js/applications/editor.js
         window.postMessage({ saveContent:content })
     }
 
     const startNotepad = (filename, content) =>{
-        // setEditorContent(content)
 
         const [ name, ...extensions ] = filename.split(".")
         const lastExtension = extensions[extensions.length - 1]
@@ -40,6 +40,9 @@
 
         if(!mode) mode = 'text'
         if(!theme) theme = "monokai"
+
+        console.log('CONTENT', content)
+        console.log('Filename', filename)
 
         mode = mode.toLowerCase()
         editor = ace.edit("editor");

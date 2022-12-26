@@ -23,8 +23,12 @@
     "helmet": "^6.0.0",
     "mime": "^3.0.0",
     "morgan": "^1.10.0",
+    "node-downloader-helper": "^2.1.6",
+    "nodejs-file-downloader": "^4.10.3",
     "nodemon": "^2.0.20",
     "socket.io": "^4.5.4",
+    "termit": "^0.4.4",
+    "tiny-cli-editor": "^0.1.1",
     "vanilla-context-menu": "^1.4.2",
     "vm2": "^3.9.11"
   },

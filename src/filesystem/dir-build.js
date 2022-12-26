@@ -2,13 +2,17 @@ const fs = require("fs")
 const File = require('../../public/js/filesystem/file.js')
 
 
-class RootFS{
-    constructor(){
-        this.system = {
-            contents:[]
-        },
-        this.contents = []
-    }
+// class RootFS{
+//     constructor(){
+//         this.system = {
+//             contents:[]
+//         },
+//         this.contents = []
+//     }
+// }
+
+const root = {
+    contents:[]
 }
 
 const log = (...text) =>{
@@ -18,7 +22,7 @@ const log = (...text) =>{
 let totalDirectories = 0
 let totalFiles = 0
 
-const buildFileSystemRepresentation = function(dirPath, fsPosition=new RootFS().system) {
+const buildFileSystemRepresentation = function(dirPath, fsPosition=root) { //new RootFS().system
     
     try{
         files = fs.readdirSync(dirPath)

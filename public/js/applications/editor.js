@@ -1,12 +1,13 @@
 let isOpen = false
-const launchEditor = (filename, content, exists=false) =>{
+const launchEditor = (filename, content, dirPointerId) =>{
     if(isOpen) return false;
 
-    const save = async (filecontent) =>{
-        const fileExists = await exec("getFile", [filename])
+    isOpen = true
 
-        if(!fileExists) return await exec("touch", [filename, filecontent])
-        else return await exec("editFile", [filename, filecontent])
+    const save = async (filecontent) =>{
+        const fileExists = await exec("getFile", [filename], dirPointerId)
+        if(!fileExists) throw new Error(`File ${filename} does not exist`)
+        return await exec("editFile", [filename, filecontent], dirPointerId)
     }
 
     const winbox = new WinBox({ 
@@ -14,6 +15,9 @@ const launchEditor = (filename, content, exists=false) =>{
         height:"95%", 
         width:"80%",
         url:"./js/external/notepad.html",
+        onclose:()=>{
+            isOpen = false
+        }
     })
 
     setTimeout(()=>{

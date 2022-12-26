@@ -20,7 +20,7 @@ const createWindow = (opts) =>{
 const minimizeAllWindows = (force=false) =>{
     for(const windowName in window.openWindows){
         const instance = window.openWindows[windowName]
-        //!instance.min
+        
         const state = (force?true:!instance.min)
         instance.minimize(state)
     }
