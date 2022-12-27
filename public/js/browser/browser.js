@@ -35,6 +35,7 @@ const launchBrowser = (url) =>{
                 <span class="button"><a class="back-button" onclick="window.postMessage({ back:'browser-${browserNumber}' });return false"></a></span>
                     | 
                 <span class="button" ><a class="forward-button" onclick="window.postMessage({ forward:'browser-${browserNumber}' });return false"></a></span>
+                <span class="button" ><a class="refresh-button" onclick="window.postMessage({ refresh:'browser-${browserNumber}' });return false"><img src="./images/icons/refresh.png"/></a></span>
             </div>
             <div class="url-container">
                 <input id="url-bar-${browserNumber}" class="url-bar" type="text" placeholder="http://google.com" value="${url}">
@@ -86,10 +87,14 @@ const launchBrowser = (url) =>{
                 webview.goForward()
             }
             
+        }else if(message.refresh){
+            
+            if(message.refresh == `browser-${browserNumber}`){
+                webview.reload()
+            }
+            
         }else if(message.visitURL){
-            console.log('Received message', )
             const { url, targetBrowser } = message.visitURL
-
             addNewURL(url)
         }
     })
@@ -217,6 +222,11 @@ const launchBrowser = (url) =>{
         width:"80%", 
         title:"Browser", 
         mount:browserContainer, 
+        launcher:{
+            //enables start at boot
+            name:"launcherBrowser",
+            params:[url]
+        },
         onclose:()=>{
             browserView.innerHTML = oldState
             browserContainer.removeEventListener("keypress", pressEnterSubmit)
@@ -225,8 +235,46 @@ const launchBrowser = (url) =>{
 
     activeWebviews[browserNumber] = browserWindow
     startPageWatcher()
+
+    const downloadCompleteHandler = (event, message)=>{
+        const { success, error } = message
+        if(success) popup(`Success: ${JSON.stringify(success, null, 2)}`)
+        else if(error) popup(`Error: ${JSON.stringify(error, null, 2)}`)
+    }
+
+    const confirmDownloadHandler = (url)=>{
+        confirmation({
+            message:"Are you sure you want to download this file?",
+            yes:()=>{
+                window.ipcRenderer.send('download-confirmed', true)
+            },
+            no:()=>{
+                window.ipcRenderer.send('download-confirmed', false)
+            }
+        })
+    }
+
+    const selectDownloadPathHandler = (event, message)=>{
+        const startingPath = message
+
+        new SaveAsDialog({
+            startingPath:startingPath
+        })
+
+    }
+
+    window.ipcRenderer.on('confirm-download', confirmDownloadHandler)
+    window.ipcRenderer.on('select-download-path', selectDownloadPathHandler)
+    window.ipcRenderer.on('download-complete', downloadCompleteHandler)
+    window.addEventListener('message', (event)=>{
+        const message = event.data
+        if(message.dialogSave){
+            window.ipcRenderer.send('download-path-selected',{ selected:message.dialogSave })
+        }else if(message.dialogCancel){
+            window.ipcRenderer.send('download-path-selected',{ cancelled:true })
+        }
+    })
     
-    console.log('Active Webviews', activeWebviews)
 }
 
 window.launchBrowser = launchBrowser

@@ -18,7 +18,7 @@
 .explorer-window-container{
     display:block;
     width:100%;
-    margin-top:6vh;
+    margin-top:5vh;
 }
 
 .explorer-window{
@@ -31,8 +31,11 @@
 
 .navigation-bar-container{
     display: flex;
-    width: 95%;
-    margin-top: 1vh;
+    width: 85%;
+    position: fixed;
+    top:0;
+    left:30px;
+    margin-top:4px;
 }
 
 .navigation-bar-container input{
@@ -46,7 +49,7 @@
     padding: 0;
     width:25%;
     min-width: 15%;
-    height: 95%;
+    min-height: 100%;
     margin:2vh;
     display:block;
     background-color: darkgray !important;
@@ -84,7 +87,6 @@
 .file-menu {
     display: block;
     transition-duration: 0.5s;
-    background: transparent !important;
 }
 
 .menu-item{
@@ -93,6 +95,8 @@
 
 .hoverable:hover {
     cursor: pointer;
+    text-decoration: underline;
+    color:blue;
 }
 
 .explorer-item:hover{
@@ -105,9 +109,10 @@
     width:75%;
     display: grid;
     grid-template-columns: repeat(var(--number-of-explorer-items), var(--size-of-item));
-    grid-auto-rows: var(--height-of-item)
-    
+    grid-auto-rows: var(--height-of-item);
 }
+
+
 
 .explorer-item-wrapper{
     display: flex;
@@ -130,11 +135,18 @@
 
 .explorer-icon{
     display:block;
+    height:40px;
+    width:40px;
 }
 
 .explorer {
     margin:2vh 2vh;
 }
+
+.hidden{
+    visibility: hidden;
+}
+
 
 @container (max-width : 1000px)  {
     *{

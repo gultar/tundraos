@@ -15,6 +15,8 @@ const createWindow = (opts) =>{
 
         console.log(window.openWindows[name].launcher.x, window.openWindows[name].launcher.y)
     } 
+
+    return newWindow
 }
 
 const minimizeAllWindows = (force=false) =>{

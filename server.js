@@ -51,8 +51,6 @@ let FileSystem = null
 
 const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system" }) =>{
 
-  
-
   const runCommand = async (cmd, args) =>{
     try{
       
@@ -112,7 +110,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
       
       if(FileSystem === null){
         FileSystem = buildUserspace(username)
-        process.FileSystem = FileSystem
+        global.FileSystem = FileSystem
       }
 
       res.sendFile(__dirname + '/public/index.html')
@@ -156,7 +154,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
 
     authorizedUsers[username].tokenHash = hexHash
     
-    process.env.activeUser = username
+    global.activeUser = username
     return { 
       token:{
         hash:hexHash.toString("hex"),
@@ -168,7 +166,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   }
 
   expressApp.post("/rootcmd", async (req, res)=>{
-    if(process.env.activeUser === "root"){
+    if(global.activeUser === "root"){
       try{
         const { command } = req.body
         
@@ -198,7 +196,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     FileSystem = null;
     if(FileSystem === null){
       FileSystem = buildUserspace(username) 
-      process.FileSystem = FileSystem
+      global.FileSystem = FileSystem
     }
   })
 
@@ -207,7 +205,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     FileSystem = null;
     
     authorizedUsers[username].token = ""
-    process.env.activeUser = ""
+    global.activeUser = ""
     log(`Logged out of user ${username}'s session`)
     log(FileSystem)
   })

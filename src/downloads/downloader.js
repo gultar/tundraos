@@ -1,12 +1,40 @@
 const Downloader = require("nodejs-file-downloader");
+const { Worker } = require('worker_threads');
 
-const download = (url, targetDir=__dirname) =>{
+const downloadWorker = (url, targetDir=__dirname, ipc) =>{
+  return new Promise((resolve) =>{
+    const worker = new Worker("./src/downloads/download-worker.js", {
+      workerData:{
+        url: url,
+        targetDir:targetDir
+      }
+    });
+    worker.on('message', (message)=>{
+        
+      if(message.success){
+        console.log('Success!')
+        resolve(message)
+        worker.terminate()
+      }else if(message.percentage){
+        console.log('Message percentage', message.percentage)
+        ipc.send('download-percentage',message)
+      }
+    });
+    worker.on('error', (error)=>{
+      resolve({ error:error })
+      worker.terminate()
+    });
+    worker.on('exit', (code) => {
+      if (code !== 0){
+        resolve({ error:new Error(`Worker stopped with exit code ${code}`) })
+        worker.terminate()
+      }
+    });
+  })
+}
+
+const download = (url, targetDir=__dirname, parentPort) =>{
     return new Promise(async (resolve)=>{
-        // const dl = new DownloaderHelper(url, targetDir);
-
-        // dl.on('end', (result) => resolve({ success:true, result:result }));
-        // dl.on('error', (err) => resolve({ error:err }));
-        // dl.start().catch(err => resolve({ error:err }));
 
         const downloader = new Downloader({
             url: url,
@@ -14,8 +42,9 @@ const download = (url, targetDir=__dirname) =>{
             onProgress: function (percentage, chunk, remainingSize) {
               //Gets called with each chunk.
               console.log("% ", percentage);
-              console.log("Current chunk of data: ", chunk);
               console.log("Remaining bytes: ", remainingSize);
+              parentPort.postMessage({ percentage:percentage, remainingSize:remainingSize })
+              
             },
           });
         
@@ -28,4 +57,5 @@ const download = (url, targetDir=__dirname) =>{
     })
 }
 
-module.exports = download
+
+module.exports = { download, downloadWorker }

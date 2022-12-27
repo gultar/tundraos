@@ -1,5 +1,5 @@
 const makeDesktopMenu = () =>{
-    console.log(new VanillaContextMenu({
+    new VanillaContextMenu({
         scope: document.querySelector('#page-wrapper'),
         menuItems: [
             { 
@@ -37,13 +37,6 @@ const makeDesktopMenu = () =>{
                         },
                     },
                     {
-                        label: 'Webamp',
-                        iconHTML: `<img src="./images/icons/music.png" height="20px" width="20px"></i>`,
-                        callback:()=>{
-                            runWebamp()
-                        }
-                    },
-                    {
                         label: 'Diablo',
                         iconHTML: `<img src="./images/diablo.png" height="20px" width="20px"></i>`,
                         callback:()=>{
@@ -74,6 +67,6 @@ const makeDesktopMenu = () =>{
                 ]
             },
         ],
-    }))
+    })
 }
 

@@ -112,6 +112,46 @@ body{
   
 }
 
+/*
+            <div id="icon-container" style="padding:5vh;display:grid;">
+                <a class="desktop-icon-link" onclick="launchBrowser()" id="browser-icon" style="display:flex;flex-direction:column">
+                    <img class="desktop-icon" src="./images/icons/browser-color-large.png" style="height:60px;width:60px">
+                    <span>Browser</span>
+                </a>
+                <a class="desktop-icon-link" onclick="new FileExplorer(0,0)" id="browser-icon" style="display:flex;flex-direction:column">
+                    <img class="desktop-icon" src="./images/icons/explorer-color-large.png" style="height:60px;width:60px">
+                    <span>Explorer</span>
+                </a>
+            </div>
+*/
+
+#icon-container{
+  padding:5vh 2vh;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, var(--size-of-desktop-icon-slot));
+  grid-template-rows: repeat(auto-fill, var(--size-of-desktop-icon-slot));
+  list-style: none;
+}
+
+
+.desktop-icon{
+  height:var(--size-of-desktop-icons);
+  width:var(--size-of-desktop-icons);
+  /* background-color: aqua; */
+}
+
+.desktop-icon-link{
+  display:flex;
+  flex-direction:column;
+}
+
+.placeholder{
+  visibility: hidden;
+}
+
+.selected{
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;

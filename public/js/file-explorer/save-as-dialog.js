@@ -1,17 +1,16 @@
-let mountPoint = window.MOUNT_POINT || "system"
-
-class FileExplorer{
+class SaveAsDialog{
     constructor(x=0, y=0, opts={}){
         this.x = x
         this.y = y
         this.width = opts.width || '70%'
         this.height = opts.height || '60%'
+        this.dialogWindow = ""
         this.explorerId = Date.now()
         this.pointerId = false
         this.currentDirContents = []
         this.fullPaths = []
         this.workingDir = ""
-        this.explorerDOM = ""
+        this.dialogDOM = ""
         this.homePath = (
             window.username == 'root' ? 
                 mountPoint+"/public/userspaces/root/home/" 
@@ -39,133 +38,41 @@ class FileExplorer{
     }
 
     createDOM(){
-        this.explorerDOM = `
-
-        <div id="file-explorer-wrapper-${this.explorerId}" class="file-explorer-wrapper">
-            <link rel="stylesheet" href="./css/explorer.css">
-            <script src="./js/external/jquery-2.1.1.min.js"></script>
-            <script src="./js/external/jquery-ui.min.js"></script>
-            <script src="./js/external/boxicons.js"></script>
-
-            <nav class="file-menu" role="navigation">
-                <ul class="menu-item-list">
-                    <li class="menu-item"><a href="#">File</a>
-                    <ul class="dropdown">
-                        <li onclick="window.postMessage({ newFile:true })" class="dropdown-item hoverable"><a href="#">New File</a></li>
-                        <li onclick="window.postMessage({ newDir:true })" class="dropdown-item hoverable"><a href="#">New Directory</a></li>
-                        <li class="dropdown-item hoverable"><a href="#">Settings</a></li>
-                        <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
-                    </ul>
-                    </li>
-                    <div id="navigation-bar-container-${this.explorerId}" class="navigation-bar-container">
-                        <input id="navigation-bar-${this.explorerId}" class="navigation-bar">
-                        <button onclick="window.postMessage({ setDir:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
-                    </div>
-                </ul>
-
-            </nav>
-            <div id="explorer-window-container-${this.explorerId}" class="explorer-window-container">
-
-                <div id="explorer-window-${this.explorerId}" class="explorer-window">
-
-                    <div id="side-bar-${this.explorerId}" class="side-bar">
-                        <div id="quick-access-${this.explorerId}" class="quick-access">
-                            <span id="quick-access-title-${this.explorerId}" class="quick-access-title"><b>Quick Access</b></span>
-                            <ul>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Root
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Home
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}desktop/', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Desktop
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}downloads/', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Downloads
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}applications/', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Applications
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}images/', 
-                                                explorerId:'${this.explorerId}' 
-                                            })">Images
-                                        </a>
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
-                        <hr>
-                    </div>
-                    <div id="explorer-${this.explorerId}" class="explorer">
-
-                    </div>
-                    
+        this.dialogDOM = `
+        <link rel="stylesheet" href="./css/save-as-dialog.css">
+        <div id="dialog-window-wrapper">
+            <div id="dialog-window">
+                <span id="save-as-label">Save file to:</span>
+                <div id="input-line">
+                    <input id="path-viewer-input" type="text" readonly value="/system/home/downloads" />
+                    <button onclick="" id="select-path">Select</button>
                 </div>
-                <div id="selection-bar-container-${this.explorerId}" class="selection-bar-container hidden">
-                    <input id="selection-bar-${this.explorerId}" class="selection-bar">
-                    <button onclick="window.postMessage({ select:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
+                <div id="dialog-explorer-box">
+
+                </div>
+                <div id="filename-input-line">
+                    <span id="filename-label">File name: </span>
+                    <input type="text" id="save-file-as" />
+                </div>
+                <div id="filetype-list-line">
+                    <label for="file-type-list">File Type:</label>
+                    <select id="file-type-list" name="file-type-list">
+                    <option value="html">HTML (*.html)</option>
+                    <option value="CSS">CSS (*.css)</option>
+                    <option value="JS">Javascript (*.js)</option>
+                    </select>
+                </div>
+                <div id="button-line">
+                    <button onclick="window.postMessage({ saveDialog:true })" id="save-as-button">
+                        Save
+                    </button>
+                    <button onclick="window.postMessage({ cancelDialog:true })" id="cancel-button">
+                        Cancel
+                    </button>
                 </div>
             </div>
-            <script>
-                const select = (element, func) =>{
-                    if(element.classList.contains('clicked')){
-                        func()
-                        element.classList.remove('clicked')
-                    }else{
-                        element.classList.add('clicked')
-                        setTimeout(()=>{
-                            element.classList.remove('clicked')
-                        }, 1000)
-                    }
-                }
-            </script>
-        </div>`
+        </div>
+        `
 
 
     }
@@ -178,18 +85,12 @@ class FileExplorer{
     }
 
     launchWindow(){
-        createWindow({ 
-            title: "File Explorer", 
-            height:"60%", 
-            width:"70%", 
-            x:this.x,
-            y:this.y,
-            launcher:{
-                //enables start at boot
-                name:"makeFileExplorer",
-                params:[this.x, this.y, this.opts]
-            },
-            html:this.explorerDOM,
+        this.dialogWindow = createWindow({ 
+            title: "File Explorer",
+            width:'71%',
+            height:'80%',
+            modal:true,
+            html:this.dialogDOM,
             onclose:()=>{
                 this.close()
             }
@@ -214,14 +115,31 @@ class FileExplorer{
             this.createNewFile()
         }else if(message.openFile){
             this.openFile(message.openFile)
+        }else if(message.cancelDialog){
+            this.cancel()
+        }else if(message.saveDialog){
+            this.save()
         }
 
         this.refreshExplorer(this.explorerId)
     }
 
+    async cancel(){
+        this.dialogWindow.close()
+        window.postMessage({ dialogCancel:true })
+    }
+
+    async save(){
+        const path = document.getElementById("path-viewer-input").value
+        const filename = document.getElementById("save-file-as").value
+
+        window.postMessage({ dialogSave:{ path:path, filename:filename } })
+        this.dialogWindow.close()
+    }
+
     async refreshExplorer(){
         this.setCurrentDirContents(this.workingDir)
-        document.querySelector(`#navigation-bar-${this.explorerId}`).value = this.workingDir
+        document.querySelector(`#path-viewer-input`).value = this.workingDir
         return true
     }
 
@@ -341,59 +259,63 @@ class FileExplorer{
         return extensions[extensions.length - 1]
     }
 
-    createElement(element, path){
+    createDialogElement(element, path){
         if(path === "/") path = ""
-
-        let elementDOM = ""
+        
+        let elementDOM = ``
         if(element.includes("/") || element == ".."){
             elementDOM = `
-            <div class="explorer-item-wrapper">
-                <div class="explorer-item">
+            <div class="dialog-item-wrapper hoverable">
+                <div class="dialog-item">
                     <a  data-path="/${path}${element}" 
                         data-workingdir="/${path}"
-                        data-name="${element}" onclick="select(this, (()=>{ window.postMessage({ 
-                            changeDir:this.dataset.name, 
-                            explorerId:'${this.explorerId}' 
-                        }) }))"
-                        class="link directory">
+                        data-name="${element}" onclick="window.postMessage({ 
+                            changeDir:this.dataset.name,
+                            explorerId:'${this.explorerId}'
+                        })"
+                        class="dialog-item-link link directory">
                         <img 
                             id="${element}-${this.explorerId}" 
-                            class="explorer-icon draggable droppable" 
-                            src="./images/icons/folder-color-large.png" 
+                            class="explorer-icon draggable" 
+                            src="./images/icons/folder-medium.png"
                         />
-                        
+                        <span class="element-name" data-name="${element}" onclick="">${element}</span>
                     </a>
-                    <span class="element-name" data-name="${element}" onclick="">${element}</span>
                 </div>
-            </div>`
+            </div>
+            `
+            /**                         
+                        
+                                                <img id="${element}-${this.explorerId}" class="explorer-icon draggable" 
+                            src="./images/icons/file-medium.png"
+                        />*/
         }else{
             elementDOM = `
-            <div class="explorer-item-wrapper">
-                <div class="explorer-item">
+            <div class="dialog-item-wrapper hoverable">
+                <div class="dialog-item">
                     <a  data-path="/${path}${element}" 
-                            data-workingdir="/${path}"
-                            data-name="${element}" onclick="select(this, (()=>{ window.postMessage({ 
-                                openFile:this.dataset.path,
-                                explorerId:'${this.explorerId}'
-                            }) }))"
-                            class="explorer-item link file">
-                            <img id="${element}-${this.explorerId}" class="explorer-icon draggable" 
-                                src="./images/icons/file-color-large.png"
-                            />
-                            
+                        data-workingdir="/${path}"
+                        data-name="${element}" onclick=""
+                        class="dialog-item-link link file">
+                        <img 
+                            id="${element}-${this.explorerId}" 
+                            class="explorer-icon draggable" 
+                            src="./images/icons/file-medium.png"
+                        />
+                        <span class="element-name" data-name="${element}" onclick="">${element}</span>
                     </a>
-                    <span class="element-name" data-name="${element}" onclick="">${element}</span>
                 </div>
-            </div>`
+               
+            </div>
+            `
         }
         
         return elementDOM
-        
      }
 
      async setCurrentDirContents(){
        
-        const explorerElement = document.getElementById(`explorer-${this.explorerId}`)
+        const explorerElement = document.getElementById(`dialog-explorer-box`)
         
         const contents = await this.exec("ls",[this.workingDir])
         if(Array.isArray(contents)){
@@ -407,7 +329,7 @@ class FileExplorer{
  
         for await(const element of this.currentDirContents){
              this.fullPaths.push(`${this.workingDir}${element}`)
-             domToAdd = domToAdd + this.createElement(element, this.workingDir)
+             domToAdd = domToAdd + this.createDialogElement(element, this.workingDir)
         }
         
         explorerElement.innerHTML = domToAdd
@@ -487,7 +409,7 @@ class FileExplorer{
 
      makeExplorerMenu(opts={}){
         new VanillaContextMenu({
-            scope: document.querySelector(`#explorer-window-${this.explorerId}`),
+            scope: document.querySelector(`#dialog-window`),
             menuItems: [
                 { 
                     label: 'Create new directory',

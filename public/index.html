@@ -20,12 +20,6 @@
     <script src="./js/external/socket.io.min.js"></script> 
     <script src="./js/external/boxicons.js"></script> <!-- Icons -->
     <script src="./js/external/ace.min.js"></script> <!-- Code editor -->
-    <script src="./js/external/simplemde.min.js"></script>
-    <script src="./js/external/lightning-fs.min.js"></script>
-    <script src="./js/external/index.umd.min.js"></script>
-    <script src="./js/external/js-file-downloader.min.js"></script>
-    <!-- <script src="https://unpkg.com/@isomorphic-git/lightning-fs"></script>
-    <script src="https://unpkg.com/isomorphic-git@beta"></script> -->
     <!-- Filesystem related scripts -->
     <script src="./js/filesystem/filesystem.bundle.js"></script>
     <script src="./js/commands/execute.js"></script>
@@ -42,13 +36,15 @@
     <!-- File explorer scripts -->
     <script src="./js/file-explorer/draggable.js"></script>
     <script src="./js/file-explorer/explorer.js"></script>
+    <script src="./js/file-explorer/save-as-dialog.js"></script>
     <!-- Applications and visual effects -->
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
     <script src="./js/settings/particlejs-init.js"></script>
     <!-- Desktop tools -->
-    <script src="./js/context/desktop-menu.js"></script>
-    <script src="./js/context/context-window.js"></script>
+    <script src="./js/desktop/desktop-menu.js"></script>
+    <script src="./js/desktop/context-window.js"></script>
+    <script src="./js/desktop/icon-creator.js"></script>
     <script src="./js/window-manager/create-window.js"></script> 
     <!-- Init scripts -->
     
@@ -58,63 +54,6 @@
     <title>Document</title>
 </head>
 <body>
-    <script>
-        const getUsername = () =>{
-            //Probably useless
-            if(window.location.hostname == 'localhost'){
-                const [ url, searchParams ] = window.location.href.split("?")
-                const [ tokenAndValue, usernameAndValue ] = searchParams.split("&")
-                let [ usernameLabel, value ] = usernameAndValue.split("=")
-                value = value.replace("#", '')
-                return value
-            }else{
-                return 'guest'
-            }
-            
-        }
-
-
-
-        const logout = async () =>{
-            
-            const [ url, searchParams ] = window.location.href.split("?")
-            const username = getUsername()
-            window.location.href = url
-            
-            if(window.location.hostname == 'localhost'){
-                const loggedOut = await Promise.resolve($.post("/logout", {
-                    logout:true,
-                    username:username
-                }))
-            }
-
-        }
-
-        const reboot = () =>{
-            confirmation({
-                message:"Are you sure you want to reboot?",
-                yes:()=>{
-                    window.openWindows = {}
-                    if(location.hostname === 'localhost')
-                        location.href = location.origin
-                    else
-                        location.reload()
-                },
-                no:()=>{}
-            })
-        }
-
-        const shutdown = () =>{
-            confirmation({
-                message:"Are you sure you want to shutdown?",
-                yes:()=>{
-                    window.openWindows = {}
-                    window.close()
-                },
-                no:()=>{}
-            })
-        }
-    </script>
     <div id="page-wrapper" class="flex">
         <div id="color-focus"></div>
         <nav id="topnav">
@@ -124,7 +63,7 @@
                         <ul>
                             <li><a href="#" onClick="createTerminalWindow()"><img class="main-menu-icons" src="./images/icons/terminal.png" />Console</a></li>
                             <li><a href="#"><img class="main-menu-icons" src="./images/icons/settings.png" />Settings</a></li>
-                            <li><a href="#" onClick="makeFileExplorer()"><img class="main-menu-icons" src="./images/icons/file-explorer.png" />Explorer</a></li>
+                            <li><a href="#" onClick="new FileExplorer(0,0)"><img class="main-menu-icons" src="./images/icons/file-explorer.png" />Explorer</a></li>
                             <li><a href="#"><img class="main-menu-icons" src="./images/icons/internet.png" />Apps</a>
                             <ul>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/music.png" />Music</a>
@@ -182,10 +121,27 @@
         </div>
         
         <div id="main-container">
+            
             <div id="logo-container"> 
                 <img id="desktop-logo" src="./images/icons/constellation-3.png">
             </div>
-            <canvas class="background"></canvas>
+
+            <div id="icon-container" style="background:transparent">
+                <a class="desktop-icon-link" onclick="select(this, launchBrowser)" id="browser-icon">
+                    <img class="desktop-icon" src="./images/icons/browser-color-large.png">
+                    <span>Browser</span>
+                </a>
+                <a class="desktop-icon-link" onclick="select(this, (()=>new FileExplorer(0,0)))" id="explorer-icon">
+                    <img class="desktop-icon" src="./images/icons/explorer-color-large.png">
+                    <span>Explorer</span>
+                </a>
+                <a class="desktop-icon-link" onclick="select(this, createTerminalWindow)" id="terminal-icon">
+                    <img class="desktop-icon" src="./images/icons/terminal-color-large.png">
+                    <span>Terminal</span>
+                </a>
+            </div>
+
+            <canvas class="background" ></canvas>
             <div id="webamp"></div>
         </div>
         
@@ -206,11 +162,82 @@
         //      });
         // });
 
+        // $("#icon-container").sortable()
+        $(".desktop-icon-link").draggable()
+
+        const select = (element, func) =>{
+            if(element.classList.contains('selected')){
+                func()
+                element.classList.remove('selected')
+            }else{
+                element.classList.add('selected')
+                setTimeout(()=>{
+                    element.classList.remove('selected')
+                }, 1000)
+            }
+        }
+
         //prevent dragging start menu elements
         $("nav a").on('dragstart drop', function(e){
             e.preventDefault();
             return false;
         });
+
+        const getUsername = () =>{
+            //Probably useless
+            if(window.location.hostname == 'localhost'){
+                const [ url, searchParams ] = window.location.href.split("?")
+                const [ tokenAndValue, usernameAndValue ] = searchParams.split("&")
+                let [ usernameLabel, value ] = usernameAndValue.split("=")
+                value = value.replace("#", '')
+                return value
+            }else{
+                return 'guest'
+            }
+            
+        }
+
+
+
+        const logout = async () =>{
+            
+            const [ url, searchParams ] = window.location.href.split("?")
+            const username = getUsername()
+            window.location.href = url
+            
+            if(window.location.hostname == 'localhost'){
+                const loggedOut = await Promise.resolve($.post("/logout", {
+                    logout:true,
+                    username:username
+                }))
+            }
+
+        }
+
+        const reboot = () =>{
+            confirmation({
+                message:"Are you sure you want to reboot?",
+                yes:()=>{
+                    window.openWindows = {}
+                    if(location.hostname === 'localhost')
+                        location.href = location.origin
+                    else
+                        location.reload()
+                },
+                no:()=>{}
+            })
+        }
+
+        const shutdown = () =>{
+            confirmation({
+                message:"Are you sure you want to shutdown?",
+                yes:()=>{
+                    window.openWindows = {}
+                    window.close()
+                },
+                no:()=>{}
+            })
+        }
 
     </script>
 

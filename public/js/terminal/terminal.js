@@ -95,9 +95,9 @@ class Terminal{
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
       view:async (args)=>await this.viewImage(args),
-      test:(args)=>this.testSomething(args),
+      test:async(args)=>await this.testSomething(args),
       explorer:(args)=>this.runExplorer(args),
-      
+      download:async(args)=>await this.downloadFile(args),
     }
   }
   
@@ -255,24 +255,33 @@ class Terminal{
     new FileExplorer(0,0)
   }
 
+  async downloadFile(args){
+    const url = args[0]
+    this.output(`Downloading... `)
+    var element = document.createElement('a');
+    element.setAttribute('href', url);
+    element.setAttribute('download', url);
+  
+    element.style.display = 'none';
+    document.body.appendChild(element);
+  
+    element.click();
+  
+    document.body.removeChild(element);
+    window.ipcRenderer.on('download-percentage', (event, message)=>{
+      const { percentage, remainingSize } = message
+      this.output(`${percentage}% -- Remaining Bytes: ${remainingSize}`)
+    })
+    window.ipcRenderer.once('download')
+  }
+
   startBrowser(args){
     const url = args[0]
     launchBrowser(url)
   }
 
-  testSomething(args){
-    // const wd = await exec("pwd")
-    // const filename = args[0]
-    // const path = `${wd}/${filename}`
-    // const content = await exec("getFileContent", [path])
-    // this.output(content)
-    window.api.invoke('myfunc')
-    .then(function(res) {
-        console.log(res); // will print "This worked!" to the browser console
-    })
-    .catch(function(err) {
-        console.error(err); // will print "This didn't work!" to the browser console.
-    });
+  async testSomething(args){
+    new SaveAsDialog()
   }
 
   runFileManager(){

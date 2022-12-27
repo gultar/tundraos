@@ -159,18 +159,6 @@ class Persistance{
         }       
     }
 
-    // getFileContentSync(path){
-    //     try{
-    //         const contentBuffer = fs.readFileSync(this.resolvePath(path))
-    //         console.log('this.resolvePath(path)', this.resolvePath(path))
-    //         console.log('path', path)
-    //         log(`Read file ${path}'s content`)
-    //         return contentBuffer.toString()
-    //     }catch(e){
-    //         console.log(e)
-    //         return false
-    //     }
-    // }
 }
 
 module.exports = Persistance

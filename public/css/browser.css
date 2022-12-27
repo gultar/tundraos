@@ -47,9 +47,15 @@
     content:"Forward »";
 }
 
-
 .forward-button{
     padding: 0 10px;
+    cursor: pointer;
+}
+
+.refresh-button{
+    margin-left:10px;
+}
+.refresh-button:hover{
     cursor: pointer;
 }
 

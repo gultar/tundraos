@@ -1,0 +1,84 @@
+#dialog-window-wrapper{
+    display:block;
+    width:90vh;
+    height:70vh;
+    background-color: darkgray;
+    padding:2vh;
+}
+
+#dialog-window{
+    display:flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#dialog-explorer-box{
+    display:block;
+    width:97%;
+    height:39vh;
+    background-color: rgb(253, 253, 253);
+    border:1px dotted rgb(54, 54, 54);
+    overflow: scroll;
+    padding:1vh;
+}
+
+.dialog-item-wrapper{
+    display:flex;
+    flex-direction: row;
+    margin:0 !important;
+    color:rgb(43, 43, 43);
+}
+
+.dialog-item img{
+    height:20px;
+    width:20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 5px;
+}
+
+#dialog-window div{
+    margin-top:1vh;
+}
+
+#dialog-explorer-box{
+    display:flex;
+    flex-direction: column;
+}
+
+#button-line{
+    display:flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#button-line button{
+
+    margin: 4vh 2vh;
+    width: 12vh;
+    height:4vh;
+}
+
+#filename-input-line{
+    display:flex;
+    width:100%;
+}
+
+#save-file-as{
+    width:50%;
+    margin-left:1vh;
+}
+
+#filetype-list-line{
+    display:flex;
+}
+
+#file-type-list{
+    width:51%;
+    margin-left:1vh;
+}
+
+.hoverable:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    color:blue;
+}

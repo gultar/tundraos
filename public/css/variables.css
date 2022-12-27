@@ -2,6 +2,8 @@
     /*Desktop Styling
     linear-gradient(-60deg, #2c4f99, #365afc, #414141, #575757);
     */
+    --size-of-desktop-icons:50px;
+    --size-of-desktop-icon-slot:85px;
     --default-font:Inconsolata, monospace;
     --first-gradient:#2c4f99;
     --second-gradient:#365afc;
