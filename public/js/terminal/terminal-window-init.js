@@ -54,6 +54,23 @@ async function createTerminalWindow(x=0, y=0, opts){
         },
     });
 
+    termWindow.addControl({
+        index: 0,
+        class: "wb-panels",
+        image: "./images/icons/panels.png",
+        click: function(event, winbox){
+            
+            // the winbox instance will be passed as 2nd parameter
+            if(!winbox.isSplitscreen){
+                winbox.isSplitscreen = true
+                winbox.resize("50%","100%")
+            }else{
+                winbox.resize("50%","50%")
+                winbox.isSplitscreen = false
+            }
+        }
+    })
+
     terminalDOM.style.height = "100%"
     terminalDOM.style.width = "100%"
 

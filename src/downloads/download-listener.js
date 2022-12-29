@@ -16,10 +16,11 @@ const listenForDownloads = (win) =>{
         let virtualDownloadPath = `/${mountPoint}/${activeUser == 'root'?'public/userspaces/root/home/downloads':'home/downloads'}`
         
         const url = item.getURL()
+        const presaveFilename = item.getFilename()  
 
         event.preventDefault()
         
-        const { path, filename, cancelled } = await seekDownloadPath(virtualDownloadPath)
+        const { path, filename, cancelled } = await seekDownloadPath(virtualDownloadPath, presaveFilename)
         if(cancelled) return false
 
         if(path){
@@ -54,7 +55,7 @@ const seekConfirmation = () =>{
     })
 }
 
-const seekDownloadPath = (startingPath) =>{
+const seekDownloadPath = (startingPath, filename) =>{
     return new Promise((resolve)=>{
         ipcMain.on('download-path-selected', (event, message)=>{
             console.log('Received', message)

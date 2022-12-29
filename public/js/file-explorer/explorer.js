@@ -12,6 +12,7 @@ class FileExplorer{
         this.fullPaths = []
         this.workingDir = ""
         this.explorerDOM = ""
+        this.collapsible = ""
         this.homePath = (
             window.username == 'root' ? 
                 mountPoint+"/public/userspaces/root/home/" 
@@ -30,7 +31,11 @@ class FileExplorer{
     async init(){
         this.pointerId = await getNewPointerId(this.explorerId)
         this.createDOM()
+        
         this.launchWindow()
+        const folderView = document.querySelector(`#explorer-folder-view-${this.explorerId}`)
+        this.collapsible = new CollapsibleBar({ mountDOM:folderView })
+        this.collapsible.init()
         await this.refreshExplorer()
         this.makeExplorerMenu()
         this.listener = window.addEventListener("message", (e)=>{
@@ -141,6 +146,7 @@ class FileExplorer{
                             </ul>
                         </div>
                         <hr>
+                        <div id="explorer-folder-view-${this.explorerId}" class="folder-view-explorer"></div>
                     </div>
                     <div id="explorer-${this.explorerId}" class="explorer">
 
@@ -202,21 +208,23 @@ class FileExplorer{
         if(message.explorerId && message.explorerId != this.explorerId){
             //skip messages sent from other explorer windows
             return false
+        }else if(message.explorerId && message.explorerId === this.explorerId){
+            if(message.changeDir){
+                this.changeDirectory(message.changeDir)
+            }else if(message.setDir){
+                this.setWorkingDir(message.setDir)
+            }else if(message.newDir){
+                this.createNewDirectory()
+            }else if(message.newFile){
+                this.createNewFile()
+            }else if(message.openFile){
+                this.openFile(message.openFile)
+            }
+    
+            this.refreshExplorer(this.explorerId)
         }
 
-        if(message.changeDir){
-            this.changeDirectory(message.changeDir)
-        }else if(message.setDir){
-            this.setWorkingDir(message.setDir)
-        }else if(message.newDir){
-            this.createNewDirectory()
-        }else if(message.newFile){
-            this.createNewFile()
-        }else if(message.openFile){
-            this.openFile(message.openFile)
-        }
-
-        this.refreshExplorer(this.explorerId)
+        
     }
 
     async refreshExplorer(){
@@ -321,7 +329,7 @@ class FileExplorer{
             
             this.viewImage(file)
         }else{
-            window.launchEditor(path, file.content, this.pointerId)
+            new Editor(path, file.content)
         }
         
     }

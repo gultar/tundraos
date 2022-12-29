@@ -37,6 +37,13 @@ const makeDesktopMenu = () =>{
                         },
                     },
                     {
+                        label: 'Editor',
+                        iconHTML: `<img src="./images/icons/editor-color-large.png" height="20px" width="20px"></i>`, 
+                        callback: ()=>{
+                            new Editor()
+                        },
+                    },
+                    {
                         label: 'Diablo',
                         iconHTML: `<img src="./images/diablo.png" height="20px" width="20px"></i>`,
                         callback:()=>{

@@ -1,10 +1,11 @@
 class SaveAsDialog{
-    constructor(x=0, y=0, opts={}){
-        this.x = x
-        this.y = y
+    constructor(opts={}){
         this.width = opts.width || '70%'
         this.height = opts.height || '60%'
         this.dialogWindow = ""
+        this.mode = opts.mode || "save"
+        this.modal = opts.modal || true
+        this.filename = opts.filename || ""
         this.explorerId = Date.now()
         this.pointerId = false
         this.currentDirContents = []
@@ -52,7 +53,7 @@ class SaveAsDialog{
                 </div>
                 <div id="filename-input-line">
                     <span id="filename-label">File name: </span>
-                    <input type="text" id="save-file-as" />
+                    <input type="text" id="save-file-as" value="${this.filename}" />
                 </div>
                 <div id="filetype-list-line">
                     <label for="file-type-list">File Type:</label>
@@ -64,7 +65,7 @@ class SaveAsDialog{
                 </div>
                 <div id="button-line">
                     <button onclick="window.postMessage({ saveDialog:true })" id="save-as-button">
-                        Save
+                        ${this.mode}
                     </button>
                     <button onclick="window.postMessage({ cancelDialog:true })" id="cancel-button">
                         Cancel
@@ -89,7 +90,7 @@ class SaveAsDialog{
             title: "File Explorer",
             width:'71%',
             height:'80%',
-            modal:true,
+            modal:this.modal,
             html:this.dialogDOM,
             onclose:()=>{
                 this.close()
@@ -107,21 +108,29 @@ class SaveAsDialog{
 
         if(message.changeDir){
             this.changeDirectory(message.changeDir)
+            this.refreshExplorer(this.explorerId)
         }else if(message.setDir){
             this.setWorkingDir(message.setDir)
+            this.refreshExplorer(this.explorerId)
         }else if(message.newDir){
             this.createNewDirectory()
+            this.refreshExplorer(this.explorerId)
         }else if(message.newFile){
             this.createNewFile()
+            this.refreshExplorer(this.explorerId)
         }else if(message.openFile){
             this.openFile(message.openFile)
+            this.refreshExplorer(this.explorerId)
         }else if(message.cancelDialog){
-            this.cancel()
+            return this.cancel()
         }else if(message.saveDialog){
-            this.save()
+            return this.save()
+        }else if(message.setDialogFilename){
+            const filenameInput = document.querySelector("#save-file-as")
+            filenameInput.value = message.setDialogFilename
         }
 
-        this.refreshExplorer(this.explorerId)
+        
     }
 
     async cancel(){
@@ -130,8 +139,8 @@ class SaveAsDialog{
     }
 
     async save(){
-        const path = document.getElementById("path-viewer-input").value
-        const filename = document.getElementById("save-file-as").value
+        const path = document.querySelector("#path-viewer-input").value
+        const filename = document.querySelector("#save-file-as").value
 
         window.postMessage({ dialogSave:{ path:path, filename:filename } })
         this.dialogWindow.close()
@@ -139,7 +148,7 @@ class SaveAsDialog{
 
     async refreshExplorer(){
         this.setCurrentDirContents(this.workingDir)
-        document.querySelector(`#path-viewer-input`).value = this.workingDir
+        document.getElementById(`path-viewer-input`).value = this.workingDir
         return true
     }
 
@@ -295,7 +304,7 @@ class SaveAsDialog{
                 <div class="dialog-item">
                     <a  data-path="/${path}${element}" 
                         data-workingdir="/${path}"
-                        data-name="${element}" onclick=""
+                        data-name="${element}" onclick="window.postMessage({ setDialogFilename:'${element}' })"
                         class="dialog-item-link link file">
                         <img 
                             id="${element}-${this.explorerId}" 

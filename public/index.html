@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./css/external/jquery-ui.structure.min.css">
     <link rel="stylesheet" href="./css/external/jquery-ui.theme.min.css">
     <link rel="stylesheet" href="./css/external/jquery.contextMenu.min.css">
-    <link rel="stylesheet" href="./css/external/simplemde.min.css">
+    <link rel="stylesheet" href="./css/editor.css">
     <!-- External scripts -->
     <script src="./js/external/winbox.bundle.min.js"></script>
     <script src="./js/external/vanilla-context-menu.js"></script>
@@ -19,7 +19,7 @@
     <script  src="./js/external/jquery-ui.min.js"></script>
     <script src="./js/external/socket.io.min.js"></script> 
     <script src="./js/external/boxicons.js"></script> <!-- Icons -->
-    <script src="./js/external/ace.min.js"></script> <!-- Code editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script> Code editor7
     <!-- Filesystem related scripts -->
     <script src="./js/filesystem/filesystem.bundle.js"></script>
     <script src="./js/commands/execute.js"></script>
@@ -32,9 +32,10 @@
     <script src="./js/terminal/terminal.js"></script>
     <script src="./js/terminal/terminal-window-init.js"></script>
     <!-- Code editor scripts -->
+    <script src="./js/external/get-extension.js"></script>
     <script src="./js/applications/editor.js"></script>
     <!-- File explorer scripts -->
-    <script src="./js/file-explorer/draggable.js"></script>
+    <script src="./js/file-explorer/collapsible-sidebar.js"></script>
     <script src="./js/file-explorer/explorer.js"></script>
     <script src="./js/file-explorer/save-as-dialog.js"></script>
     <!-- Applications and visual effects -->
@@ -68,9 +69,6 @@
                             <ul>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/music.png" />Music</a>
                                     <ul>
-                                        <li>
-                                            <a onclick="runWebamp()"><img class="main-menu-icons" src="./images/icons/winamp.png" />Webamp</a>
-                                        </li>
                                         <li><a onclick='runLofi()'><img class="main-menu-icons" src="./images/icons/music.png" />Lo-fi Girl</a></li>
                                     </ul>
                                 </li>
@@ -113,31 +111,32 @@
         </nav>
 
         <div id="page-anchor"></div>
-        <div id="filemanager">
-            
-        </div>
-        <div id="editor-container">
+        <div id="filemanager"></div>
 
-        </div>
+        <div id="editor-container"></div>
         
         <div id="main-container">
             
-            <div id="logo-container"> 
+            <!-- <div id="logo-container"> 
                 <img id="desktop-logo" src="./images/icons/constellation-3.png">
-            </div>
+            </div> -->
 
             <div id="icon-container" style="background:transparent">
-                <a class="desktop-icon-link" onclick="select(this, launchBrowser)" id="browser-icon">
+                <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, launchBrowser)" id="browser-icon">
                     <img class="desktop-icon" src="./images/icons/browser-color-large.png">
                     <span>Browser</span>
                 </a>
-                <a class="desktop-icon-link" onclick="select(this, (()=>new FileExplorer(0,0)))" id="explorer-icon">
+                <a data-name="explorer-icon" class="desktop-icon-link" onclick="select(this, (()=>new FileExplorer(0,0)))" id="explorer-icon">
                     <img class="desktop-icon" src="./images/icons/explorer-color-large.png">
                     <span>Explorer</span>
                 </a>
-                <a class="desktop-icon-link" onclick="select(this, createTerminalWindow)" id="terminal-icon">
+                <a data-name="terminal-icon" class="desktop-icon-link" onclick="select(this, createTerminalWindow)" id="terminal-icon">
                     <img class="desktop-icon" src="./images/icons/terminal-color-large.png">
                     <span>Terminal</span>
+                </a>
+                <a data-name="editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Editor()))" id="editor-icon">
+                    <img class="desktop-icon" src="./images/icons/editor-color-large.png">
+                    <span>Editor</span>
                 </a>
             </div>
 

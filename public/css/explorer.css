@@ -52,7 +52,7 @@
     min-height: 100%;
     margin:2vh;
     display:block;
-    background-color: darkgray !important;
+    background-color: var(--background) !important;
     resize: horizontal;
     scroll-behavior: smooth;
     overflow: scroll;
@@ -141,6 +141,10 @@
 
 .explorer {
     margin:2vh 2vh;
+}
+
+.folder-view-explorer{
+    resize: none !important;
 }
 
 .hidden{

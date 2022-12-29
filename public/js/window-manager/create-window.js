@@ -9,12 +9,6 @@ const createWindow = (opts) =>{
     newWindow.onclose = ()=>{
         delete window.openWindows[name]
     }
-    newWindow.onmove = (x, y) =>{
-        window.openWindows[name].launcher.x = x
-        window.openWindows[name].launcher.y = y
-
-        console.log(window.openWindows[name].launcher.x, window.openWindows[name].launcher.y)
-    } 
 
     return newWindow
 }

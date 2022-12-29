@@ -258,7 +258,8 @@ const launchBrowser = (url) =>{
         const startingPath = message
 
         new SaveAsDialog({
-            startingPath:startingPath
+            startingPath:startingPath,
+            filename:""
         })
 
     }

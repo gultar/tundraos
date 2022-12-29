@@ -17,9 +17,9 @@ const validateLogin = async ({ username, password }) =>{
       return false
     }
   
-  }
+}
   
-  const isValidPassword = async (password, hash) => {
+const isValidPassword = async (password, hash) => {
     try{
       const isEqual = await bcrypt.compare(password, hash)
       return isEqual
@@ -27,9 +27,9 @@ const validateLogin = async ({ username, password }) =>{
       console.log(e)
       return false
     }
-  }
+}
   
-  const createUser = async ({ username, password, timestamp }) =>{
+const createUser = async ({ username, password, timestamp }) =>{
     try{
       if(userExists(username) == true) return "User already exists"
       
@@ -44,7 +44,7 @@ const validateLogin = async ({ username, password }) =>{
     }catch(e){
       throw e
     }
-  }
+}
   
 const createUserHandler = async (req, res) =>{
     try{
@@ -64,8 +64,6 @@ const addUserToAccountFile = ({ username, hash, timestamp, rounds}) =>{
       created:timestamp,
       rounds:rounds
     }
-  
-    filesystems[username] = new VirtualFileSystem(username)
   
     const written = fs.writeFileSync("./accounts.json",JSON.stringify(accounts))
     return written

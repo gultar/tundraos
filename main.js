@@ -21,6 +21,7 @@ if(process.argv.includes("--silent") || process.argv.includes("-s")){
 
 process.MOUNT_POINT = "system"
 
+
 app.on('ready', async () => {
     
     runServer({ electron:true, mountPoint:process.MOUNT_POINT || 'system' })

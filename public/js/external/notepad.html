@@ -25,10 +25,10 @@
         editorContent.innerHTML = `<xmp>${content}</xmp>`
     }
 
-    const save = () =>{
+    const save = (filename) =>{
         const content = getContent()
         //message is received in ./public/js/applications/editor.js
-        window.postMessage({ saveContent:content })
+        window.postMessage({ saveContent:content, filename:filename })
     }
 
     const startNotepad = (filename, content) =>{
@@ -52,7 +52,7 @@
             name: 'save',
             bindKey: {win: 'Ctrl-S',  mac: 'Command-M'},
             exec: async function(editor) {
-                save()
+                save(filename)
             },
         });
         editor.setValue(content);

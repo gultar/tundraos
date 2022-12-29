@@ -257,17 +257,7 @@ class Terminal{
 
   async downloadFile(args){
     const url = args[0]
-    this.output(`Downloading... `)
-    var element = document.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', url);
-  
-    element.style.display = 'none';
-    document.body.appendChild(element);
-  
-    element.click();
-  
-    document.body.removeChild(element);
+    window.ipcRenderer.send('will-download', url)
     window.ipcRenderer.on('download-percentage', (event, message)=>{
       const { percentage, remainingSize } = message
       this.output(`${percentage}% -- Remaining Bytes: ${remainingSize}`)
@@ -281,7 +271,18 @@ class Terminal{
   }
 
   async testSomething(args){
-    new SaveAsDialog()
+    const anchor = document.getElementById('page-anchor')
+    const win = new WinBox({
+      mount:anchor,
+    })
+
+    
+    const collapse = new CollapsibleBar({
+      startingPath:"/",
+      mountDOM:anchor
+    })
+    collapse.init()
+    // new Editor("/system/home/desktop/muppet")
   }
 
   runFileManager(){

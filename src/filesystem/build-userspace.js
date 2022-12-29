@@ -15,7 +15,7 @@ const buildUserspace = (username='root') =>{
     }
 
     class Userspace{
-        constructor(userspacePath){
+        constructor(userspacePath=`./public/userspaces/${username}`){
             this.userspacePath = userspacePath
             this.structure = {
                 home:{
@@ -87,9 +87,9 @@ const buildUserspace = (username='root') =>{
     persistance = new Persistance(username)
     
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)
-
     const filesystemStructure = { 
         [mountPoint]:userDir,
+        home:{},
         vars:{} 
     }
     

@@ -1,0 +1,66 @@
+
+  
+  * {
+    --directory-color:rgb(255, 255, 255);
+    --open-dir-color:rgb(148, 148, 148);
+    --file-color:rgb(198, 245, 237);
+    /* --folder-view-background:rgb(32, 32, 32); */
+  }
+
+  .collapsible-container{
+    display:block;
+    margin-top: 3vh;
+  }
+  
+  ul.parent::before{
+    overflow: hidden;
+  }
+  
+  ul.parent {
+    padding: 2px;
+    margin: 1vh;
+    width:auto;
+    height:95%;
+    font-size: 8pt;
+  }
+  
+  .directory-content {
+    padding-left: 0.3em;
+    margin-left: 0.2em;
+    border-left: 1px dotted #c0d1d1;
+    color: var(--file-color);
+  }
+
+  .file-element{
+    margin-left:1.5vh;
+  }
+
+  .file-element:hover{
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  .collapse-element {
+    list-style-type: none;
+  }
+  
+  details summary {
+    cursor: pointer;
+  }
+  
+  details summary {
+    color: var(--directory-color);
+  }
+  
+  details summary::-webkit-details-marker {
+    color: var(--directory-color);
+    font-size: 18px;
+  }
+  
+  details[open] > summary::-webkit-details-marker {
+    color: var(--open-dir-color);
+  }
+  
+  details[open] > summary {
+    color: var(--open-dir-color);
+  }

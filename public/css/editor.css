@@ -1,0 +1,54 @@
+.editor-wrapper{
+    position: absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+}
+.editor {
+    position: relative;
+    top: 20px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width:auto;
+    height:95%;
+}
+.folder-view-editor{
+    position: relative;
+    float:left;
+    top: 20px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width:220px;
+    height:96.5%;
+    overflow:scroll;
+    resize:horizontal;
+    background-color:rgb(32, 32, 32);
+}
+
+.folder-view-editor .directory-content{
+    color:rgb(0, 255, 213) !important;
+}
+
+.folder-view-editor details summary {
+    color: rgb(30, 255, 0) !important;
+  }
+  
+  .folder-view-editor details summary::-webkit-details-marker {
+    color: rgb(30, 255, 0) !important;
+  }
+  
+  .folder-view-editor details[open] > summary::-webkit-details-marker {
+    color: rgb(7, 139, 2) !important;
+  }
+  
+  .folder-view-editor details[open] > summary {
+    color: rgb(7, 139, 2) !important;
+  }
+
+
+.file-menu {
+    z-index:9;
+}

@@ -904,3 +904,5 @@ const getNameFromExtension = (extension) =>{
 
       return codingDictionary[extension]
 }
+
+window.getNameFromExtension = getNameFromExtension

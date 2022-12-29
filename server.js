@@ -9,7 +9,7 @@ const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 
 const log = (...text) =>{
-  console.log("[SERVER:>]", ...text)
+  console.log("[server:>]", ...text)
 }
 
 const sha256 = (text) =>{
@@ -236,9 +236,6 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   httpServer.listen(port, ()=>{
     log('HTTP Server listening on '+port)
   });
-
-
-
 
     
 }
