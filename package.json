@@ -4,8 +4,10 @@
   "description": "",
   "main": "main.js",
   "scripts": {
+    "startx": "unset XDG_SEAT && Xephyr -br -ac -noreset -resizeable -screen 1200x600 :1",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "display": "DISPLAY=:1 electron . --silent-build",
     "electron": "electron . --silent-build",
     "dev": "electron . --no-full"
   },
