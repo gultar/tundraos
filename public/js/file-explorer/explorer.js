@@ -204,11 +204,10 @@ class FileExplorer{
 
     handleExplorerMessage(event, that){
         const message = event.data
-        
         if(message.explorerId && message.explorerId != this.explorerId){
             //skip messages sent from other explorer windows
             return false
-        }else if(message.explorerId && message.explorerId === this.explorerId){
+        }else if(message.explorerId && message.explorerId == this.explorerId){
             if(message.changeDir){
                 this.changeDirectory(message.changeDir)
             }else if(message.setDir){
