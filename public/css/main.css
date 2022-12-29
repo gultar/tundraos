@@ -120,13 +120,14 @@ body{
   list-style: none;
   background-color: transparent;
   position:fixed;
+  text-align: center;
 }
 
 
 .desktop-icon{
   height:var(--size-of-desktop-icons);
   width:var(--size-of-desktop-icons);
-  /* background-color: aqua; */
+  text-align: center;
 }
 
 .desktop-icon-link{
