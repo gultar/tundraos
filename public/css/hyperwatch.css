@@ -19,3 +19,7 @@
 .hyperwatch-full{
     background-color: rgba(0, 0, 0, 0.61) !important;
 }
+
+.hyperwatch-full .terminal{
+    color:var(--terminal-font-color) !important;
+}
