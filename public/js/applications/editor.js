@@ -119,6 +119,8 @@ class Editor{
                 this.saveAs()
             }else if(message.collapseFileOpen && message.id == this.collapsible.collapsibleId){
                 this.changeFile(message.collapseFileOpen)
+            }else if(message.openSettings && message.openSettings == this.editorId){
+                this.editor.execCommand("showSettingsMenu")
             }
         })
     }
@@ -183,7 +185,7 @@ class Editor{
     }
 
     async openFile(){
-        const selection = await this.selectSavePath()
+        const selection = await this.selectSavePath("", "select")
         if(!selection) return false
 
         this.filename = selection.saved.filename
@@ -236,7 +238,7 @@ class Editor{
     
     async saveAs(){
         const content = this.editor.getValue()
-        const selection = await this.selectSavePath(this.filename)
+        const selection = await this.selectSavePath(this.filename, "select")
         console.log('Selection', selection)
         if(!selection) return false
 
@@ -260,11 +262,11 @@ class Editor{
 
     }
 
-    async selectSavePath(filename){
+    async selectSavePath(filename, mode="save"){
         return new Promise((resolve)=>{
             console.log('Save as dialog initial filename', filename)
             console.log('Path ', this.path)
-            new SaveAsDialog({ filename:filename })
+            new SaveAsDialog({ filename:filename, mode:mode })
 
             window.addEventListener('message', async (event)=>{
                 const message = event.data
@@ -307,6 +309,7 @@ class Editor{
                             <li onclick="window.postMessage({ openFileEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Open</a></li>
                             <li onclick="window.postMessage({ saveEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save</a></li>
                             <li onclick="window.postMessage({ saveAsEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save As</a></li>
+                            <li onclick="window.postMessage({ openSettings:'${this.editorId}' })" class="dropdown-item hoverable"><a>Settings</a></li>
                             <li class="dropdown-item hoverable"><a>Exit</a></li>
                         </ul>
                         </li>

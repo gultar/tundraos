@@ -25,10 +25,24 @@ const makeDesktopMenu = () =>{
             },
             'hr',
             { 
-                label: 'Application', 
+                label: 'Applications', 
                 iconHTML: `<img src="./images/icons/internet.png" height="20px" width="20px"></i>`,
                 preventCloseOnClick:true,
                 nestedMenu:[
+                    {
+                        label: 'Terminal',
+                        iconHTML: `<img src="./images/icons/terminal.png" height="20px" width="20px"></i>`, 
+                        callback: ()=>{
+                            createTerminalWindow()
+                        },
+                    },
+                    {
+                        label: 'Explorer',
+                        iconHTML: `<img src="./images/icons/file-explorer.png" height="20px" width="20px"></i>`, 
+                        callback: ()=>{
+                            new FileExplorer()
+                        },
+                    },
                     {
                         label: 'Browser',
                         iconHTML: `<img src="./images/icons/browser.png" height="20px" width="20px"></i>`, 

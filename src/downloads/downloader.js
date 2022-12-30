@@ -18,6 +18,9 @@ const downloadWorker = (url, targetDir=__dirname, ipc) =>{
       }else if(message.percentage){
         console.log('Message percentage', message.percentage)
         ipc.send('download-percentage',message)
+      }else if(message.error){
+        resolve({ error:message.error })
+        worker.terminate()
       }
     });
     worker.on('error', (error)=>{

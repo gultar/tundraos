@@ -1,11 +1,12 @@
 const {download, downloadWorker} = require('./downloader')
 const {ipcMain} = require('electron');
 const fs = require('fs').promises
+const Https = require('https')
 
 
 let browserWin = ''
 
-const listenForDownloads = (win) =>{
+const listenForDownloads = async (win) =>{
 
     browserWin = win
     win.webContents.session.on('will-download', async (event, item, webContents) => {
@@ -19,20 +20,35 @@ const listenForDownloads = (win) =>{
         const presaveFilename = item.getFilename()  
 
         event.preventDefault()
-        
-        const { path, filename, cancelled } = await seekDownloadPath(virtualDownloadPath, presaveFilename)
-        if(cancelled) return false
 
+        const { path, filename, cancelled } = await seekDownloadPath(virtualDownloadPath, presaveFilename)
         if(path){
             const convertedPath = global.FileSystem.persistance.resolvePath(path)
             downloadPath = convertedPath
             virtualDownloadPath = path
         }
+        
+        let success = false
+        let error = false  
+        if(cancelled) return false
+
+        if(url.includes("http")){
+            const result = await downloadWorker(url, downloadPath, win.webContents)
+            success = result.success
+            error = result.error
+        }else if(url.includes('data:')){
             
-        const { success, error } = await downloadWorker(url, downloadPath, win.webContents)
+            let base64File = url.split(';base64,').pop();
+            console.log('Path', downloadPath)
+            console.log('Filename', filename)
+            console.log('downloadPath+filename',downloadPath+filename)
+            const saved = await global.FileSystem.persistance.saveBase64File(base64File, downloadPath+"/"+filename)
+            if(saved.error) error = saved.error
+            else success = saved
+        }
+        
         if(error){
             win.webContents.send('download-complete',{ error:error })
-            
         }else{
             win.webContents.send('download-complete',{ success:success })
             
@@ -57,7 +73,7 @@ const seekConfirmation = () =>{
 
 const seekDownloadPath = (startingPath, filename) =>{
     return new Promise((resolve)=>{
-        ipcMain.on('download-path-selected', (event, message)=>{
+        ipcMain.once('download-path-selected', (event, message)=>{
             console.log('Received', message)
             const { selected, cancelled } = message
             if(cancelled) resolve({ cancelled:cancelled })

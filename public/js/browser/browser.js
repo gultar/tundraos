@@ -135,11 +135,6 @@ const launchBrowser = (url) =>{
                 setURL(url)
             })
 
-            // webview.getWebContents().session.on('will-download', (evt, item) => {
-            //     console.log('Webview event', evt)
-            //     console.log('Webview download item', item)
-            // })
-
         }else{
             //iframe tag
             webview.onload = () =>{
@@ -204,7 +199,7 @@ const launchBrowser = (url) =>{
     }
 
     const isGoogleSearch = (question) =>{
-        if(question.slice(0, 4) == "http"){
+        if(question.slice(0, 4) == "http" || !question.includes(" ")){
             visit(question)
         }else if(isValidDomain(question)){
             visit("https://"+question)

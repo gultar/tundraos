@@ -1,6 +1,6 @@
 .hyperwatch-mini{
-    width:200px !important;
-    height:200px !important;
+    width:270px !important;
+    height:150px !important;
     font-size:6pt !important;
     margin-top:40px !important;
     padding:10px !important;
@@ -21,5 +21,6 @@
 }
 
 .hyperwatch-full .terminal{
+    background-color: transparent !important;
     color:var(--terminal-font-color) !important;
 }

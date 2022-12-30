@@ -259,7 +259,7 @@ class FileExplorer{
         //    if(newFileNumber > maxNewElementNumber) throw new Error('Cannot create more new files')
            try{ 
                const newFilename = `newfile${newFileNumber}`
-               const path = (workingDir === "/" ? this.workingDir + newFilename : this.workingDir + "/" + newFilename)
+               const path = (this.workingDir === "/" ? this.workingDir + newFilename : this.workingDir + "/" + newFilename)
                const contents = await this.exec("ls",[this.workingDir])
     
                if(!contents.error && !contents.includes(newFilename)){

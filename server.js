@@ -124,10 +124,13 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   expressApp.use("/log", express.static(__dirname + '/public/login'))
   
   expressApp.use(cors())
-  expressApp.use(bodyParser.json());       // to support JSON-encoded bodies
-  expressApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-    extended: true
-  }));
+//   expressApp.use(bodyParser.json());       // to support JSON-encoded bodies
+//   expressApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+//     extended: true
+//   }));
+  expressApp.use(express.json({limit: '50mb'}));
+  expressApp.use(bodyParser.json({ limit: "200mb" }));
+  expressApp.use(bodyParser.urlencoded({ limit: "200mb",  extended: true, parameterLimit: 1000000 }));
 
   expressApp.post("/login", (req, res)=>{
     const { username, password, timestamp } = req.body

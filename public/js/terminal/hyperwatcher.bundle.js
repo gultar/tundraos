@@ -12798,9 +12798,6 @@ function through (write, end, opts) {
 },{"_process":7,"stream":13}],71:[function(require,module,exports){
 
 
-const toggleHyperwatch = () =>{
-  
-}
 
 require('hyperwatch')({
   mini: {

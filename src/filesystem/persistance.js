@@ -159,6 +159,18 @@ class Persistance{
         }       
     }
 
+    async saveBase64File(base64String, pathToFile){
+        try{
+            const saved = await fsa.writeFile(pathToFile, base64String, {encoding: 'base64'});
+            log(`Saved base64 file ${pathToFile}'s content: ${saved}`)
+
+            return true
+        }catch(e){
+            console.log(e)
+            throw new Error(e)
+        }
+    }
+
 }
 
 module.exports = Persistance
