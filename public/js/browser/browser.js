@@ -199,10 +199,12 @@ const launchBrowser = (url) =>{
     }
 
     const isGoogleSearch = (question) =>{
-        if(question.slice(0, 4) == "http" || !question.includes(" ")){
+        if(question.slice(0, 4) == "http"){
             visit(question)
         }else if(isValidDomain(question)){
             visit("https://"+question)
+        }else if(question.slice(0, 5) == "data:"){
+            visit(question) //
         }else{
             searchOnGoogle(question)
         }

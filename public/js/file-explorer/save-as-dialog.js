@@ -45,8 +45,8 @@ class SaveAsDialog{
             <div id="dialog-window">
                 <span id="save-as-label">Save file to:</span>
                 <div id="input-line">
-                    <input id="path-viewer-input" type="text" readonly value="/system/home/downloads" />
-                    <button onclick="" id="select-path">Select</button>
+                    <input id="path-viewer-input" type="text" value="/system/home/downloads" />
+                    <button onclick="window.postMessage({ setDir:document.getElementById('path-viewer-input').value })" id="select-path">Select</button>
                 </div>
                 <div id="dialog-explorer-box">
 

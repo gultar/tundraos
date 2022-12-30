@@ -39,12 +39,14 @@ const listenForDownloads = async (win) =>{
         }else if(url.includes('data:')){
             
             let base64File = url.split(';base64,').pop();
-            console.log('Path', downloadPath)
-            console.log('Filename', filename)
-            console.log('downloadPath+filename',downloadPath+filename)
+            // console.log('Path', downloadPath)
+            // console.log('Filename', filename)
+            // console.log('downloadPath+filename',downloadPath+filename)
             const saved = await global.FileSystem.persistance.saveBase64File(base64File, downloadPath+"/"+filename)
             if(saved.error) error = saved.error
-            else success = saved
+            else success = {
+                filePath:downloadPath+"/"+filename,
+            }
         }
         
         if(error){

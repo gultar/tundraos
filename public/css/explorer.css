@@ -147,6 +147,10 @@
     resize: none !important;
 }
 
+.folder-view-explorer .directory-content {
+    margin-top:0 !important;
+}
+
 .hidden{
     visibility: hidden;
 }
