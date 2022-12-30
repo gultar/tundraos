@@ -246,7 +246,7 @@ class Terminal{
       content = file.content
     }
 
-    launchEditor(path, content, (file?"exists":false))
+    new Editor(path, content)
     return true
   }
 

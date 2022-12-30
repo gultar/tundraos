@@ -75,6 +75,13 @@ body{
     box-shadow: 0 3px 5px rgb(0 0 0 / 0.7);
 }
 
+#username{
+    width:150px;
+}
+
+#password{
+    width:150px;
+}
 
 @keyframes gradient {
     0% {

@@ -50,15 +50,15 @@ body{
 
 
 #logo-container{
-  display:block;
   padding:20px;
   background: rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 0 4px rgba(45, 52, 63, 0.5);
   border-radius: 50%;
   position:fixed;
-  top:40%;
-  left:43%;
+  top:43%;
+  left:44%;
   z-index: 0;
+  justify-content: center;
 }
 
 
@@ -121,6 +121,7 @@ body{
   background-color: transparent;
   position:fixed;
   text-align: center;
+  
 }
 
 
@@ -128,6 +129,10 @@ body{
   height:var(--size-of-desktop-icons);
   width:var(--size-of-desktop-icons);
   text-align: center;
+}
+
+.desktop-icon:hover{
+    cursor:pointer;
 }
 
 .desktop-icon-link{
