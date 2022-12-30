@@ -86,6 +86,8 @@ const buildUserspace = (username='root') =>{
     
     persistance = new Persistance(username)
     
+    console.log()
+    
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)
     const filesystemStructure = { 
         [mountPoint]:userDir,
@@ -95,7 +97,7 @@ const buildUserspace = (username='root') =>{
     
     FileSystem.import(filesystemStructure)
     
-
+    
     log('File system loaded successfully')
     log(getBuildStats())
 

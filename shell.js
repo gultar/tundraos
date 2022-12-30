@@ -109,7 +109,7 @@ let autoComplete = function completer(line) {
   const commandNames = Object.keys(commands)
   const cmdIsComplete = commandNames.includes(cmd)
   
-  let completions = FileSystem.wd().getContentNames()
+  let completions = FileSystem.mainPointer.workingDir.getContentNames()
   if(cmdIsComplete){
     let parentDirname = ""
     let partial = args[0]
