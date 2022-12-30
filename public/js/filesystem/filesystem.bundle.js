@@ -23,6 +23,7 @@ class DirectoryPointer{
             rmdir:this.rmdir,
             mkdir:this.mkdir,
             touch:this.touch,
+            createVirtualFile:this.createVirtualFile,
             cat:this.cat,
             cp:this.cp,
             mv:this.mv,
@@ -229,6 +230,29 @@ class DirectoryPointer{
         return true
     }
 
+    createVirtualFile(filePath, content=""){
+        if(filePath === undefined) throw new Error('touch: missing file operand')
+        
+        const pathArray = this.fromPathToArray(filePath)
+        const filename = pathArray.pop()
+        const path = pathArray.join("/")
+        if(this.workingDir[filename]) throw new Error(`touch: cannot overwrite directory ${filename}`)
+        
+
+        const directory = this.findDir(path)
+        if(!directory) throw new Error(`touch: could not find containing directory ${path}`)
+
+        const exists = directory.hasFile(filename)
+        if(exists) throw new Error(`touch: file ${filename} already exists`)
+
+        const realPath = this.persistance.resolvePath(filePath)
+        
+        const file = new File(filename, content, realPath)
+        directory.contents.push(file)
+
+        return true
+    }
+
     async cp(pathFrom, pathTo){
         let copied = false
         if(!pathFrom) throw new Error('Need to provide origin path of file to copy')
@@ -413,7 +437,7 @@ class DirectoryPointer{
         if(path === '.') return { directory:this.wd() } 
         if(path === './') return { directory:this.wd() } 
 
-        path = this.preParsePath(path)
+        path = this.removeDirectoryMarker(path)
 
         const pathArray = this.fromPathToArray(path)
         const target = pathArray[pathArray.length - 1]

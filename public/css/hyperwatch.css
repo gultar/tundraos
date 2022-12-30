@@ -1,0 +1,21 @@
+.hyperwatch-mini{
+    width:200px !important;
+    height:200px !important;
+    font-size:6pt !important;
+    margin-top:40px !important;
+    padding:10px !important;
+    background-color: transparent !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    
+}
+
+.hyperwatch-mini .terminal{
+    background-color: transparent !important;
+    overflow: hidden !important;
+    color:var(--terminal-font-color) !important;
+}
+
+.hyperwatch-full{
+    background-color: rgba(0, 0, 0, 0.61) !important;
+}

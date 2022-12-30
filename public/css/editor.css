@@ -25,7 +25,7 @@
     height:96.5%;
     overflow:scroll;
     resize:horizontal;
-    background-color:rgb(32, 32, 32);
+    background-color:var(--background);
 }
 
 .folder-view-editor .directory-content{

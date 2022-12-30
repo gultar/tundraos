@@ -20,7 +20,7 @@ class Persistance{
         if(user == 'root'){
             this.baseDir = this.rootDir//`./public` 
         }
-        // console.log('Base dir', this.baseDir)
+        
         this.currentDir = "/"
         
         if(user && !fs.existsSync(this.baseDir)){

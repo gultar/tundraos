@@ -20,10 +20,10 @@ class Editor{
         const [ name, ...extensions ] = filename.split(".")
         const lastExtension = extensions[extensions.length - 1]
         let mode = getNameFromExtension(lastExtension)
-        let theme = 'monokai' //Read config file/json
+        let theme = 'cobalt' //Read config file/json
 
         if(!mode) mode = 'text'
-        if(!theme) theme = "monokai"
+        if(!theme) theme = "cobalt"
 
         mode = mode.toLowerCase()
         let editor = ace.edit(`editor-${this.editorId}`);

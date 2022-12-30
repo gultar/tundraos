@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const { createServer } = require("http")
 const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
+const hyperwatch = require("hyperwatch")
 
 const log = (...text) =>{
   console.log("[server:>]", ...text)
@@ -235,7 +236,9 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   
   httpServer.listen(port, ()=>{
     log('HTTP Server listening on '+port)
-  });
+  })
+  
+  const config = hyperwatch(httpServer)
 
     
 }
