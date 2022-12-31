@@ -6,9 +6,9 @@ const createWindow = (opts) =>{
     const name = opts.label || opts.title
     newWindow.launcher = opts.launcher
     window.openWindows[name] = newWindow
-    newWindow.onclose = ()=>{
-        delete window.openWindows[name]
-    }
+    // newWindow.onclose = ()=>{
+    //     delete window.openWindows[name]
+    // }
 
     return newWindow
 }

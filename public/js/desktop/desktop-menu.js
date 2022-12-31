@@ -29,6 +29,7 @@ const makeDesktopMenu = () =>{
                 iconHTML: `<img src="./images/icons/internet.png" height="20px" width="20px"></i>`,
                 preventCloseOnClick:true,
                 nestedMenu:[
+                    
                     {
                         label: 'Browser',
                         iconHTML: `<img src="./images/icons/browser.png" height="20px" width="20px"></i>`, 
@@ -37,8 +38,15 @@ const makeDesktopMenu = () =>{
                         },
                     },
                     {
+                        label: 'Rich Text Editor',
+                        iconHTML: `<img src="./images/icons/quill.png" height="20px" width="20px"></i>`, 
+                        callback: ()=>{
+                            new RichTextEditor()
+                        },
+                    },
+                    {
                         label: 'Editor',
-                        iconHTML: `<img src="./images/icons/editor-color-large.png" height="20px" width="20px"></i>`, 
+                        iconHTML: `<img src="./images/icons/editor.png" height="20px" width="20px"></i>`, 
                         callback: ()=>{
                             new Editor()
                         },

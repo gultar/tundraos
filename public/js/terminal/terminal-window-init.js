@@ -30,7 +30,7 @@ async function createTerminalWindow(x=0, y=0, opts){
     
     const terminalId = spawnTerminalContainer()
     const directoryPointerId = await getNewPointerId(terminalId)
-    const term = new Terminal(terminalId, directoryPointerId);
+    let term = new Terminal(terminalId, directoryPointerId);
     term.init();
     
 
@@ -50,7 +50,7 @@ async function createTerminalWindow(x=0, y=0, opts){
         onclose:()=>{
             terminalDOM.remove();
             terminalDOM.style.visibility = "hidden"
-            term.close()
+            term = null
         },
     });
 

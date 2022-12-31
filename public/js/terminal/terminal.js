@@ -165,6 +165,7 @@ class Terminal{
   }
 
   reboot(){
+    window.ipcRenderer.send("reboot",{ args:[], now:true })
     location.reload()
   }
 
@@ -271,18 +272,8 @@ class Terminal{
   }
 
   async testSomething(args){
-    const anchor = document.getElementById('page-anchor')
-    const win = new WinBox({
-      mount:anchor,
-    })
-
     
-    const collapse = new CollapsibleBar({
-      startingPath:"/",
-      mountDOM:anchor
-    })
-    collapse.init()
-    // new Editor("/system/home/desktop/muppet")
+    const test = new RichTextEditor("/system/public/userspaces/root/home/documents/muppet.quill","rockets are blue")
   }
 
   runFileManager(){

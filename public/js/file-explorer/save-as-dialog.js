@@ -64,16 +64,17 @@ class SaveAsDialog{
                     </select>
                 </div>
                 <div id="button-line">
-                    <button onclick="window.postMessage({ saveDialog:true })" id="save-as-button">
+                    <button onclick="window.postMessage({ saveDialog:${this.explorerId} })" id="save-as-button">
                         ${this.mode}
                     </button>
-                    <button onclick="window.postMessage({ cancelDialog:true })" id="cancel-button">
+                    <button onclick="window.postMessage({ cancelDialog:${this.explorerId} })" id="cancel-button">
                         Cancel
                     </button>
                 </div>
             </div>
         </div>
         `
+        //
 
 
     }
@@ -129,21 +130,31 @@ class SaveAsDialog{
             const filenameInput = document.querySelector("#save-file-as")
             filenameInput.value = message.setDialogFilename
         }
+        
+        window.ipcRenderer.on("test", (event, message)=>{
+            console.log('IPC', event)
+            console.log('Message', message)
+        })
 
         
     }
 
     async cancel(){
         this.dialogWindow.close()
-        window.postMessage({ dialogCancel:true })
+        window.postMessage({ dialogCancel:{ id:this.explorerId } })
+        sendEvent("dialog-save", { cancelled:true, id:this.explorerId })
+        
+        window.removeEventListener("message", this.handleExplorerMessage)
     }
 
     async save(){
         const path = document.querySelector("#path-viewer-input").value
         const filename = document.querySelector("#save-file-as").value
 
-        window.postMessage({ dialogSave:{ path:path, filename:filename } })
+        window.postMessage({ dialogSave:{ path:path, filename:filename, id:this.explorerId } })
+        sendEvent("dialog-save", { saved:true, path:path, filename:filename, id:this.explorerId })
         this.dialogWindow.close()
+        window.removeEventListener("message", this.handleExplorerMessage)
     }
 
     async refreshExplorer(){

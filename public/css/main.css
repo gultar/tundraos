@@ -121,7 +121,7 @@ body{
   background-color: transparent;
   position:fixed;
   text-align: center;
-  
+  font-size:9pt !important;
 }
 
 
@@ -138,6 +138,10 @@ body{
 .desktop-icon-link{
   display:flex;
   flex-direction:column;
+}
+
+.desktop-icon-link span{
+    
 }
 
 .placeholder{

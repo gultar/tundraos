@@ -106,8 +106,8 @@ class Editor{
         })
 
         this.makeFolderView()
-
-        window.addEventListener('message', async (event)=>{
+        
+        this.editorMessageHandler = async (event)=>{
             const message = event.data
             if(message.newFileEditor && message.newFileEditor == this.editorId){
                 this.newFile()
@@ -122,13 +122,15 @@ class Editor{
             }else if(message.openSettings && message.openSettings == this.editorId){
                 this.editor.execCommand("showSettingsMenu")
             }
-        })
+        }
+
+        window.addEventListener('message', this.editorMessageHandler)
     }
 
     close(){
         const filecontent = this.editor.getValue()
         this.editorWrapper.style.visibility = 'hidden'
-        
+        window.removeEventListener("nessage", this.editorMessageHandler)
         if(!this.saved){
             confirmation({
                 message:'Do you want to save before exiting?',
@@ -264,18 +266,17 @@ class Editor{
 
     async selectSavePath(filename, mode="save"){
         return new Promise((resolve)=>{
-            console.log('Save as dialog initial filename', filename)
-            console.log('Path ', this.path)
             new SaveAsDialog({ filename:filename, mode:mode })
 
-            window.addEventListener('message', async (event)=>{
-                const message = event.data
-                if(message.dialogSave){
-                    resolve({ saved:message.dialogSave })
-                }else if(message.dialogCancel){
+            window.addEventListener('dialog-save', async function(event){
+                const selection = event.detail
+                if(selection.cancelled){
                     resolve(false)
+                }else{
+                    resolve({ saved:selection })
                 }
-            })
+            }, { once:true })
+            
         })
     }
 
