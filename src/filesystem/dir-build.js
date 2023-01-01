@@ -41,7 +41,7 @@ const buildFileSystemRepresentation = function(dirPath, fsPosition=root) { //new
             fsPosition[dir] = {
                 contents:[]
             }
-            log(`Adding directory ${dirPath + "/" + dir}`)
+            log(`Adding directory ${dir}`)
             totalDirectories++
             buildFileSystemRepresentation(dirPath + "/" + file, fsPosition[dir])
         } else {

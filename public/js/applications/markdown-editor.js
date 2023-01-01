@@ -1,9 +1,9 @@
 
 
-class RichTextEditor{
+class MarkdownEditor{
     constructor(pathToFile="", content=""){
-        this.textEditorId = Date.now()
-        this.textEditorDOMId = `text-editor-${this.textEditorId}`
+        this.mdEditorId = Date.now()
+        this.mdEditorDOMId = `text-editor-${this.mdEditorId}`
         this.dirPointerId = ""
         this.pathToFile = pathToFile
         this.filename = this.extractFilename(this.pathToFile)
@@ -12,8 +12,9 @@ class RichTextEditor{
         this.editorDOM = ""
         this.editor = ""
         this.winbox = ""
+        this.listenerController = new AbortController()
         this.editorDOMString = `
-        <div id="editor-wrapper-${this.textEditorId}" 
+        <div id="editor-wrapper-${this.mdEditorId}" 
                 style="background-color:white;color:black;height:100%">
             <link rel="stylesheet" href="./css/topnav.css">
             <div style="display:block">
@@ -21,10 +22,10 @@ class RichTextEditor{
                     <ul class="menu-item-list">
                         <li class="menu-item"><a href="#">File</a>
                         <ul class="dropdown">
-                            <li onclick="window.postMessage({ newFileEditor:'${this.textEditorId}' })" class="dropdown-item hoverable"><a>New</a></li>
-                            <li onclick="window.postMessage({ openFileEditor:'${this.textEditorId}' })" class="dropdown-item hoverable"><a>Open</a></li>
-                            <li onclick="window.postMessage({ saveEditor:'${this.textEditorId}' })" class="dropdown-item hoverable"><a>Save</a></li>
-                            <li onclick="window.postMessage({ saveAsEditor:'${this.textEditorId}' })" class="dropdown-item hoverable"><a>Save As</a></li>
+                            <li onclick="sendEvent('message-${this.mdEditorId}',{ newFileEditor:'${this.mdEditorId}' })" class="dropdown-item hoverable"><a>New</a></li>
+                            <li onclick="sendEvent('message-${this.mdEditorId}',{ openFileEditor:'${this.mdEditorId}' })" class="dropdown-item hoverable"><a>Open</a></li>
+                            <li onclick="sendEvent('message-${this.mdEditorId}',{ saveEditor:'${this.mdEditorId}' })" class="dropdown-item hoverable"><a>Save</a></li>
+                            <li onclick="sendEvent('message-${this.mdEditorId}',{ saveAsEditor:'${this.mdEditorId}' })" class="dropdown-item hoverable"><a>Save As</a></li>
                             <li class="dropdown-item hoverable"><a>Exit</a></li>
                         </ul>
                         </li>
@@ -32,11 +33,11 @@ class RichTextEditor{
                     </ul>
                 </nav>
             </div>
-            <div id="toolbar-${this.textEditorId}" style="margin-top:30px"></div>
+            <div id="toolbar-${this.mdEditorId}" style="margin-top:30px"></div>
             
-            <div id="${this.textEditorDOMId}">
-                
-            </div>
+            <textarea id="${this.mdEditorDOMId}">
+                ${this.content}
+            </textarea>
         </div>
         
         `
@@ -45,7 +46,7 @@ class RichTextEditor{
     }
     
     async init(){
-        this.dirPointerId = await getNewPointerId(this.textEditorId)
+        this.dirPointerId = await getNewPointerId(this.mdEditorId)
         await this.exec('cd',["/"])
         
         const container = document.querySelector("#text-editor-container")
@@ -56,69 +57,41 @@ class RichTextEditor{
         
          
         setTimeout(async ()=>{
-        
+            const { signal } = this.listenerController
             
-            let toolbarOptions = [
-              ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-              ['blockquote', 'code-block'],
-            
-              [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-              [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
-              [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
-              [{ 'direction': 'rtl' }],                         // text direction
-            
-              [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            
-              [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-              [{ 'font': [] }],
-              [{ 'align': [] }],
-            
-              ['clean']                                         // remove formatting button
-            ];
-                
-            this.editor = new Quill(`#${this.textEditorDOMId}`, {
-                theme: 'snow',
-                modules: {
-                    toolbar:toolbarOptions, //`#toolbar-${this.textEditorId}`
-                }
-            });
+            console.log('this.editorDOM',this.editorDOM)
+            this.editor = new SimpleMDE({ element: this.editorDOM });
             
             this.winbox = createWindow({ 
-                title: "Quill Editor", 
+                title: "Markdown Editor", 
                 height:"95%", 
                 width:"80%",
                 mount:this.editorWrapperDOM,
                 onclose:()=>{
                     this.destroy()
-                    
+                    this.listenerController.abort()
                 }
             })
             
             await this.exec("cd",["/"])
             
-            if(this.content){
-                this.setValueString(this.content)
-            }
-            
             
             this.editorMessageHandler = (event)=>{
                 
-                const message = event.data
-                if(message.newFileEditor && message.newFileEditor == this.textEditorId){
+                const message = event.detail
+                if(message.newFileEditor && message.newFileEditor == this.mdEditorId){
                     this.newFile()
-                }else if(message.openFileEditor && message.openFileEditor == this.textEditorId){
+                }else if(message.openFileEditor && message.openFileEditor == this.mdEditorId){
                     this.openFile()
-                }else if(message.saveEditor && message.saveEditor == this.textEditorId){
+                }else if(message.saveEditor && message.saveEditor == this.mdEditorId){
                     this.save()
-                }else if(message.saveAsEditor && message.saveAsEditor == this.textEditorId){
+                }else if(message.saveAsEditor && message.saveAsEditor == this.mdEditorId){
                     this.saveAs()
                 }
             }
             container.style.visibility = 'visible'
             container.style.display = ''
-            window.addEventListener('message', this.editorMessageHandler)
+            window.addEventListener(`message-${this.mdEditorId}`, this.editorMessageHandler, { signal })
         },200)
         
     }
@@ -132,7 +105,7 @@ class RichTextEditor{
         if(!fileExists || this.pathToFile == ""){
             return await this.saveAs()
         }else{
-            const content = JSON.stringify(this.editor.getContents())
+            const content = this.editor.value()
             this.saved = true
             const saved =  await this.exec("editFile", [this.pathToFile, content])
             if(saved && saved.error) popup(`Save Error: ${saved.error}`)
@@ -145,7 +118,7 @@ class RichTextEditor{
     async saveAs(){
         await this.exec("cd",["/"])
         
-        const content = JSON.stringify(this.editor.getContents())
+        const content = this.editor.value()
         
         const selection = await this.selectSavePath(this.filename, "select")
         
@@ -199,37 +172,15 @@ class RichTextEditor{
         let content = await this.exec("getFileContent", [this.pathToFile])
         if(content && content.error) return popup(`Save Error: ${fileExists.error}`)
         
-        try{
-            this.content = JSON.parse(content)
-        }catch(e){
-            popup(`ERROR: Could not open file ${this.filename}`)
-            this.filename = ""
-            this.pathToFile = ""
-            return false
-        }
+        this.content = content
         
-        
-        this.editor.setContents(this.content)
+        this.editor.value(this.content)
         
         return true
     }
     
-    setValueString(contentString){
-        try{
-            this.content = JSON.parse(contentString)
-        }catch(e){
-            popup(`ERROR: Could not open file ${this.filename}`)
-            this.filename = ""
-            this.pathToFile = ""
-            return false
-        }
-        
-        
-        this.editor.setContents(this.content)
-    }
-    
     async newFile(){
-        this.editor.setContents("\n")
+        this.editor.value("")
         this.pathToFile = ""
         this.filename = ""
     }
@@ -272,8 +223,8 @@ class RichTextEditor{
         
         editorsContainer.innerHTML = editorsContainer.innerHTML + this.editorDOMString
         
-        this.editorDOM = document.querySelector(`#${this.textEditorDOMId}`)
-        this.editorWrapperDOM = document.querySelector(`#editor-wrapper-${this.textEditorId}`)
+        this.editorDOM = document.querySelector(`#${this.mdEditorDOMId}`)
+        this.editorWrapperDOM = document.querySelector(`#editor-wrapper-${this.mdEditorId}`)
         
     }
     

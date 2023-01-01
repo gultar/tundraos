@@ -1,245 +1,136 @@
-let activeWebviews = {}
-const launchBrowser = (url) =>{
-    if(!url){
-        if(window.isElectron) url = "https://google.com"
-        else url = 'https://www.google.com/webhp?igu=1'
+activeWebviews = {}
+
+class Browser{
+    constructor(url){
+        if(!url){
+            if(window.isElectron) url = "https://google.com"
+            else url = 'https://www.google.com/webhp?igu=1'
+        }
+        this.url = url
+        
+        this.browserNumber = Date.now()
+
+        this.browsersContainer = document.getElementById("browsers-container")
+        this.webviewDOM = ""
+        this.webview = ""
+        this.init()
     }
-
-    let browserNumber = Date.now()
-
-    const browserView = document.getElementById("browser-view")
-    let browserDOM = ""
-
-    if(window.isElectron){
-        browserDOM = `
-        <webview 
-            class="responsive-webview" 
-            id="webview-${browserNumber}" 
-            src="${url}" 
-            autosize="on" 
-            style="display:flex; 
-            min-width:100%; 
-            min-height:95%" >
-        </webview>
-        `
-    }
-    else{
-        browserDOM = `<iframe class="responsive-webview" id="webview-${browserNumber}" src="${url}" autosize="on"></iframe>`
-    }
-
-    let menuDOM = `
-    <link rel="stylesheet" href="./css/browser.css">  
-    <div id="browser-container-${browserNumber}" class="browser-container">
-        <div class="browser-menu" style="min-width:100%;">
-            <div class="navigation-buttons">
-                <span class="button"><a class="back-button" onclick="window.postMessage({ back:'browser-${browserNumber}' });return false"></a></span>
-                    | 
-                <span class="button" ><a class="forward-button" onclick="window.postMessage({ forward:'browser-${browserNumber}' });return false"></a></span>
-                <span class="button" ><a class="refresh-button" onclick="window.postMessage({ refresh:'browser-${browserNumber}' });return false"><img src="./images/icons/refresh.png"/></a></span>
-            </div>
-            <div class="url-container">
-                <input id="url-bar-${browserNumber}" class="url-bar" type="text" placeholder="http://google.com" value="${url}">
-                <button 
-                id="url-button" 
-                class="url-button"
-                onclick="
-                    window.postMessage({ 
-                        visitURL:{ 
-                            url:document.getElementById('url-bar-${browserNumber}').value, 
-                            targetBrowser:'${browserNumber}' 
-                        } })"> 
-                         GO  
-                </button>
-            </div>
-            <span class="button" class="settings-button"><a onclick="console.log('settings')"><img src="./images/icons/settings.png"></a></span>
-        </div>
-        ${browserDOM}
-    </div>
-    `
-    let oldState = browserView.innerHTML
-    browserView.innerHTML = oldState + menuDOM
     
-    const browserContainer = document.querySelector(`#browser-container-${browserNumber}`)
-
-    const getURLValue = () =>{
-        return document.getElementById('url-bar-'+browserNumber).value
-    }
-
-    const pressEnterSubmit = (e)=>{
-        if(e.key == "Enter"){
-            addNewURL(getURLValue())
-        }
-    }
-
-    browserContainer.addEventListener("keypress", pressEnterSubmit)
+    async init(){
+        this.injectDOM()
+        this.browser = document.querySelector(`#browser-container-${this.browserNumber}`)
+        this.webview = document.querySelector("#webview-"+this.browserNumber)
+        this.urlBar = document.getElementById('url-bar-'+this.browserNumber)
     
-    window.addEventListener("message", (event)=>{
-        console.log('Message', event)
-        const message = event.data
-        if(message.back){
-            
-            if(message.back == `browser-${browserNumber}`){
-                webview.goBack()
+        this.openWindow()
+        
+        window.addEventListener("message", (event)=>{
+            console.log('Message', event)
+            const message = event.data
+            if(message.back){
+                
+                if(message.back == `browser-${this.browserNumber}`){
+                    this.webview.goBack()
+                }
+            }else if(message.forward){
+                
+                if(message.forward == `browser-${this.browserNumber}`){
+                    this.webview.goForward()
+                }
+                
+            }else if(message.refresh){
+                
+                if(message.refresh == `browser-${this.browserNumber}`){
+                    this.webview.reload()
+                }
+                
+            }else if(message.visitURL){
+                const { url, targetBrowser } = message.visitURL
+                this.addNewURL(url)
+            }else if(message.dialogSave){
+                window.ipcRenderer.send('download-path-selected',{ selected:message.dialogSave })
+            }else if(message.dialogCancel){
+                window.ipcRenderer.send('download-path-selected',{ cancelled:true })
             }
-        }else if(message.forward){
-            
-            if(message.forward == `browser-${browserNumber}`){
-                webview.goForward()
+        })
+        
+        
+        window.addEventListener("visit-url", (e)=>this.visitURLHandler(e))
+        
+        window.addEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
+        window.ipcRenderer.on('confirm-download', this.confirmDownloadHandler)
+        window.ipcRenderer.on('select-download-path', this.selectDownloadPathHandler)
+        window.ipcRenderer.on('download-complete', this.downloadCompleteHandler)
+        this.browser.addEventListener("keypress", (e)=>this.pressEnterSubmit(e))
+        
+        
+        $(`#webview-${this.browserNumber}`).click(function(e) {
+            if ( e.ctrlKey ) {
+                console.log('Ctrl click event fired')
+                // return launchBrowser(a.href)
+            } else {
+                console.log("Normal click")
+                //normal click
             }
-            
-        }else if(message.refresh){
-            
-            if(message.refresh == `browser-${browserNumber}`){
-                webview.reload()
-            }
-            
-        }else if(message.visitURL){
-            const { url, targetBrowser } = message.visitURL
-            addNewURL(url)
-        }
-    })
+        });
 
-    let history = []
-    let backStack = []
-    let forwardStack = []
+    }
     
-    let isBackEvent = false;
-    let isForwardEvent = false;
-    let webview = document.getElementById("webview-"+browserNumber)
-
-    const startPageWatcher = () =>{
-
-        const addUrlToHistory = (url) =>{
-
-            history.push(url)
-            if(!isBackEvent && !isForwardEvent){
-                backStack.push(url)
-                forwardStack = []
-            }else{
-                isBackEvent = false
-                isForwardEvent = false
-            }
-
-        }
+    async openWindow(){
+        this.browserWindow = new WinBox({
+            height:"80%",
+            width:"80%", 
+            title:"Browser", 
+            mount:this.browser, 
+            launcher:{
+                //enables start at boot
+                name:"new Browser",
+                params:[this.url]
+            },
+            onclose:()=>{
+                // this.browsersContainer.innerHTML = this.otherBrowsers
+                this.close()
+            } 
+        })
+    
+        activeWebviews[this.browserNumber] = this.browserWindow
+        this.watchURLChange()
+    }
+    
+    async close(){
+        window.removeEventListener("visit-url", (e)=>this.visitURLHandler(e))
+        window.removeEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
+        this.browser.removeEventListener("keypress", (e)=>this.pressEnterSubmit(e))
+        this.browser.remove()
+    }
+    
+    visitURLHandler(event){
+        const message = event.detail
+        const { url, targetBrowser } = message.visitURL
+        if(targetBrowser == `browser-${this.browserNumber}`) 
+            console.log('Is same browser')
         
-        if(window.isElectron){
-            //webview tag
-            webview.addEventListener('did-finish-load', (e) => {
-                const url = webview.getURL()
-                addUrlToHistory(url)
-                setURL(url)
-            })
-
-            webview.addEventListener('did-start-loading', (e) => {
-                const url = webview.getURL()
-                setURL(url)
-            })
-
-        }else{
-            //iframe tag
-            webview.onload = () =>{
-                url = webview.src
-
-                addUrlToHistory(url)
-                setURL(url)
-            }
-        }
-        
+        this.addNewURL(url)
     }
-
-    const setURL = (url) => {
-        console.log('Setting URL', url)
-        document.getElementById('url-bar-'+browserNumber).value = url.trim()
-    }
-
-    const visit = (url, index="none") =>{
-        
-        if(window.isElectron){
-            webview.loadURL(url)
-        }else{
-            webview.src = url
-        }
-
-        
-    }
-
-    const addNewURL = (url) =>{
-        isGoogleSearch(url)
-        return true
-    }
-
-
-    const forward = () =>{
-        let next = forwardStack.pop()
-        if(next) backStack.push(next)
-        const url = backStack[backStack.length - 1]
-        isForwardEvent = true
-
-        visit(url)
-    }
-
-    const back = () =>{
-        let last = backStack.pop()
-        forwardStack.push(last)
-        const url = backStack[backStack.length - 1]
-        isBackEvent = true
-        
-        visit(url)
-    }
-
-    const isURL = (string) =>{
-        const urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
-        return urlRegex.test(string)
-    }
-
-    const isValidDomain = (string) =>{
-        const domainRegex = new RegExp(/^(?!-)[A-Za-z0-9-]+([\-\.]{1}[a-z0-9]+)*\.[A-Za-z]{2,6}$/)
-
-        return domainRegex.test(string)
-    }
-
-    const isGoogleSearch = (question) =>{
-        if(question.slice(0, 4) == "http"){
-            visit(question)
-        }else if(isValidDomain(question)){
-            visit("https://"+question)
-        }else if(question.slice(0, 5) == "data:"){
-            visit(question) //
-        }else{
-            searchOnGoogle(question)
+    
+    browserNavigationHandler(event){
+        const message = event.detail
+        if(message.back == `browser-${this.browserNumber}`){
+                this.webview.goBack()
+        }else if(message.forward == `browser-${this.browserNumber}`){
+                this.webview.goForward()
+        }if(message.refresh == `browser-${this.browserNumber}`){
+                this.webview.reload()
         }
     }
-
-    const searchOnGoogle = (question) =>{
-        visit(`https://www.google.com/search?q=${question}`)
-    }
-
-    const browserWindow = new WinBox({
-        height:"80%",
-        width:"80%", 
-        title:"Browser", 
-        mount:browserContainer, 
-        launcher:{
-            //enables start at boot
-            name:"launcherBrowser",
-            params:[url]
-        },
-        onclose:()=>{
-            browserView.innerHTML = oldState
-            browserContainer.removeEventListener("keypress", pressEnterSubmit)
-        } 
-    })
-
-    activeWebviews[browserNumber] = browserWindow
-    startPageWatcher()
-
-    const downloadCompleteHandler = (event, message)=>{
+    
+    downloadCompleteHandler(event, message){
         const { success, error } = message
         if(success) popup(`Success: ${JSON.stringify(success, null, 2)}`)
         else if(error) popup(`Error: ${JSON.stringify(error, null, 2)}`)
     }
 
-    const confirmDownloadHandler = (url)=>{
+    confirmDownloadHandler(url){
         confirmation({
             message:"Are you sure you want to download this file?",
             yes:()=>{
@@ -251,7 +142,7 @@ const launchBrowser = (url) =>{
         })
     }
 
-    const selectDownloadPathHandler = (event, message)=>{
+    selectDownloadPathHandler(event, message){
         const startingPath = message
 
         new SaveAsDialog({
@@ -260,19 +151,141 @@ const launchBrowser = (url) =>{
         })
 
     }
-
-    window.ipcRenderer.on('confirm-download', confirmDownloadHandler)
-    window.ipcRenderer.on('select-download-path', selectDownloadPathHandler)
-    window.ipcRenderer.on('download-complete', downloadCompleteHandler)
-    window.addEventListener('message', (event)=>{
-        const message = event.data
-        if(message.dialogSave){
-            window.ipcRenderer.send('download-path-selected',{ selected:message.dialogSave })
-        }else if(message.dialogCancel){
-            window.ipcRenderer.send('download-path-selected',{ cancelled:true })
-        }
-    })
     
-}
+    watchURLChange(){
+        if(window.isElectron){
+            //webview tag
+            this.webview.addEventListener('did-finish-load', (e) => {
+                // const url = webview.getURL()
+                // addUrlToHistory(url)
+                // setURL(url)
+            })
 
-window.launchBrowser = launchBrowser
+            this.webview.addEventListener('did-start-loading', (e) => {
+                const url = this.webview.getURL()
+                this.setURL(url)
+            })
+
+        }else{
+            //iframe tag
+            this.webview.onload = () =>{
+                url = this.webview.src
+
+                this.setURL(url)
+            }
+        }
+    }
+    
+    getURLValue(){
+        return this.urlBar.value
+    }
+    
+    setURL(url){
+        console.log('Setting URL', url)
+        this.urlBar.value = url.trim()
+    }
+
+    visit(url){
+        
+        if(window.isElectron){
+            this.webview.loadURL(url)
+        }else{
+            this.webview.src = url
+        }
+    }
+
+    addNewURL(url){
+        this.isGoogleSearch(url)
+        return true
+    }
+    
+    isURL(string){
+        const urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+        return urlRegex.test(string)
+    }
+
+    isValidDomain(string){
+        const domainRegex = new RegExp(/^(?!-)[A-Za-z0-9-]+([\-\.]{1}[a-z0-9]+)*\.[A-Za-z]{2,6}$/)
+
+        return domainRegex.test(string)
+    }
+
+    isGoogleSearch(question){
+        if(question.slice(0, 4) == "http"){
+            this.visit(question)
+        }else if(this.isValidDomain(question)){
+            this.visit("https://"+question)
+        }else if(question.slice(0, 5) == "data:"){
+            this.visit(question) //
+        }else{
+            this.searchOnGoogle(question)
+        }
+    }
+    
+    searchOnGoogle(question){
+        this.visit(`https://www.google.com/search?q=${question}`)
+    }
+
+
+    pressEnterSubmit(e){
+        if(e.key == "Enter"){
+            this.addNewURL(this.urlBar.value)
+        }
+    }
+    
+    injectDOM(){
+        if(window.isElectron){
+            this.webviewDOM = `
+            <webview 
+                class="responsive-webview" 
+                id="webview-${this.browserNumber}" 
+                src="${this.url}" 
+                autosize="on" 
+                style="display:flex; 
+                min-width:100%; 
+                min-height:95%" >
+            </webview>
+            `
+        }
+        else{
+            this.webviewDOM = `<iframe 
+                            class="responsive-webview" 
+                            id="webview-${this.browserNumber}" 
+                            src="${this.url}" 
+                            autosize="on">
+                          </iframe>`
+        }
+        
+        this.browserDOM = `
+        <link rel="stylesheet" href="./css/browser.css">  
+        <div id="browser-container-${this.browserNumber}" class="browser-container">
+            <div class="browser-menu" style="min-width:100%;">
+                <div class="navigation-buttons">
+                    <span class="button"><a class="back-button" onclick="sendEvent('browser-navigation', { back:'browser-${this.browserNumber}' });return false"></a></span>
+                        | 
+                    <span class="button" ><a class="forward-button" onclick="sendEvent('browser-navigation', { forward:'browser-${this.browserNumber}' });return false"></a></span>
+                    <span class="button" ><a class="refresh-button" onclick="sendEvent('browser-navigation', { refresh:'browser-${this.browserNumber}' });return false"><img src="./images/icons/refresh.png"/></a></span>
+                </div>
+                <div class="url-container">
+                    <input id="url-bar-${this.browserNumber}" class="url-bar" type="text" placeholder="http://google.com" value="${this.url}">
+                    <button 
+                    id="url-button" 
+                    class="url-button"
+                    onclick="
+                        sendEvent('visit-url',{ 
+                            visitURL:{ 
+                                url:document.getElementById('url-bar-${this.browserNumber}').value, 
+                                targetBrowser:'browser-${this.browserNumber}' 
+                            } })"> 
+                             GO  
+                    </button>
+                </div>
+                <span class="button" class="settings-button"><a onclick="console.log('settings')"><img src="./images/icons/settings.png"></a></span>
+            </div>
+            ${this.webviewDOM}
+        </div>
+        `
+        this.otherBrowsers = this.browsersContainer.innerHTML
+        this.browsersContainer.innerHTML = this.otherBrowsers + this.browserDOM
+    }
+}

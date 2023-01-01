@@ -1,7 +1,7 @@
 class SaveAsDialog{
     constructor(opts={}){
-        this.width = opts.width || '70%'
-        this.height = opts.height || '60%'
+        this.width = opts.width || '55%'
+        this.height = opts.height || '82%'
         this.dialogWindow = ""
         this.mode = opts.mode || "save"
         this.modal = opts.modal || true
@@ -89,8 +89,8 @@ class SaveAsDialog{
     launchWindow(){
         this.dialogWindow = createWindow({ 
             title: "File Explorer",
-            width:'71%',
-            height:'80%',
+            width:this.width,
+            height:this.height,
             modal:this.modal,
             html:this.dialogDOM,
             onclose:()=>{

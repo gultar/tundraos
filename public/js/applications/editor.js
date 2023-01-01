@@ -6,6 +6,8 @@ class Editor{
         this.editorId = Date.now()
         this.pathToFile = pathToFile
         this.filename = this.extractFilename(this.pathToFile)
+        this.filenameDisplay = ""
+        this.filepathDisplay = ""
         this.content = content
         this.dirPointerId = ""
         this.editorContainer = ""
@@ -13,10 +15,11 @@ class Editor{
         this.editor = ""
         this.collapsible = ""
         this.saved = (pathToFile === '')
+        this.listenerController = new AbortController();
         this.init()
     }
 
-    async startEditor(filename, content){
+    async startEditor(filename, content=" "){
         const [ name, ...extensions ] = filename.split(".")
         const lastExtension = extensions[extensions.length - 1]
         let mode = getNameFromExtension(lastExtension)
@@ -59,11 +62,12 @@ class Editor{
     }
 
     async init(){
+        const { signal } = this.listenerController 
         this.editorDOM = this.injectDOM()
         this.editorWrapper = document.querySelector(`#editor-wrapper-${this.editorId}`)
         this.folderView = document.querySelector(`#folder-view-${this.editorId}`)
-        
-        
+        this.filenameDisplay = document.querySelector(`#filename-display-${this.editorId}`)
+        this.filepathDisplay = document.querySelector(`#filepath-display-${this.editorId}`)
         
         this.dirPointerId = await getNewPointerId(this.editorId)
         await this.exec('cd',["/"])
@@ -75,10 +79,11 @@ class Editor{
         this.editor = await this.startEditor(this.filename, this.content)
 
         this.editor.session.on('change', function(delta) {
+            //watch for change to enable prompt for saving file upon closing window
             this.saved = false
         });
         
-        this.winbox = new WinBox({ 
+        this.winbox = createWindow({ 
             title: "Editor", 
             height:"95%", 
             width:"80%",
@@ -108,29 +113,90 @@ class Editor{
         this.makeFolderView()
         
         this.editorMessageHandler = async (event)=>{
-            const message = event.data
-            if(message.newFileEditor && message.newFileEditor == this.editorId){
+            const message = event.detail
+            if(message.newFileEditor){
                 this.newFile()
-            }else if(message.openFileEditor && message.openFileEditor == this.editorId){
+            }else if(message.openFileEditor){
                 this.openFile()
-            }else if(message.saveEditor && message.saveEditor == this.editorId){
+            }else if(message.saveEditor){
                 this.save()
-            }else if(message.saveAsEditor && message.saveAsEditor == this.editorId){
+            }else if(message.saveAsEditor){
                 this.saveAs()
-            }else if(message.collapseFileOpen && message.id == this.collapsible.collapsibleId){
+            }else if(message.collapseFileOpen){
                 this.changeFile(message.collapseFileOpen)
-            }else if(message.openSettings && message.openSettings == this.editorId){
+            }else if(message.openSettings){
                 this.editor.execCommand("showSettingsMenu")
             }
         }
 
-        window.addEventListener('message', this.editorMessageHandler)
+        window.addEventListener(`message-${this.editorId}`, this.editorMessageHandler, { signal })
+        window.addEventListener("collapsible-directory-delete-"+this.editorId, (payload)=>this.collapsibleDirectoryDeleteHandler(payload), {signal})
+        window.addEventListener("collapsible-file-open-"+this.editorId, (payload)=>this.collapsibleFileOpenHandler(payload), {signal})
+        window.addEventListener("collapsible-file-delete-"+this.editorId, (payload)=>this.collapsibleFileDeleteHandler(payload), {signal})
+        
+    }
+    
+    
+    collapsibleDirectoryDeleteHandler(payload){
+        const { path } = payload.detail
+        confirmation({
+                message:`Are you sure you want to delete directory ${path}?`,
+                yes:async()=>{
+                    const deleted = await this.exec("rmdir",[path])
+                    if(deleted && deleted.error) popup(deleted.error)
+                    else if(deleted && !deleted.error) popup(`Successfully deleted directory ${path}`)
+                },
+                no:()=>{}
+        })
+    }
+    
+    collapsibleFileOpenHandler(payload, that){
+        console.log("That", that)
+        
+        const { path, id } = payload.detail
+        console.log('Payload',payload)
+        if(id !== this.editorId) return false
+        
+        if(!this.saved){
+            
+            confirmation({
+                message:'Do you want to save before exiting?',
+                yes:async()=>{
+                    
+                    const saved = await this.save(this.content, this.pathToFile)
+                    if(saved && saved.error) popup(JSON.stringify(saved))
+                    
+                    return this.selectFile(path)
+                },
+                no:()=>{}
+            })
+        }
+        
+        return this.selectFile(path)   
+        
+        
+    }
+    
+    collapsibleFileDeleteHandler(payload){
+        const { path } = payload.detail
+        if(id == this.editorId){
+            confirmation({
+                message:`Are you sure you want to delete file ${path}?`,
+                yes:async()=>{
+                    const deleted = await this.exec("rm",[path])
+                    if(deleted && deleted.error) popup(deleted.error)
+                    else if(deleted && !deleted.error) popup(`Successfully deleted file ${path}`)
+                },
+                no:()=>{}
+            })
+        }
+        
     }
 
     close(){
         const filecontent = this.editor.getValue()
         this.editorWrapper.style.visibility = 'hidden'
-        window.removeEventListener("nessage", this.editorMessageHandler)
+        this.listenerController.abort()
         if(!this.saved){
             confirmation({
                 message:'Do you want to save before exiting?',
@@ -160,7 +226,11 @@ class Editor{
 
     makeFolderView(){
         const folderView = document.querySelector(`#folder-view-${this.editorId}`)
-        this.collapsible = new CollapsibleBar({ mountDOM:folderView })
+        this.collapsible = new CollapsibleBar({ 
+            mountDOM:folderView, 
+            hostId:this.editorId, 
+            listenerController:this.listenerController 
+        })
         this.collapsible.init()
     }
 
@@ -196,15 +266,19 @@ class Editor{
         this.editor.setValue(this.content)
         let mode = this.readModeFromExtension(this.filename)
         this.setMode(mode)
+        this.filenameDisplay.innerText = this.filename
+        this.filepathDisplay.innerText = this.pathToFile
     }
 
-    async selectFile(path){
+    async selectFile(path, filename=""){
         this.pathToFile = path
-        this.filename = this.extractFilename(path)
+        this.filename = filename || this.extractFilename(path)
         this.content = await this.exec("getFileContent", [this.pathToFile])
         this.editor.setValue(this.content)
         let mode = this.readModeFromExtension(this.filename)
         this.setMode(mode)
+        this.filenameDisplay.innerText = this.filename
+        this.filepathDisplay.innerText = this.pathToFile
     }
 
     async changeFile(path){
@@ -241,7 +315,7 @@ class Editor{
     async saveAs(){
         const content = this.editor.getValue()
         const selection = await this.selectSavePath(this.filename, "select")
-        console.log('Selection', selection)
+       
         if(!selection) return false
 
         this.filename = selection.saved.filename
@@ -303,20 +377,29 @@ class Editor{
             <link rel="stylesheet" href="./css/topnav.css">
             <div style="display:block">
                 <nav class="file-menu" role="navigation">
-                    <ul class="menu-item-list">
-                        <li class="menu-item"><a href="#">File</a>
+                    <ul class="menu-item-list editor-nav">
+                        <li class="menu-item"><a>File</a>
                         <ul class="dropdown">
-                            <li onclick="window.postMessage({ newFileEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>New</a></li>
-                            <li onclick="window.postMessage({ openFileEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Open</a></li>
-                            <li onclick="window.postMessage({ saveEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save</a></li>
-                            <li onclick="window.postMessage({ saveAsEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save As</a></li>
-                            <li onclick="window.postMessage({ openSettings:'${this.editorId}' })" class="dropdown-item hoverable"><a>Settings</a></li>
+                            <li onclick="sendEvent('message-${this.editorId}',{ newFileEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>New</a></li>
+                            <li onclick="sendEvent('message-${this.editorId}',{ openFileEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Open</a></li>
+                            <li onclick="sendEvent('message-${this.editorId}',{ saveEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save</a></li>
+                            <li onclick="sendEvent('message-${this.editorId}',{ saveAsEditor:'${this.editorId}' })" class="dropdown-item hoverable"><a>Save As</a></li>
+                            <li onclick="sendEvent('message-${this.editorId}',{ openSettings:'${this.editorId}' })" class="dropdown-item hoverable"><a>Settings</a></li>
                             <li class="dropdown-item hoverable"><a>Exit</a></li>
                         </ul>
                         </li>
-                        
+                        <li id="info-display-block-${this.editorId}" class="info-display">
+                            <span>Filename: </span>
+                            <span id="filename-display-${this.editorId}">${this.filename}</span>
+                              |  
+                            <span>Path: </span>
+                            <span id="filepath-display-${this.editorId}">${this.pathToFile}</span>
+                        </li>
                     </ul>
                 </nav>
+            </div>
+            <div style="display:block">
+                
             </div>
             <div id="folder-view-${this.editorId}" class="folder-view-editor"></div>
             <div id="editor-${this.editorId}" class="editor" style="margin-top:10px;">

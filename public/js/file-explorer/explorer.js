@@ -10,9 +10,10 @@ class FileExplorer{
         this.pointerId = false
         this.currentDirContents = []
         this.fullPaths = []
-        this.workingDir = ""
+        this.workingDir = opts.workingDir || ""
         this.explorerDOM = ""
         this.collapsible = ""
+        this.listenerController = new AbortController()
         this.homePath = (
             window.username == 'root' ? 
                 mountPoint+"/public/userspaces/root/home/" 
@@ -34,13 +35,22 @@ class FileExplorer{
         
         this.launchWindow()
         const folderView = document.querySelector(`#explorer-folder-view-${this.explorerId}`)
-        this.collapsible = new CollapsibleBar({ mountDOM:folderView })
+        this.collapsible = new CollapsibleBar({ 
+            mountDOM:folderView, 
+            hostId:this.explorerId,
+            listenerController:this.listenerController
+        })
         this.collapsible.init()
         await this.refreshExplorer()
         this.makeExplorerMenu()
-        this.listener = window.addEventListener("message", (e)=>{
+        
+        const { signal } = this.listenerController
+        
+         window.addEventListener(`message-${this.explorerId}`, (e)=>{
             this.handleExplorerMessage(e)
-        }, true);
+        }, { signal });
+        
+        
     }
 
     createDOM(){
@@ -56,15 +66,15 @@ class FileExplorer{
                 <ul class="menu-item-list">
                     <li class="menu-item"><a href="#">File</a>
                     <ul class="dropdown">
-                        <li onclick="window.postMessage({ newFile:true })" class="dropdown-item hoverable"><a href="#">New File</a></li>
-                        <li onclick="window.postMessage({ newDir:true })" class="dropdown-item hoverable"><a href="#">New Directory</a></li>
+                        <li onclick="sendEvent('message-${this.explorerId}',{ newFile:true })" class="dropdown-item hoverable"><a href="#">New File</a></li>
+                        <li onclick="sendEvent('message-${this.explorerId}',{ newDir:true })" class="dropdown-item hoverable"><a href="#">New Directory</a></li>
                         <li class="dropdown-item hoverable"><a href="#">Settings</a></li>
                         <li class="dropdown-item hoverable"><a href="#">Exit</a></li>
                     </ul>
                     </li>
                     <div id="navigation-bar-container-${this.explorerId}" class="navigation-bar-container">
                         <input id="navigation-bar-${this.explorerId}" class="navigation-bar">
-                        <button onclick="window.postMessage({ setDir:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
+                        <button onclick="sendEvent('message-${this.explorerId}',{ setDir:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
                     </div>
                 </ul>
 
@@ -81,9 +91,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/',
                                             })">Root
                                         </a>
                                     </span>
@@ -92,9 +101,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}',
                                             })">Home
                                         </a>
                                     </span>
@@ -103,9 +111,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}desktop/', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}desktop/',
                                             })">Desktop
                                         </a>
                                     </span>
@@ -114,9 +121,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}downloads/', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}downloads/',
                                             })">Downloads
                                         </a>
                                     </span>
@@ -125,9 +131,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}applications/', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}applications/',
                                             })">Applications
                                         </a>
                                     </span>
@@ -136,9 +141,8 @@ class FileExplorer{
                                     <span>
                                         <a 
                                             class="dir-link" 
-                                            onclick="window.postMessage({ 
-                                                setDir:'/${this.homePath}images/', 
-                                                explorerId:'${this.explorerId}' 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}images/',
                                             })">Images
                                         </a>
                                     </span>
@@ -155,7 +159,7 @@ class FileExplorer{
                 </div>
                 <div id="selection-bar-container-${this.explorerId}" class="selection-bar-container hidden">
                     <input id="selection-bar-${this.explorerId}" class="selection-bar">
-                    <button onclick="window.postMessage({ select:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
+                    <button onclick="sendEvent('message-${this.explorerId}',{ select:this.parentElement.children[0].value, explorerId:'${this.explorerId}' })" class="">Go</button>
                 </div>
             </div>
             <script>
@@ -177,7 +181,7 @@ class FileExplorer{
     }
 
     close(){
-        window.removeEventListener("message", this.handleExplorerMessage, true)
+        this.listenerController.abort()
         this.currentDirContents = []
         this.fullPaths = []
         this.workingDir = ""
@@ -203,28 +207,23 @@ class FileExplorer{
     }
 
     handleExplorerMessage(event, that){
-        const message = event.data
-        if(message.explorerId && message.explorerId != this.explorerId){
-            //skip messages sent from other explorer windows
-            return false
-        }else if(message.explorerId && message.explorerId == this.explorerId){
-            if(message.changeDir){
-                this.changeDirectory(message.changeDir)
-            }else if(message.setDir){
-                this.setWorkingDir(message.setDir)
-            }else if(message.newDir){
-                this.createNewDirectory()
-            }else if(message.newFile){
-                this.createNewFile()
-            }else if(message.openFile){
-                this.openFile(message.openFile)
-            }
-    
-            this.refreshExplorer(this.explorerId)
+        const message = event.detail
+        if(message.changeDir){
+            this.changeDirectory(message.changeDir)
+        }else if(message.setDir){
+            this.setWorkingDir(message.setDir)
+        }else if(message.newDir){
+            this.createNewDirectory()
+        }else if(message.newFile){
+            this.createNewFile()
+        }else if(message.openFile){
+            this.openFile(message.openFile)
         }
-
+            
+        this.refreshExplorer(this.explorerId)
         
     }
+    
 
     async refreshExplorer(){
         this.setCurrentDirContents(this.workingDir)
@@ -358,7 +357,7 @@ class FileExplorer{
                 <div class="explorer-item">
                     <a  data-path="/${path}${element}" 
                         data-workingdir="/${path}"
-                        data-name="${element}" onclick="select(this, (()=>{ window.postMessage({ 
+                        data-name="${element}" onclick="select(this, (()=>{ sendEvent('message-${this.explorerId}',{ 
                             changeDir:this.dataset.name, 
                             explorerId:'${this.explorerId}' 
                         }) }))"
@@ -379,7 +378,7 @@ class FileExplorer{
                 <div class="explorer-item">
                     <a  data-path="/${path}${element}" 
                             data-workingdir="/${path}"
-                            data-name="${element}" onclick="select(this, (()=>{ window.postMessage({ 
+                            data-name="${element}" onclick="select(this, (()=>{ sendEvent('message-${this.explorerId}',{ 
                                 openFile:this.dataset.path,
                                 explorerId:'${this.explorerId}'
                             }) }))"
@@ -424,11 +423,11 @@ class FileExplorer{
         for(const directory of directories){
             this.makeDirectoryMenu(directory)
         }
- 
+        let that = this
         $('.element-name').bind('dblclick', function() {
              $(this).attr('contentEditable', true);
          }).blur(function() {
-             this.rename(this)
+             that.rename(this)
          });
  
         const files = document.getElementsByClassName("file")
@@ -494,7 +493,7 @@ class FileExplorer{
 
      makeExplorerMenu(opts={}){
         new VanillaContextMenu({
-            scope: document.querySelector(`#explorer-window-${this.explorerId}`),
+            scope: document.querySelector(`#explorer-${this.explorerId}`),
             menuItems: [
                 { 
                     label: 'Create new directory',
@@ -524,10 +523,16 @@ class FileExplorer{
         
         new VanillaContextMenu({
             scope: element,
+            customThemeClass: 'context-menu-orange-theme',
+            customClass: 'custom-context-menu-cls',
             menuItems: [{ 
                   label: 'Open',
                   iconHTML: `<img src="./images/icons/folder.png" height="20px" width="20px">`,
                   callback: () => this.changeDirectory(element.dataset.name)
+                },{ 
+                  label: 'Open in Explorer',
+                  iconHTML: `<img src="./images/icons/folder.png" height="20px" width="20px">`,
+                  callback: () => new FileExplorer(0,0, { workingDir:element.dataset.path })
                 },{ 
                     label: 'Remove',
                     iconHTML: `<img src="./images/icons/file.png" height="20px" width="20px">`,
@@ -546,8 +551,10 @@ class FileExplorer{
         
         new VanillaContextMenu({
             scope: element,
+            customThemeClass: 'context-menu-orange-theme',
+            customClass: 'custom-context-menu-cls',
             menuItems: [{ 
-                  label: 'Open',
+                  label: 'Open File',
                   iconHTML: `<img src="./images/icons/folder.png" height="20px" width="20px"></i>`,
                   callback: () => this.openFile(element.dataset.name)
                 },{ 

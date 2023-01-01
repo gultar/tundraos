@@ -90,14 +90,14 @@ class Terminal{
       tirex:()=>runTirex(),
       map:()=>runMap(),
       lofi:()=>runLofi(),
-      webamp:()=>runWebamp(),
       editor:async (args)=>await this.runEditor(args), //Alias
+      markdown:(args)=>this.runMarkdownEditor(args),
+      text:(args)=>this.runRichTextEditor(args),
       weather:async()=>await this.getWeather(),
       whoami:()=>this.whoami(),
       view:async (args)=>await this.viewImage(args),
       test:async(args)=>await this.testSomething(args),
-      explorer:(args)=>this.runExplorer(args),
-      download:async(args)=>await this.downloadFile(args),
+      explorer:async(args)=>await this.runExplorer(args),
     }
   }
   
@@ -250,20 +250,40 @@ class Terminal{
     new Editor(path, content)
     return true
   }
+  
+  async runMarkdownEditor(args){
+    const path = args[0]
+    const file = await this.exec("getFile", [path])
+    let content = ""
+    if(file){
+      content = file.content
+    }
 
-  runExplorer(args){
-    //makeFileExplorer()
-    new FileExplorer(0,0)
+    new MarkdownEditor(path, content)
+    return true
+  }
+  
+  async runRichTextEditor(args){
+    const path = args[0]
+    const file = await this.exec("getFile", [path])
+    let content = ""
+    
+    // try{
+    //     if(file){
+    //       content = JSON.parse(file.content)
+    //     }
+    // }catch(e){
+    //     this.output(e.message)
+    //     return { error:e }
+    // }
+
+    const editor = new RichTextEditor(path, file.content)
+    return true
   }
 
-  async downloadFile(args){
-    const url = args[0]
-    window.ipcRenderer.send('will-download', url)
-    window.ipcRenderer.on('download-percentage', (event, message)=>{
-      const { percentage, remainingSize } = message
-      this.output(`${percentage}% -- Remaining Bytes: ${remainingSize}`)
-    })
-    window.ipcRenderer.once('download')
+  async runExplorer(args){
+    const current = await this.exec("pwd")
+    new FileExplorer(0,0, { workingDir:current })
   }
 
   startBrowser(args){
@@ -272,16 +292,8 @@ class Terminal{
   }
 
   async testSomething(args){
-    
-    const test = new RichTextEditor("/system/public/userspaces/root/home/documents/muppet.quill","rockets are blue")
-  }
-
-  runFileManager(){
-    const anchor = document.getElementById("filemanager")
-    const temp = anchor.insertAdjacentHTML('beforeEnd', `
-    <iframe src="./js-fileexplorer/demo.html"></iframe>
-    `)
-    new WinBox({ title: "Window Title", mount:temp });
+  
+      
   }
 
   async getWeather(){
@@ -292,6 +304,7 @@ class Terminal{
 
   whoami(){
     this.output(navigator.userAgent)
+    this.output("")
     this.output(`Username: ${getUsername()}`)
   }
 
@@ -524,7 +537,7 @@ class Terminal{
       const suggestions = await this.exec("autoCompletePath", [relativePath+partialTarget])
       console.log('Suggestions', suggestions)
       if(suggestions.length > 1){
-        this.output(suggestions.join(" "))
+        this.output(suggestions.join("<br>"))
       }else if(suggestions.length === 1){
 
         const contentOfTarget = await this.exec('ls', [relativePath+partialTarget])

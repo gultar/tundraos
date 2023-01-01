@@ -1,6 +1,6 @@
 const initScript = () =>{
     initParticles()
-    initTerminalClock()
+    initClock()
     verifyIfElectronApp()
     setUsernameAsGlobal()
 }
@@ -17,6 +17,15 @@ const verifyIfElectronApp = async () =>{
 const setUsernameAsGlobal = () =>{
     window.username = getUsername()
     console.log('Active user:',window.username)
+}
+
+const initClock = () => {
+   
+  setInterval(()=>{
+    const date = new Date()
+    $("#clock").text(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
+  }, 1000)
+
 }
 
 

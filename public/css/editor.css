@@ -5,6 +5,26 @@
     bottom:0;
     left:0;
 }
+
+.info-display{
+    font-size:8pt;
+    align-items:center;
+    display:inline-block;
+    background-color:transparent;
+    margin-top:8px;
+    margin-right:8px;
+}
+
+.filename-display{
+    
+}
+
+.editor-nav{
+    justify-content:space-between;
+    width:100% !important;
+    display:flex;
+}
+
 .editor {
     position: relative;
     top: 20px;
@@ -14,6 +34,8 @@
     width:auto;
     height:95%;
 }
+
+
 .folder-view-editor{
     position: relative;
     float:left;

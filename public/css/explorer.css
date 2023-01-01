@@ -55,7 +55,6 @@
     background-color: var(--background) !important;
     resize: horizontal;
     scroll-behavior: smooth;
-    overflow: scroll;
 }
 
 .side-bar ul{

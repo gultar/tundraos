@@ -2,13 +2,13 @@ window.openWindows = {}
 window.launchSequence = []
 
 const createWindow = (opts) =>{
+    if(!opts.width) opts.width = "500"
+    if(!opts.height) opts.height = "350"
     const newWindow = new WinBox(opts)
+    newWindow.min = false
     const name = opts.label || opts.title
     newWindow.launcher = opts.launcher
     window.openWindows[name] = newWindow
-    // newWindow.onclose = ()=>{
-    //     delete window.openWindows[name]
-    // }
 
     return newWindow
 }
@@ -16,7 +16,6 @@ const createWindow = (opts) =>{
 const minimizeAllWindows = (force=false) =>{
     for(const windowName in window.openWindows){
         const instance = window.openWindows[windowName]
-        
         const state = (force?true:!instance.min)
         instance.minimize(state)
     }

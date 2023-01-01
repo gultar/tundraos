@@ -10,8 +10,10 @@
     <link rel="stylesheet" href="./css/external/jquery-ui.structure.min.css">
     <link rel="stylesheet" href="./css/external/jquery-ui.theme.min.css">
     <link rel="stylesheet" href="./css/external/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <link rel="stylesheet" href="./css/editor.css">
     <link rel="stylesheet" href="./css/hyperwatch.css">
+    <link rel="stylesheet" href="./css/external/font-awesome.min.css">
     <link rel="stylesheet" href="./css/external/quill.bubble.css">
     <link rel="stylesheet" href="./css/external/quill.snow.css">
     <!-- External scripts -->
@@ -24,8 +26,8 @@
     <script src="./js/external/boxicons.js"></script> <!-- Icons -->
     <script src="./js/terminal/hyperwatcher.bundle.js"></script>
     <script src="./js/external/quill.min.js"></script>
-    <script src="./js/applications/rich-text-editor.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script> Code editor7
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js"></script>
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <!-- Filesystem related scripts -->
     <script src="./js/filesystem/filesystem.bundle.js"></script>
     <script src="./js/event_emitter/sendevent.js"></script>
@@ -54,6 +56,8 @@
     <script src="./js/desktop/context-window.js"></script>
     <script src="./js/desktop/icon-creator.js"></script>
     <script src="./js/window-manager/create-window.js"></script> 
+    <script src="./js/applications/rich-text-editor.js"></script>
+    <script src="./js/applications/markdown-editor.js"></script>
     <!-- Init scripts -->
     
     <script src="./js/init-script.js" defer></script>
@@ -78,12 +82,13 @@
                                     <ul>
                                         <li><a onclick='new Editor()'><img class="main-menu-icons" src="./images/icons/editor.png" />Code Editor</a></li>
                                         <li><a onclick='new RichTextEditor()'><img class="main-menu-icons" src="./images/icons/quill.png" />Rich Text Editor</a></li>
+                                        <li><a onclick='new MarkdownEditor()'><img class="main-menu-icons" src="./images/icons/markdown.png" />Markdown Editor</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/system.png" />System</a>
                                     <ul>
-                                        <li><a href="#" onClick="createTerminalWindow()"><img class="main-menu-icons" src="./images/icons/terminal.png" />Terminal</a></li>
-                                        <li><a href="#" onClick="new FileExplorer(0,0)"><img class="main-menu-icons" src="./images/icons/file-explorer.png" />Explorer</a></li>
+                                        <li><a href="#" onclick="new TerminalWindow()"><img class="main-menu-icons" src="./images/icons/terminal.png" />Terminal</a></li>
+                                        <li><a href="#" onclick="new FileExplorer(0,0)"><img class="main-menu-icons" src="./images/icons/file-explorer.png" />Explorer</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/music.png" />Music</a>
@@ -93,20 +98,20 @@
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/games.png" />Games</a>
                                     <ul>
-                                        <li><a onclick="runWeb(['https://d07riv.github.io/diabloweb/'])"><img class="main-menu-icons" src="./images/diablo.png" />Diablo Web</a></li>
+                                        <li><a onclick="new Browser('https://d07riv.github.io/diabloweb/')"><img class="main-menu-icons" src="./images/diablo.png" />Diablo Web</a></li>
                                         <li><a onclick="runTirex()"><img class="main-menu-icons" src="./images/icons/Lonelytrex.webp" />Tirex Game</a></li>
-                                        <li><a onclick="runWeb(['https://gba.js.org/'])"><img class="main-menu-icons" src="./images/icons/games.png" />Game Boy Advance</a></li>
-                                        <li><a onclick="runWeb(['https://browserquest.io/'])"><img class="main-menu-icons" src="./images/icons/games.png" />BrowserQuest</a></li>
+                                        <li><a onclick="new Browser('https://gba.js.org/')"><img class="main-menu-icons" src="./images/icons/games.png" />Game Boy Advance</a></li>
+                                        <li><a onclick="new Browser('https://browserquest.io/')"><img class="main-menu-icons" src="./images/icons/games.png" />BrowserQuest</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/browser.png" />Browser</a>
                                     <ul>
-                                        <li><a onclick='runWeb(["https://www.google.com/webhp?igu=1"])'><img class="main-menu-icons" src="./images/icons/google.png" />Google</a></li>
+                                        <li><a onclick='new Browser()'><img class="main-menu-icons" src="./images/icons/google.png" />Google</a></li>
                                         <li><a onclick="runLinguee([])"><img class="main-menu-icons" src="./images/icons/translation.png" />Linguee</a></li>
-                                        <li><a onclick="runWeb(['https://gdt.oqlf.gouv.qc.ca/Resultat.aspx'])"><img class="main-menu-icons" src="./images/icons/dictionary.png" />GDT</a></li>
-                                        <li><a onclick='runWeb(["https://wikipedia.org"])'><img class="main-menu-icons" src="./images/icons/wikipedia.png" />Wiki</a></li>
-                                        <li><a onclick='runWeb(["https://gultar.github.io/iching/"])'><img class="main-menu-icons" src="./images/icons/yinyang.png" />I-Ching</a></li>
-                                        <li><a onclick='runWeb(["https://georatio.com/"])'><img class="main-menu-icons" src="./images/icons/constellation.png" />Georatio</a></li>
+                                        <li><a onclick="new Browser('https://gdt.oqlf.gouv.qc.ca/Resultat.aspx')"><img class="main-menu-icons" src="./images/icons/dictionary.png" />GDT</a></li>
+                                        <li><a onclick='new Browser("https://wikipedia.org")'><img class="main-menu-icons" src="./images/icons/wikipedia.png" />Wiki</a></li>
+                                        <li><a onclick='new Browser("https://gultar.github.io/iching/")'><img class="main-menu-icons" src="./images/icons/yinyang.png" />I-Ching</a></li>
+                                        <li><a onclick='new Browser("https://georatio.com/")'><img class="main-menu-icons" src="./images/icons/constellation.png" />Georatio</a></li>
                                         
                                     </ul>
                                 </li>
@@ -143,7 +148,7 @@
             </div>
 
             <div id="icon-container" style="background:transparent">
-                <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, launchBrowser)" id="browser-icon">
+                <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, (()=>new Browser()))" id="browser-icon">
                     <img class="desktop-icon" src="./images/icons/browser-color-large.png">
                     <span>Browser</span>
                 </a>
@@ -151,7 +156,7 @@
                     <img class="desktop-icon" src="./images/icons/explorer-color-large.png">
                     <span>Explorer</span>
                 </a>
-                <a data-name="terminal-icon" class="desktop-icon-link" onclick="select(this, createTerminalWindow)" id="terminal-icon">
+                <a data-name="terminal-icon" class="desktop-icon-link" onclick="select(this, (()=>new TerminalWindow()))" id="terminal-icon">
                     <img class="desktop-icon" src="./images/icons/terminal-color-large.png">
                     <span>Terminal</span>
                 </a>
@@ -163,13 +168,17 @@
                     <img class="desktop-icon" src="./images/icons/quill-color-large.png">
                     <span>Text Editor</span>
                 </a>
+                <a data-name="markdown-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new MarkdownEditor()))" id="markdown-editor-icon">
+                    <img class="desktop-icon" src="./images/icons/markdown-color-large.png">
+                    <span>Text Editor</span>
+                </a>
             </div>
 
             <canvas class="background" ></canvas>
             <div id="webamp"></div>
         </div>
         
-        <div id="browser-view" style="width:80%; height:80%;"></div>
+        <div id="browsers-container" style="width:90%; height:90%;"></div>
         <div id="dialog-message" title="System Message"></div>
 
     </div>
@@ -178,16 +187,8 @@
         makeDesktopMenu()
 
         function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
-        
-        //Forces user to "reboot" instead of refreshing
-        // $(document).ready(function(){
-        //      $(document).on("keydown", (e)=>{
-        //         disableF5(e)
-        //      });
-        // });
-
+       
         $("#icon-container").sortable()
-        // $(".desktop-icon-link").draggable()
 
         const select = (element, func) =>{
             if(element.classList.contains('selected')){
@@ -262,7 +263,7 @@
                 no:()=>{}
             })
         }
-        // (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+        
     </script>
 
 
