@@ -122,6 +122,16 @@ class FileExplorer{
                                         <a 
                                             class="dir-link" 
                                             onclick="sendEvent('message-${this.explorerId}',{ 
+                                                setDir:'/${this.homePath}documents/',
+                                            })">Documents
+                                        </a>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span>
+                                        <a 
+                                            class="dir-link" 
+                                            onclick="sendEvent('message-${this.explorerId}',{ 
                                                 setDir:'/${this.homePath}downloads/',
                                             })">Downloads
                                         </a>
@@ -185,6 +195,7 @@ class FileExplorer{
         this.currentDirContents = []
         this.fullPaths = []
         this.workingDir = ""
+        this.collapsible.destroy()
     }
 
     launchWindow(){

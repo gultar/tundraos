@@ -197,6 +197,7 @@ class Editor{
         const filecontent = this.editor.getValue()
         this.editorWrapper.style.visibility = 'hidden'
         this.listenerController.abort()
+        this.collapsible.destroy()
         if(!this.saved){
             confirmation({
                 message:'Do you want to save before exiting?',
@@ -204,16 +205,15 @@ class Editor{
                     
                     const saved = await this.save(filecontent, this.pathToFile)
                     if(saved && saved.error) popup(JSON.stringify(saved))
-                    this.destroy()
+                    
                 },
-                no:()=>{
-                    this.destroy()
-                }
+                no:()=>{}
             })
 
-        }else{
-            this.destroy()
         }
+        
+        this.destroy()
+        
         
     }
 

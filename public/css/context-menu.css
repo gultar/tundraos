@@ -23,3 +23,24 @@
 .custom-context-menu-cls {
     font-family: var(--default-font);
 }
+
+.context-menu-list{
+    background-color:var(--nav-background-color) !important;
+    border-radius:0 !important;
+    border:0px !important;
+    
+}
+
+.context-menu-list .context-menu-item{
+    background-color:var(--nav-background-color) !important;
+    color:white !important;
+    font-family: var(--default-font);
+    font-size:8pt !important;
+    padding-top:10px;
+    padding-bottom:10px;
+}
+
+.context-menu-item:hover{
+    background-color:var(--terminal-font-color) !important;
+    color:var(--nav-background-color) !important;
+}

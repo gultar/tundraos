@@ -41,7 +41,13 @@ class CollapsibleBar{
                 
             }
         }, { signal })
-        
+        this.createCollapsibleFileMenu()
+        this.createCollapsibleDirectoryMenu()
+    }
+    
+    destroy(){
+        $.contextMenu("destroy",`.file-element-${this.collapsibleId}`)
+        $.contextMenu("destroy",`.directory-element-${this.collapsibleId}`)
     }
     
     async openAtDirectory(){
@@ -70,28 +76,8 @@ class CollapsibleBar{
         }
 
         element.innerHTML = domToInject
-        this.bindMenu(element)
     }
-    
-    async bindMenu(element){
-        var children = element.children;
-        for(var i=0; i<children.length; i++){
-            var child = children[i];
-            const elementPath = child.dataset.path
-            
-            const elementNameIsDirectory = elementPath[elementPath.length - 1] == "/"
-            
-            
-            if(elementNameIsDirectory){
-                
-                this.createCollapsibleDirectoryMenu(child)
-                // console.log('Dir ID', child.id)
-            }else{
-                this.createCollapsibleFileMenu(child)
-                // console.log('File ID', child.id)
-            }
-        }
-    }
+
 
     async exec(cmd, args){
         return await exec(cmd, args, this.pointerId)
@@ -105,7 +91,7 @@ class CollapsibleBar{
             return name
         }
         return `
-        <li class="directory-element collapse-element"
+        <li class="directory-element collapse-element directory-element-${this.collapsibleId}"
             id="${stripName(name)}-${this.collapsibleId}" 
             class="directory-line"
             data-path="${path}"
@@ -124,7 +110,7 @@ class CollapsibleBar{
 
     makeFileDOM(name, path){
         return `
-        <li class="file-element collapse-element"
+        <li class="file-element collapse-element file-element-${this.collapsibleId}"
             id="${name.replace(".","")}-${this.collapsibleId}" 
             class="directory-line"
             data-path="${path}"
@@ -134,15 +120,15 @@ class CollapsibleBar{
         </li>`
     }
     
-    createCollapsibleFileMenu(element){
+    createCollapsibleFileMenu(){
         const hostId = this.hostId
-        $.contextMenu({
-            selector: `#${element.id}`, 
-            callback: function(key, options) {
-                if(key == 'Open file') sendEvent(`collapsible-file-open-${hostId}`, { path:element.dataset.path, id:hostId })
-                else if(key == 'Open in Editor') new Editor(element.dataset.path)
-                else if(key == 'Delete') sendEvent(`collapsible-file-delete-${hostId}`, { path:element.dataset.path, id:hostId })
-                else if(key == 'Get info') popup(element.dataset)
+        return $.contextMenu({
+            selector: `.file-element-${this.collapsibleId}`, 
+            callback: function(key, options){
+                if(key == 'Open file') sendEvent(`collapsible-file-open-${hostId}`, { path:this.context.dataset.path, id:hostId })
+                else if(key == 'Open in Editor') new Editor(this.context.dataset.path)
+                else if(key == 'Delete') sendEvent(`collapsible-file-delete-${hostId}`, { path:this.context.dataset.path, id:hostId })
+                else if(key == 'Get info') popup(this.context.dataset.path)
             },   
             items: {
                 "Open file": {name: "Open file", icon: 'fa-edit'},
@@ -153,14 +139,14 @@ class CollapsibleBar{
         });
     }
     
-    createCollapsibleDirectoryMenu(element){
+    createCollapsibleDirectoryMenu(){
         const hostId = this.hostId
-        $.contextMenu({
-            selector: `#${element.dataset.summaryid}`, 
+        return $.contextMenu({
+            selector: `.directory-element-${this.collapsibleId}`, 
             callback: function(key, options) {
-                if(key == 'Open in Explorer') new FileExplorer(0,0, { workingDir:element.dataset.path })
-                else if(key == 'Delete') sendEvent(`collapsible-directory-delete-${hostId}`, { path:element.dataset.path, id:hostId })
-                else if(key == 'Get info') popup(element.dataset)
+                if(key == 'Open in Explorer') new FileExplorer(0,0, { workingDir:this.context.dataset.path })
+                else if(key == 'Delete') sendEvent(`collapsible-directory-delete-${hostId}`, { path:this.context.dataset.path, id:hostId })
+                else if(key == 'Get info') popup(this.context.dataset.path)
             },   
             items: {
                 "Open in Explorer": {name: "Open in Explorer", icon: 'fa-edit'},

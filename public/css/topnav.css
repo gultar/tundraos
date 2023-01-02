@@ -58,6 +58,7 @@ nav a {
 
 nav a:hover { 
 	background-color: var(--hover-color); 
+	color:var(--nav-background-color);
 }
 
 /* Hide Dropdowns by Default */
