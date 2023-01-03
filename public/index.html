@@ -58,6 +58,7 @@
     <script src="./js/window-manager/create-window.js"></script> 
     <script src="./js/applications/rich-text-editor.js"></script>
     <script src="./js/applications/markdown-editor.js"></script>
+    <script src="./js/applications/notepad.js"></script>
     <!-- Init scripts -->
     
     <script src="./js/init-script.js" defer></script>
@@ -171,6 +172,10 @@
                 <a data-name="markdown-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new MarkdownEditor()))" id="markdown-editor-icon">
                     <img class="desktop-icon" src="./images/icons/markdown-color-large.png">
                     <span>Text Editor</span>
+                </a>
+                <a data-name="notepad-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Notepad()))" id="notepad-icon">
+                    <img class="desktop-icon" src="./images/icons/text-editor-color-large.png">
+                    <span>Notepad</span>
                 </a>
             </div>
 

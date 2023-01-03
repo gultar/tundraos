@@ -27,8 +27,8 @@ app.on('ready', async () => {
     runServer({ electron:true, mountPoint:process.MOUNT_POINT || 'system' })
     
     const win = new BrowserWindow({
-      width:1366,
-      height:768,
+      width:(fullscreen? 1366:800),
+      height:(fullscreen? 768:600),
       fullscreen:fullscreen,
       kiosk: fullscreen,
       autoHideMenuBar: true,
