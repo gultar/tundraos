@@ -87,8 +87,9 @@ class SaveAsDialog{
     }
 
     launchWindow(){
-        this.dialogWindow = createWindow({ 
+        this.dialogWindow = new ApplicationWindow({ 
             title: "File Explorer",
+            label:`explorer-${this.explorerId}`,
             width:this.width,
             height:this.height,
             modal:this.modal,

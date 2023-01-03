@@ -52,8 +52,7 @@ app.on('ready', async () => {
 });
 
 app.on("web-contents-created", (e, contents) => {
-    console.log("Event", e)
-   contextMenu({
+    contextMenu({
       window: contents,
       showInspectElement: true
    });

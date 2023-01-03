@@ -11,6 +11,10 @@ const makeDesktopMenu = () =>{
                 label: 'Open Terminal',
                 iconHTML: `<img src="./images/icons/console.png" height="20px" width="20px"></i>`,
                 callback: (e) => new TerminalWindow(e.pageX/2, e.pageY/2)
+            },{
+                label: 'Open Browser',
+                iconHTML: `<img src="./images/icons/browser.png" height="20px" width="20px"></i>`, 
+                callback: ()=>new Browser(),
             },{ 
                 label: 'Open Explorer', 
                 iconHTML: `<img src="./images/icons/file-explorer.png" height="20px" width="20px"></i>`,

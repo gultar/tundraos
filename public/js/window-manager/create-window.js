@@ -1,16 +1,40 @@
 window.openWindows = {}
 window.launchSequence = []
 
-const createWindow = (opts) =>{
-    if(!opts.width) opts.width = "500"
-    if(!opts.height) opts.height = "350"
-    const newWindow = new WinBox(opts)
-    newWindow.min = false
-    const name = opts.label || opts.title
-    newWindow.launcher = opts.launcher
-    window.openWindows[name] = newWindow
+// const createWindow = (opts) =>{
+//     if(!opts.width) opts.width = "500"
+//     if(!opts.height) opts.height = "350"
+//     const newWindow = new WinBox(opts)
+//     newWindow.min = false
+//     const name = opts.label || opts.title
+//     newWindow.launcher = opts.launcher
+//     window.openWindows[name] = newWindow
     
-    return newWindow
+//     return newWindow
+// }
+
+class ApplicationWindow extends WinBox{
+    constructor(opts){
+        if(!opts.width) opts.width = "500"
+        if(!opts.height) opts.height = "350"
+        super(opts)
+        this.min = false
+        
+        this.name = opts.label || opts.title
+        this.launcher = opts.launcher
+        
+        this.onclose = (callback=()=>{}) =>{
+            delete window.openWindows[this.name]
+            opts.onclose(callback)
+        }
+        
+        window.openWindows[this.name] = this
+
+    }
+    
+    destroy(callback){
+        delete window.openWindows[this.name]
+    }
 }
 
 const minimizeAllWindows = (force=false) =>{

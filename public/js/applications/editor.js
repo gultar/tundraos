@@ -83,7 +83,7 @@ class Editor{
             this.saved = false
         });
         
-        this.winbox = createWindow({
+        this.winbox = new ApplicationWindow({
             title:"Code Editor",
             label: `editor-${this.editorId}`, 
             height:"95%", 
@@ -91,6 +91,7 @@ class Editor{
             mount:this.editorWrapper,
             onclose:()=>{
                 this.close()
+                // this.winbox.destroy()
             }
         })
 
@@ -223,7 +224,7 @@ class Editor{
         this.editor.destroy()
         this.editorWrapper.remove()
         this.editor.container.remove()
-        delete window.openWindows[`editor-${this.editorId}`]
+        // delete window.openWindows[`editor-${this.editorId}`]
     }
 
     makeFolderView(){

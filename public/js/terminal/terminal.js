@@ -82,10 +82,10 @@ class Terminal{
       //Applications
       web:(args)=>this.startBrowser(args),
       browser:(args)=>this.startBrowser(args),
-      wiki:()=>runWeb(["https://wikipedia.org"]),
-      gdt:()=>runWeb(["https://gdt.oqlf.gouv.qc.ca/"]),
-      iching:()=>runWeb(["https://gultar.github.io/iching/"]),//
-      georatio:()=>runWeb(["https://georatio.com/"]),
+      wiki:()=>new Browser("https://wikipedia.org"),
+      gdt:()=>new Browser("https://gdt.oqlf.gouv.qc.ca/"),
+      iching:()=>new Browser("https://gultar.github.io/iching/"),//
+      georatio:()=>new Browser("https://georatio.com/"),
       linguee:(args)=>runLinguee(args),
       tirex:()=>runTirex(),
       map:()=>runMap(),
@@ -288,7 +288,7 @@ class Terminal{
 
   startBrowser(args){
     const url = args[0]
-    launchBrowser(url)
+    new Browser(url)
   }
 
   async testSomething(args){

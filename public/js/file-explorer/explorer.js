@@ -200,7 +200,7 @@ class FileExplorer{
     }
 
     launchWindow(){
-        createWindow({ 
+        new ApplicationWindow({ 
             title: "File Explorer",
             label:"file-explorer-"+this.explorerId,
             height:"60%", 

@@ -62,7 +62,7 @@ class MarkdownEditor{
             console.log('this.editorDOM',this.editorDOM)
             this.editor = new SimpleMDE({ element: this.editorDOM });
             
-            this.winbox = createWindow({ 
+            this.winbox = new ApplicationWindow({ 
                 title: "Markdown Editor",
                 label:`markdown-editor-${this.mdEditorId}`,
                 height:"95%", 
@@ -71,6 +71,7 @@ class MarkdownEditor{
                 onclose:()=>{
                     this.destroy()
                     this.listenerController.abort()
+                    // this.winbox.destroy()
                 }
             })
             
@@ -233,6 +234,6 @@ class MarkdownEditor{
         this.editorWrapperDOM.remove()
         this.editorDOM.remove()
         this.editor = null
-        delete window.openWindows[`markdown-editor-${this.mdEditorId}`]
+        // delete window.openWindows[`markdown-editor-${this.mdEditorId}`]
     }
 }

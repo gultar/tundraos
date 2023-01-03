@@ -54,13 +54,15 @@ class Notepad{
             this.saved = false
         });
         
-        this.winbox = createWindow({ 
-            title: "Editor", 
+        this.winbox = new ApplicationWindow({ 
+            title: "Notepad",
+            label:`notepad-${this.editorId}`,
             height:"95%", 
             width:"80%",
             mount:this.editorWrapper,
             onclose:()=>{
                 this.close()
+                // this.winbox.destroy()
             }
         })
 
@@ -129,6 +131,7 @@ class Notepad{
         this.editor.destroy()
         this.editorWrapper.remove()
         this.editor.container.remove()
+        // delete window.openWindows[`notepad-${this.notepadId}`]
     }
 
     extractFilename(path){

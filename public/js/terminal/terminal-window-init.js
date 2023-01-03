@@ -1,6 +1,6 @@
 //  const Terminal = require('./terminal')
  const activeTerminals = []
-
+window.activeTerminals = {}
 //  const spawnTerminalContainer = ()=>{
 //   //Assign a new directory pointer id everytime a terminal window is created
 //    const id = Date.now() 
@@ -109,7 +109,7 @@ class TerminalWindow{
     this.term = new Terminal(this.terminalId, this.directoryPointerId);
     this.term.init();
 
-    this.termWindow = createWindow({ 
+    this.termWindow = new ApplicationWindow({ 
         x:this.x,
         y:this.y,
         label:"terminal-window-"+this.terminalId,
@@ -123,7 +123,9 @@ class TerminalWindow{
             this.terminalDOM.remove();
             this.terminalDOM.style.visibility = "hidden"
             this.term = null
-            delete window.openWindows["terminal-window-"+this.terminalId]
+            
+            delete window.activeTerminals[this.terminalId]
+            // delete window.openWindows["terminal-window-"+this.terminalId]
         },
     });
 
@@ -168,7 +170,7 @@ class TerminalWindow{
     `
     const parentNode = $("#main-container")
     parentNode.append(domElement)
-    activeTerminals.push(this.terminalId)
+    window.activeTerminals[this.terminalId] = this.term
     return true
   }
 

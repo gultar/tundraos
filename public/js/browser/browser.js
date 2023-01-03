@@ -69,7 +69,7 @@ class Browser{
     }
     
     async openWindow(){
-        this.browserWindow = createWindow({
+        this.browserWindow = new ApplicationWindow({
             height:"80%",
             width:"80%", 
             title:"Browser",
@@ -83,6 +83,7 @@ class Browser{
             onclose:()=>{
                 // this.browsersContainer.innerHTML = this.otherBrowsers
                 this.close()
+                // this.browserWindow.destroy()
             } 
         })
     
@@ -95,7 +96,7 @@ class Browser{
         window.removeEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
         this.browser.removeEventListener("keypress", (e)=>this.pressEnterSubmit(e))
         this.browser.remove()
-        delete window.openWindows[`browser-${this.browserNumber}`]
+        // delete window.openWindows[`browser-${this.browserNumber}`]
     }
     
     visitURLHandler(event){

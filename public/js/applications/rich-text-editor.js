@@ -85,7 +85,7 @@ class RichTextEditor{
                 }
             });
             
-            this.winbox = createWindow({ 
+            this.winbox = new ApplicationWindow({ 
                 title: "Quill Editor",
                 label:`text-editor-${this.textEditorId}`,
                 height:"95%", 
@@ -93,7 +93,7 @@ class RichTextEditor{
                 mount:this.editorWrapperDOM,
                 onclose:()=>{
                     this.destroy()
-                    
+                    // this.winbox.destroy()
                 }
             })
             
@@ -282,6 +282,6 @@ class RichTextEditor{
         this.editorWrapperDOM.remove()
         this.editorDOM.remove()
         this.editor = null
-        delete window.openWindows[`text-editor-${this.textEditorId}`]
+        // delete window.openWindows[`text-editor-${this.textEditorId}`]
     }
 }

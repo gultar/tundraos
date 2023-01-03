@@ -7,7 +7,7 @@ let FileSystem = {}
 let persistance = {}
 let PointerPool = {}
 
-const buildUserspace = (username='root') =>{
+const buildUserspace = (username='root', rootPath=".") =>{
     let mountPoint = process.MOUNT_POINT || "system"
 
     const log = (...text) =>{
@@ -77,7 +77,7 @@ const buildUserspace = (username='root') =>{
     }
 
     if(username == 'root'){
-        userspacePath = "."
+        userspacePath = rootPath
     }
     
     log("Standy as I attempt to load the file system")
