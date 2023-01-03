@@ -196,11 +196,13 @@ class FileExplorer{
         this.fullPaths = []
         this.workingDir = ""
         this.collapsible.destroy()
+        delete window.openWindows["file-explorer-"+this.explorerId]
     }
 
     launchWindow(){
         createWindow({ 
-            title: "File Explorer", 
+            title: "File Explorer",
+            label:"file-explorer-"+this.explorerId,
             height:"60%", 
             width:"70%", 
             x:this.x,

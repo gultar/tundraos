@@ -63,7 +63,8 @@ class MarkdownEditor{
             this.editor = new SimpleMDE({ element: this.editorDOM });
             
             this.winbox = createWindow({ 
-                title: "Markdown Editor", 
+                title: "Markdown Editor",
+                label:`markdown-editor-${this.mdEditorId}`,
                 height:"95%", 
                 width:"80%",
                 mount:this.editorWrapperDOM,
@@ -232,5 +233,6 @@ class MarkdownEditor{
         this.editorWrapperDOM.remove()
         this.editorDOM.remove()
         this.editor = null
+        delete window.openWindows[`markdown-editor-${this.mdEditorId}`]
     }
 }

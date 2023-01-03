@@ -21,7 +21,9 @@ class Browser{
         this.browser = document.querySelector(`#browser-container-${this.browserNumber}`)
         this.webview = document.querySelector("#webview-"+this.browserNumber)
         this.urlBar = document.getElementById('url-bar-'+this.browserNumber)
-    
+        this.webview.addEventListener("keypress",(event, message)=>{
+            console.log("Webview keypress", event, message)
+        })
         this.openWindow()
         
         window.addEventListener("message", (event)=>{
@@ -63,24 +65,15 @@ class Browser{
         window.ipcRenderer.on('download-complete', this.downloadCompleteHandler)
         this.browser.addEventListener("keypress", (e)=>this.pressEnterSubmit(e))
         
-        
-        $(`#webview-${this.browserNumber}`).click(function(e) {
-            if ( e.ctrlKey ) {
-                console.log('Ctrl click event fired')
-                // return launchBrowser(a.href)
-            } else {
-                console.log("Normal click")
-                //normal click
-            }
-        });
 
     }
     
     async openWindow(){
-        this.browserWindow = new WinBox({
+        this.browserWindow = createWindow({
             height:"80%",
             width:"80%", 
-            title:"Browser", 
+            title:"Browser",
+            label:`browser-${this.browserNumber}`,
             mount:this.browser, 
             launcher:{
                 //enables start at boot
@@ -102,6 +95,7 @@ class Browser{
         window.removeEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
         this.browser.removeEventListener("keypress", (e)=>this.pressEnterSubmit(e))
         this.browser.remove()
+        delete window.openWindows[`browser-${this.browserNumber}`]
     }
     
     visitURLHandler(event){

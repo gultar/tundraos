@@ -9,7 +9,7 @@ const createWindow = (opts) =>{
     const name = opts.label || opts.title
     newWindow.launcher = opts.launcher
     window.openWindows[name] = newWindow
-
+    
     return newWindow
 }
 
@@ -17,7 +17,8 @@ const minimizeAllWindows = (force=false) =>{
     for(const windowName in window.openWindows){
         const instance = window.openWindows[windowName]
         const state = (force?true:!instance.min)
-        instance.minimize(state)
+        if(instance && instance.minimize) 
+            instance.minimize(state)
     }
 }
 
@@ -47,5 +48,28 @@ const loadWindowState = () =>{
     }
 
     window.launchSequence = []
+}
+
+const cycleThroughWindows = () =>{
+    let position = 0
+    let windowNames = []
+    $(document).keydown(function(event) {
+        if (event.ctrlKey && event.which == 9) {
+            windowNames = Object.keys(window.openWindows)
+            console.log(Object.keys(window.openWindows))
+            minimizeAllWindows("force")
+            if(windowNames.length > 0){
+                console.log("Position", position)
+                const windowName = windowNames[position]
+                const openWindow = window.openWindows[windowName]
+                console.log('Open Window', openWindow)
+                if(openWindow) openWindow.minimize(false)
+                position++
+                if(position >= windowNames.length) position = 0
+                
+                
+            }
+        }
+    });
 }
 

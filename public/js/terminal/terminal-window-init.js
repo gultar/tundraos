@@ -123,6 +123,7 @@ class TerminalWindow{
             this.terminalDOM.remove();
             this.terminalDOM.style.visibility = "hidden"
             this.term = null
+            delete window.openWindows["terminal-window-"+this.terminalId]
         },
     });
 

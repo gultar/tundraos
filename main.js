@@ -4,7 +4,7 @@ const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 const runServer = require('./server.js')
 const {listenForDownloads} = require('./src/downloads/download-listener')
-
+const contextMenu = require("electron-context-menu")
 
 let fullscreen = true
 if(process.argv.includes("--no-full")){
@@ -50,3 +50,11 @@ app.on('ready', async () => {
     listenForDownloads(win)
   
 });
+
+app.on("web-contents-created", (e, contents) => {
+    console.log("Event", e)
+   contextMenu({
+      window: contents,
+      showInspectElement: true
+   });
+})
