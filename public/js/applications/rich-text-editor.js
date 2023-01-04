@@ -282,6 +282,7 @@ class RichTextEditor{
         this.editorWrapperDOM.remove()
         this.editorDOM.remove()
         this.editor = null
+        destroyPointer(this.dirPointerId)
         // delete window.openWindows[`text-editor-${this.textEditorId}`]
     }
 }

@@ -5,6 +5,7 @@ const path = require('path');
 const runServer = require('./server.js')
 const {listenForDownloads} = require('./src/downloads/download-listener')
 const contextMenu = require("electron-context-menu")
+const mapLinuxFs = require("./src/filesystem/map-linux-fs")
 
 let fullscreen = true
 if(process.argv.includes("--no-full")){
@@ -19,11 +20,20 @@ if(process.argv.includes("--silent") || process.argv.includes("-s")){
   process.silent = true
 }
 
-process.MOUNT_POINT = "system"
+if(process.argv.includes("--full-os") || process.argv.includes("-f")){
+  process.fullOs = true
+}
 
+
+if(!process.fullOs)process.MOUNT_POINT = 'system'
+else process.MOUNT_POINT = "/"
 
 app.on('ready', async () => {
-    
+    if(process.fullOs){
+      const linuxFs = await mapLinuxFs()
+      global.linuxFs = linuxFs
+    }
+
     runServer({ electron:true, mountPoint:process.MOUNT_POINT || 'system' })
     
     const win = new BrowserWindow({

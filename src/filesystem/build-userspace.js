@@ -1,59 +1,61 @@
 const VirtualFileSystem = require('../../public/js/filesystem/virtualfilesystem.js')
-const { buildFileSystemRepresentation, getBuildStats } = require('./dir-build.js')
+const buildWorker = require('./build-controller.js')
 const Persistance = require('./persistance.js')
 const fs = require('fs')
+const mapLinuxFs = require('./map-linux-fs.js')
+const fsa = require("fs").promises
 
 let FileSystem = {}
 let persistance = {}
 let PointerPool = {}
 
-const buildUserspace = (username='root', rootPath=".") =>{
+class Userspace{
+    constructor(username){
+        this.username = username
+        this.userspacePath=`./public/userspaces/${username}`
+        this.structure = {
+            home:{
+                desktop:{},
+                documents:{},
+                downloads:{},
+                applications:{},
+                images:{}
+            },
+            sys:{
+                settings:{}
+            }
+        }
+
+        this.build()
+    }
+
+    build(dirlevel=this.structure, path=this.userspacePath){
+        const dirnames = Object.keys(dirlevel).filter(name => name != '..')
+        for(const dirname of dirnames){
+            const dirpath = `${path}/${dirname}`
+            if(!fs.existsSync(dirpath)){
+                try{
+                    fs.mkdirSync(dirpath)
+                    this.build(dirlevel[dirname], dirpath)
+                }catch(e){
+                    console.log(e)
+                    throw e
+                }
+            }
+        }
+
+        return true
+    }
+}
+
+const buildUserspace = async (username='root', rootPath="/") =>{
     let mountPoint = process.MOUNT_POINT || "system"
 
     const log = (...text) =>{
         console.log(`[${username}:>]`, ...text)
     }
-
-    class Userspace{
-        constructor(userspacePath=`./public/userspaces/${username}`){
-            this.userspacePath = userspacePath
-            this.structure = {
-                home:{
-                    desktop:{},
-                    documents:{},
-                    downloads:{},
-                    applications:{},
-                    images:{}
-                },
-                sys:{
-                    settings:{}
-                }
-            }
     
-            this.build()
-        }
-    
-        build(dirlevel=this.structure, path=this.userspacePath){
-            const dirnames = Object.keys(dirlevel).filter(name => name != '..')
-            for(const dirname of dirnames){
-                const dirpath = `${path}/${dirname}`
-                if(!fs.existsSync(dirpath)){
-                    try{
-                        fs.mkdirSync(dirpath)
-                        this.build(dirlevel[dirname], dirpath)
-                    }catch(e){
-                        console.log(e)
-                        throw e
-                    }
-                }
-            }
-    
-            return true
-        }
-    }
-    
-    let userspacePath = `./public/userspaces/${username}`
-
+    let userspacePath = "."
 
     if(!fs.existsSync("./public/userspaces")){
         try{
@@ -64,11 +66,11 @@ const buildUserspace = (username='root', rootPath=".") =>{
         }
     }
     
-    if(!fs.existsSync(userspacePath)){
+    if(!fs.existsSync(`./public/userspaces/${username}`)){
         try{
-            fs.mkdirSync(userspacePath)
+            fs.mkdirSync(`./public/userspaces/${username}`)
     
-            const userspace = new Userspace(userspacePath)
+            const userspace = new Userspace(username)
     
         }catch(e){
             console.log(e)
@@ -76,28 +78,46 @@ const buildUserspace = (username='root', rootPath=".") =>{
         }
     }
 
-    if(username == 'root'){
-        userspacePath = rootPath
-    }
-    
     log("Standy as I attempt to load the file system")
     
-    let userDir = buildFileSystemRepresentation(userspacePath)
     
-    persistance = new Persistance(username)
+    persistance = new Persistance(username, rootPath, userspacePath)
+    let directories = {}
+
+    if(!process.fullOs) directories = await buildWorker(".")
+    else directories = global.linuxFs
+
+    let sharedspace = await buildWorker("./public/sharedspace")
     
+    let filesystemStructure = {}
     
-    FileSystem = new VirtualFileSystem(username, persistance, userspacePath)
-    const filesystemStructure = { 
-        [mountPoint]:userDir,
-        home:{},
-        vars:{} 
+    if(username === "root"){
+        filesystemStructure = { 
+            ...directories,
+        }
+        
+    }else{
+        filesystemStructure = { 
+            public:{
+                userspaces:{
+                    [username]:{
+                        ...directories.public.userspaces[username]
+                    },
+                },
+                sharedspace:{
+                    ...sharedspace,
+                },
+            }
+        }
     }
     
+
+    FileSystem = new VirtualFileSystem(username, persistance, userspacePath)    
     FileSystem.import(filesystemStructure)
+
+    if(username === 'root' && !process.fullOs) FileSystem.root().contents = directories.contents
     
     log('File system loaded successfully')
-    log(getBuildStats())
 
     return FileSystem
 }

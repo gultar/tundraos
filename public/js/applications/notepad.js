@@ -131,6 +131,7 @@ class Notepad{
         this.editor.destroy()
         this.editorWrapper.remove()
         this.editor.container.remove()
+        destroyPointer(this.dirPointerId)
         // delete window.openWindows[`notepad-${this.notepadId}`]
     }
 

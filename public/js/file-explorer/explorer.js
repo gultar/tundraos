@@ -196,7 +196,7 @@ class FileExplorer{
         this.fullPaths = []
         this.workingDir = ""
         this.collapsible.destroy()
-        delete window.openWindows["file-explorer-"+this.explorerId]
+        destroyPointer(this.pointerId)
     }
 
     launchWindow(){

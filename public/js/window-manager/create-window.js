@@ -28,6 +28,7 @@ class ApplicationWindow extends WinBox{
             opts.onclose(callback)
         }
         
+        
         window.openWindows[this.name] = this
 
     }
@@ -59,15 +60,19 @@ const saveWindowState = () =>{
     localStorage.setItem("launchSequence", JSON.stringify(window.launchSequence))
 }
 
-const loadWindowState = () =>{
+const loadWindowState = async () =>{
     const launchSequenceString = localStorage.getItem("launchSequence")
     const launchSequence = JSON.parse(launchSequenceString)
     console.log('launchSequence', launchSequence)
     for(const launcher of launchSequence){
-        //
-        console.log('launcher.name', window[launcher.name])
-        console.log('launcher.params', ...launcher.params)
-        window[launcher.name](...launcher.params)
+        try{
+            
+            console.log('launcher.name', window[launcher.name])
+            console.log('launcher.params', ...launcher.params)
+            window[launcher.name](...launcher.params)
+        }catch(e){
+            console.log('Window Launcher Error', e)
+        }
         
     }
 

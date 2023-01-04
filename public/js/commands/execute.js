@@ -29,7 +29,9 @@ const getPointer = async (instanceId) =>{
 const getNewPointerId = async (instanceId) =>{
   let id = false
   if(location.hostname == 'localhost'){
-    const { pointerId } = await Promise.resolve($.get("http://localhost:8000/makepointer"))
+    const { pointerId } = await Promise.resolve($.post("http://localhost:8000/makepointer", {
+      instanceId:instanceId
+    }))
     id = pointerId
   }else{
     id = Date.now() //If local file without server, make unique id from timestamp
@@ -38,8 +40,18 @@ const getNewPointerId = async (instanceId) =>{
   return id
 }
 
-const destroyPointer = (id) =>{
-
+const destroyPointer = async (id) =>{
+  if(!id) throw new Error("Destroy Pointer: Need to provide id of directory pointer to destroy")
+  if(location.hostname == 'localhost'){
+    const { result, error } = await Promise.resolve($.post("http://localhost:8000/destroypointer", {
+        id:id
+    }))
+    if(error) return { error:error }
+    else return result
+    
+  }else{
+    delete directoryPointers[id] //If local file without server, make unique id from timestamp
+  }
 }
 
 const runFileSystemCommand = (cmd, args=[]) =>{
@@ -49,6 +61,29 @@ const runFileSystemCommand = (cmd, args=[]) =>{
   }catch(e){
     console.log(e)
     return { error:e.message }
+  }
+}
+
+const runWifiCommand = async (wifiCmd, params)=>{
+  console.log('Params', params)
+  const { ssid, password, iface } = params
+  try{
+    const response = await Promise.resolve($.post("http://localhost:8000/wifi", {
+          wifiCmd:wifiCmd,
+          ssid:ssid,
+          password:password,
+          iface:iface
+    }));
+
+    console.log("RUN", {          ssid:ssid,
+      password:password,
+      iface:iface})
+    const { error, success } = response
+    
+    if(error) return { error:error }
+    else return { result:success }
+  }catch(e){
+    return { error:e }
   }
 }
 

@@ -10,12 +10,17 @@ const log = (...text) =>{
 let mountPoint = "system"
 
 class Persistance{
-    constructor(user="", rootDir=".", userspaceDir="./public/userspaces/"){
+    constructor(
+        user="", 
+        rootDir=".", 
+        userspaceDir="./public/userspaces/",
+        pointerWorkingDir=false){
         // console.log('User', user)
         this.user = user
         this.rootDir = rootDir
         this.userspaceDir = userspaceDir
-        this.baseDir = `${userspaceDir}${user}`
+        this.baseDir = userspaceDir//`${userspaceDir}${user}`
+        this.pointerWorkingDir = pointerWorkingDir //should be pointer .pwd()
         
         if(user == 'root'){
             this.baseDir = this.rootDir//`./public` 
@@ -36,15 +41,20 @@ class Persistance{
         mountPoint = process.MOUNT_POINT || 'system'
     }
 
+    getCurrentDir(path){
+        if(this.pointerWorkingDir){
+            path = this.pointerWorkingDir()
+            console.log("Path is:", path)
+        }
+
+        return path
+    }
+
     resolvePath(pathString){
-        
-        pathString = pathString.replace(mountPoint, '')
-        this.currentDir = this.currentDir.replace(mountPoint, '').replace('//', '/')
-        this.baseDir = this.baseDir.replace(mountPoint, '')
-        const paths = pathString.split("/").filter(path => path !== "")
-        
+        this.currentDir = this.getCurrentDir()
         let truePath = this.baseDir + this.currentDir
-        
+
+        const paths = pathString.split("/").filter(path => path !== "")
         for(const path of paths){
             if(path !== ".."){
                 truePath = truePath + "/" + path
@@ -53,15 +63,39 @@ class Persistance{
                 truePath.pop()
                 truePath = truePath.join("/")
             }
-
-            truePath = truePath.replace("//", "/")
         }
 
+        truePath = truePath.replace("//", "/")
         return truePath
     }
 
+    // resolvePath(pathString){
+    //     this.currentDir = this.getCurrentDir()
+    //     pathString = pathString.replace(mountPoint, '')
+    //     this.currentDir = this.currentDir.replace(mountPoint, '').replace('//', '/')
+    //     this.baseDir = this.baseDir.replace(mountPoint, '')
+    //     const paths = pathString.split("/").filter(path => path !== "")
+        
+    //     let truePath = this.baseDir + this.currentDir
+        
+    //     for(const path of paths){
+    //         if(path !== ".."){
+    //             truePath = truePath + "/" + path
+    //         }else{
+    //             truePath = truePath.split("/")
+    //             truePath.pop()
+    //             truePath = truePath.join("/")
+    //         }
+
+            
+    //     }
+
+    //     truePath = truePath.replace("//", "/")
+    //     return truePath
+    // }
+
     cd(path){
-        this.currentDir = path
+        this.currentDir = this.getCurrentDir(path)
     }
 
     async touch(path, content=" "){

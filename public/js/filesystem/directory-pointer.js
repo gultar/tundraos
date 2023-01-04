@@ -10,7 +10,8 @@ class DirectoryPointer{
         this.rootDir = root
         this.workingDir = root
         this.persistance = persistance
-
+        this.persistance.pointerWorkingDir = ()=>this.pwd()
+        this.lastUsed = Date.now()
     }
 
     exposeExternalCommands(){
@@ -253,21 +254,21 @@ class DirectoryPointer{
     }
 
     async cp(pathFrom, pathTo){
-        let copied = false
         if(!pathFrom) throw new Error('Need to provide origin path of file to copy')
         if(!pathTo) throw new Error('Need to provide destination path of file to copy')
-
+        let copied = false
         const found = this.search(pathFrom)
         if(!found) throw new Error(`Could not find file ${pathFrom}`)
 
         const { file, directory } = found
         if(!file && directory){
-            //throw new Error(`-r not specified; omitting directory ${pathFrom}`)
             copied = this.mkdir(pathTo)
+            
         }else if(file && !directory){
-            let content = await this.getFileContent(pathFrom)
-            if(!content) content = " "
+            const content = await this.getFileContent(pathFrom)
             copied = this.touch(pathTo, content)
+            
+            
         }
 
         this.persistance.cp(pathFrom, pathTo)

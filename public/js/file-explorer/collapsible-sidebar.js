@@ -48,6 +48,7 @@ class CollapsibleBar{
     destroy(){
         $.contextMenu("destroy",`.file-element-${this.collapsibleId}`)
         $.contextMenu("destroy",`.directory-element-${this.collapsibleId}`)
+        destroyPointer(this.pointerId)
     }
     
     async openAtDirectory(){

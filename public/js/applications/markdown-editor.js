@@ -234,6 +234,7 @@ class MarkdownEditor{
         this.editorWrapperDOM.remove()
         this.editorDOM.remove()
         this.editor = null
+        destroyPointer(this.dirPointerId)
         // delete window.openWindows[`markdown-editor-${this.mdEditorId}`]
     }
 }

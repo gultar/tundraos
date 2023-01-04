@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "display": "DISPLAY=:1 electron . --silent-build",
+    "electron-full": "electron . --silent-build --full-os",
     "electron": "electron . --silent-build",
     "dev": "electron . --no-full"
   },
@@ -28,6 +29,7 @@
     "mime": "^3.0.0",
     "morgan": "^1.10.0",
     "node-downloader-helper": "^2.1.6",
+    "node-wifi": "^2.0.16",
     "nodejs-file-downloader": "^4.10.3",
     "nodemon": "^2.0.20",
     "socket.io": "^4.5.4",

@@ -125,6 +125,7 @@ class TerminalWindow{
             this.term = null
             
             delete window.activeTerminals[this.terminalId]
+            destroyPointer(this.directoryPointerId)
             // delete window.openWindows["terminal-window-"+this.terminalId]
         },
     });

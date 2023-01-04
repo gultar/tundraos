@@ -8,6 +8,7 @@ const { createServer } = require("http")
 const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 const hyperwatch = require("hyperwatch")
+const wifiTools = require("./src/wifi/network-tools")
 
 const log = (...text) =>{
   console.log("[server:>]", ...text)
@@ -81,7 +82,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
       if(availableCommands[cmd]){
         const pointer = FileSystem.getPointer(pointerId)
         const result = await pointer[cmd](...args)
-        
+        pointer.lastUsed = Date.now()
         return result
       }else{
         return { error:`Command ${cmd} unavailable` }
@@ -97,7 +98,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   const httpServer = createServer(expressApp)
   const port = process.env.PORT || 8000;
   
-  expressApp.get("/", (req, res)=>{
+  expressApp.get("/", async (req, res)=>{
     const query = req.query
     const { token, username } = query
     if(!query.token){
@@ -110,7 +111,7 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     }else{
       
       if(FileSystem === null){
-        FileSystem = buildUserspace(username)
+        FileSystem = await buildUserspace(username)
         global.FileSystem = FileSystem
       }
 
@@ -228,9 +229,37 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     else res.json({ result:result })
   });
 
-  expressApp.get("/makepointer", (req, res)=>{
-    const { id } = FileSystem.createPointer()
+  expressApp.post("/wifi", async(req, res)=>{
+      
+    const { wifiCmd, ssid, password, iface } = req.body
+    
+    if(!wifiTools[wifiCmd]) return res.send({ error:`Ẁifi Command ${wifiCmd} not found` })
+    else{
+      try{
+        console.log(wifiTools)
+        const result = await wifiTools[wifiCmd]({ ssid:ssid, password:password, iface:iface })
+        console.log('RESULT OF WIFI', result)
+        return res.send(result) 
+      }catch(e){
+        return res.send({ error:e })
+      }
+    }
+  })
+
+  expressApp.post("/makepointer", (req, res)=>{
+    const { instanceId } = req.body
+    const { id } = FileSystem.createPointer(instanceId)
     res.send({ pointerId:id })
+  })
+  
+  expressApp.post("/destroypointer", (req, res)=>{
+    const { id } = req.body
+    if(!id) res.send({ error:"Server: Need to provide Id of directory pointer to destroy" })
+    FileSystem.deletePointer(id)
+
+    console.log("Active Pointers", Object.keys(FileSystem.pointerPool))
+
+    res.send({ result:`Pointer ${id} deleted successfully` })
   })
 
   expressApp.get("/origin", (req, res)=>{

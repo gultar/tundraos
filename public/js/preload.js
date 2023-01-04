@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('ipcRenderer',{
   on:(...args)=>ipcRenderer.on(...args)
 })
 
+
 window.addEventListener('DOMContentLoaded', () => {
     const replaceText = (selector, text) => {
       const element = document.getElementById(selector)

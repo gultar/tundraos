@@ -98,6 +98,7 @@ class Terminal{
       view:async (args)=>await this.viewImage(args),
       test:async(args)=>await this.testSomething(args),
       explorer:async(args)=>await this.runExplorer(args),
+      wifi:async(args)=>await this.makeWifiCommand(args),
     }
   }
   
@@ -182,9 +183,13 @@ class Terminal{
   output(data){
     if(typeof data == 'object'){
       data = JSON.stringify(data, null, 2)
+      this.output_.insertAdjacentHTML('beforeEnd', '<pre>' + data + '</pre>');
+      this.cmdLine_.focus();
+    }else{
+      this.output_.insertAdjacentHTML('beforeEnd', '<p>' + data + '</p>');
+      this.cmdLine_.focus();
     }
-    this.output_.insertAdjacentHTML('beforeEnd', '<p>' + data + '</p>');
-    this.cmdLine_.focus();
+    
   }
 
   clear(){
@@ -241,13 +246,14 @@ class Terminal{
 
   async runEditor(args){
     const path = args[0]
+    const currentDir = await this.exec("pwd")
     const file = await this.exec("getFile", [path])
     let content = ""
     if(file){
       content = file.content
     }
 
-    new Editor(path, content)
+    new Editor(currentDir+"/"+path, content)
     return true
   }
   
@@ -289,6 +295,59 @@ class Terminal{
   startBrowser(args){
     const url = args[0]
     new Browser(url)
+  }
+
+  async makeWifiCommand(args){
+    //list, scan, connect, disconnect
+    
+
+    const [ wifiCmd, ...wifiArgs ] = args
+
+    const splitArgumentsByApostrophe = (argsBySpace) =>{
+      let argString = argsBySpace.join(" ")
+      
+      let argsByApostrophe = []
+      if(argString.includes('"')) argsByApostrophe = argString.split('"')
+      
+      if(argString.includes("'")) argsByApostrophe = argString.split("'")
+      
+      argsByApostrophe = argsByApostrophe.filter(e => e != "")
+      argsByApostrophe = argsByApostrophe.map(e => e.trim())
+      
+      return argsByApostrophe
+    }
+
+    const parseArgument = (flag, args) =>{
+      console.log(args)
+      if(!args.includes(flag)){
+        return null
+      }
+      
+      const index = args.indexOf(flag)
+      if(index == -1){
+        return null
+      }
+
+      return args[index + 1]
+      
+    }
+
+    const newArgs = splitArgumentsByApostrophe(wifiArgs)
+
+    let ssid = parseArgument("--ssid", newArgs)
+    let password = parseArgument("--password", newArgs)
+    let iface = parseArgument("--iface", newArgs)
+
+    console.log("Split",ssid, password, iface)
+
+    this.output("Running Wifi Command "+wifiCmd)
+    this.output("Standy...")
+
+    const { result, error } = await runWifiCommand(wifiCmd, { ssid:ssid, password:password, iface:iface })
+    if(error) this.output(`Wifi Error: ${JSON.stringify(error)}`)
+    else {
+      this.output(result)
+    }
   }
 
   async testSomething(args){

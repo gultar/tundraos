@@ -19,11 +19,16 @@ class Editor{
         this.init()
     }
 
-    async startEditor(filename, content=" "){
-        const [ name, ...extensions ] = filename.split(".")
-        const lastExtension = extensions[extensions.length - 1]
-        let mode = getNameFromExtension(lastExtension)
-        let theme = 'cobalt' //Read config file/json
+    async startEditor(filename, content=""){
+        let mode = false
+        let theme = false
+        
+        if(filename && !filename.error){
+            const [ name, ...extensions ] = filename.split(".")
+            const lastExtension = extensions[extensions.length - 1]
+            mode = getNameFromExtension(lastExtension)
+            theme = 'cobalt' //Read config file/json
+        }
 
         if(!mode) mode = 'text'
         if(!theme) theme = "cobalt"
@@ -40,9 +45,10 @@ class Editor{
                 if(typeof saved === 'object') saved = JSON.stringify(saved)
                 popup(`Saved file ${this.pathToFile}: ${saved}`)
                 this.saved = true
+                
             },
         });
-        editor.setValue(content);
+        if(content && !content.error) editor.setValue(content);
         window.editorInstance = editor
         return editor
     }
@@ -62,6 +68,8 @@ class Editor{
     }
 
     async init(){
+        this.dirPointerId = await getNewPointerId(this.editorId)
+       
         const { signal } = this.listenerController 
         this.editorDOM = this.injectDOM()
         this.editorWrapper = document.querySelector(`#editor-wrapper-${this.editorId}`)
@@ -69,11 +77,14 @@ class Editor{
         this.filenameDisplay = document.querySelector(`#filename-display-${this.editorId}`)
         this.filepathDisplay = document.querySelector(`#filepath-display-${this.editorId}`)
         
-        this.dirPointerId = await getNewPointerId(this.editorId)
         await this.exec('cd',["/"])
 
         if(this.pathToFile !== ''){
             this.content = await this.exec('getFileContent',[this.pathToFile])
+            if(this.content.error){
+                popup(`File Open Error: ${JSON.stringify(this.content)}`)
+                this.content = ""
+            }
         }
 
         this.editor = await this.startEditor(this.filename, this.content)
@@ -224,6 +235,7 @@ class Editor{
         this.editor.destroy()
         this.editorWrapper.remove()
         this.editor.container.remove()
+        destroyPointer(this.dirPointerId)
         // delete window.openWindows[`editor-${this.editorId}`]
     }
 
@@ -405,9 +417,7 @@ class Editor{
                 
             </div>
             <div id="folder-view-${this.editorId}" class="folder-view-editor"></div>
-            <div id="editor-${this.editorId}" class="editor" style="margin-top:10px;">
-                
-            </div>
+            <div id="editor-${this.editorId}" class="editor" style="margin-top:10px;"></div>
             <script>
                 $("#folder-view-${this.editorId}").resizable()
             </script>

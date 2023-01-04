@@ -26,6 +26,7 @@ class VirtualFileSystem{
         this.pointerPool = {}
         this.mainPointer = new DirectoryPointer(this.filesystem["/"], this.persistance)
         this.initMainPointer()
+        //this.startPointerCleaningRoutine()
     }
 
     exposeCommands(){
@@ -67,8 +68,8 @@ class VirtualFileSystem{
         return this.filesystem["/"]
     }
 
-    createPointer(){
-        const id = Date.now()
+    createPointer(id){
+        if(!id) id = Date.now()
         this.pointerPool[id] = new DirectoryPointer(this.root(), this.persistance)
 
         this.pointerPool[id].id = id
@@ -84,12 +85,26 @@ class VirtualFileSystem{
         delete this.pointerPool[id]
     }
 
+    startPointerCleaningRoutine(){
+        setInterval(()=>{
+            for(const id in this.pointerPool){
+                const pointer = this.pointerPool[id]
+
+                if(pointer.lastUsed + (60 * 1000) < Date.now()){
+                    console.log("Deleting pointer", id)
+                    delete this.pointerPool[id]
+                }
+            }
+        }, 10*1000)
+    }
+
     setDirectoryContent(directory, structureEntry){
         for(const prop in structureEntry){
             if(!Array.isArray(structureEntry[prop]) && typeof structureEntry[prop] == "object"){
                 directory[prop] = structureEntry[prop]
                 this.setDirectoryContent(directory[prop], structureEntry[prop])
             }
+            
         }
         return true
     }
