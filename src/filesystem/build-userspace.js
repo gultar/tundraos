@@ -115,7 +115,8 @@ const buildUserspace = async (username='root', rootPath="/") =>{
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)    
     FileSystem.import(filesystemStructure)
 
-    if(username === 'root' && !process.fullOs) FileSystem.root().contents = directories.contents
+    if(username === 'root' && !process.fullOs) 
+        FileSystem.root().contents = directories.contents
     
     log('File system loaded successfully')
 

@@ -14,8 +14,6 @@ const connect = ({ ssid, password, iface=null })=>{
         wifi.init({
             iface:iface
         })
-
-        console.log('RECEIVED', ssid, password, iface)
         
         if(!ssid){
             console.log('ERROR',ssid, password, iface)
@@ -126,10 +124,10 @@ const disconnect = ({ iface }) =>{
     })
 }
 
-connect({
-    ssid:"Maison Smith ☕",
-    password:""
-})
+// connect({
+//     ssid:"Maison Smith ☕",
+//     password:""
+// })
 
 // disconnect()
 

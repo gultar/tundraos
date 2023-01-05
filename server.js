@@ -53,25 +53,25 @@ let FileSystem = null
 
 const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system" }) =>{
 
-  const runCommand = async (cmd, args) =>{
-    try{
+  // const runCommand = async (cmd, args) =>{
+  //   try{
       
-      if(!args) args = []
+  //     if(!args) args = []
 
-      const availableCommands = FileSystem.exposeCommands()
-      if(availableCommands[cmd]){
-        const result = await FileSystem[cmd](...args)
+  //     const availableCommands = FileSystem.exposeCommands()
+  //     if(availableCommands[cmd]){
+  //       const result = await FileSystem[cmd](...args)
         
-        return result
-      }else{
-        return { error:`Command ${cmd} unavailable` }
-      }
+  //       return result
+  //     }else{
+  //       return { error:`Command ${cmd} unavailable` }
+  //     }
 
-    }catch(e){
-      log(e)
-      return { error:e.message }
-    }
-  }
+  //   }catch(e){
+  //     log(e)
+  //     return { error:e.message }
+  //   }
+  // }
 
   const execute = async (cmd, args, pointerId) =>{
     try{
@@ -125,10 +125,6 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
   expressApp.use("/log", express.static(__dirname + '/public/login'))
   
   expressApp.use(cors())
-//   expressApp.use(bodyParser.json());       // to support JSON-encoded bodies
-//   expressApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-//     extended: true
-//   }));
   expressApp.use(express.json({limit: '50mb'}));
   expressApp.use(bodyParser.json({ limit: "200mb" }));
   expressApp.use(bodyParser.urlencoded({ limit: "200mb",  extended: true, parameterLimit: 1000000 }));
@@ -161,33 +157,33 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     
     global.activeUser = username
     return { 
-      token:{
-        hash:hexHash.toString("hex"),
-        username:username,
-        status:200,
-      }
-  }
+        token:{
+          hash:hexHash.toString("hex"),
+          username:username,
+          status:200,
+        }
+    }
     
   }
 
   expressApp.post("/rootcmd", async (req, res)=>{
     if(global.activeUser === "root"){
       try{
-        const { command } = req.body
-        
-        if(command.substr(0, 3) == "cd "){
-          const path = command.substr(3)
-          process.chdir(path)
-          return res.send({ result:process.cwd(), error:false })
-        }else if(command.substr(0, 3) === 'node'){
+          const { command } = req.body
           
-          return res.send({ result:stdout, error:stderr })
-        }else{
-          const { stdout, stderr } = await exec(command);
-          console.log('stdout:', stdout);
-          console.error('stderr:', stderr);
-          return res.send({ result:stdout, error:stderr })
-        }
+          if(command.substr(0, 3) == "cd "){
+            const path = command.substr(3)
+            process.chdir(path)
+            return res.send({ result:process.cwd(), error:false })
+          }else if(command.substr(0, 3) === 'node'){
+            
+            return res.send({ result:stdout, error:stderr })
+          }else{
+            const { stdout, stderr } = await exec(command);
+            console.log('stdout:', stdout);
+            console.error('stderr:', stderr);
+            return res.send({ result:stdout, error:stderr })
+          }
       }catch(e){
         log(e)
         return res.send({ error:e.message, result:false })
@@ -196,11 +192,11 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     }else return res.send({ error:'UNAUTHORIZED: Only root user may run such commands', result:false })
   })
 
-  expressApp.post("/changeUser", (req, res)=>{
+  expressApp.post("/changeUser", async (req, res)=>{
     const { username } = req.body
     FileSystem = null;
     if(FileSystem === null){
-      FileSystem = buildUserspace(username) 
+      FileSystem = await buildUserspace(username) 
       global.FileSystem = FileSystem
     }
   })
@@ -215,12 +211,12 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     log(FileSystem)
   })
 
-  expressApp.post('/command', async(req, res)=> {
-    const { cmd, args } = req.body
-    const result = await runCommand(cmd, args)
-    if(result.error) res.json({ error:result.error })
-    else res.json({ result:result })
-  });
+  // expressApp.post('/command', async(req, res)=> {
+  //   const { cmd, args } = req.body
+  //   const result = await runCommand(cmd, args)
+  //   if(result.error) res.json({ error:result.error })
+  //   else res.json({ result:result })
+  // });
 
   expressApp.post('/execute', async(req, res)=> {
     const { cmd, args, pointerId } = req.body

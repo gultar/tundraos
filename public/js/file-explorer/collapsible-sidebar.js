@@ -1,7 +1,7 @@
 
 
 class CollapsibleBar{
-    constructor({ startingPath="/", mountDOM, hostId, listenerController }){
+    constructor({ startingPath="/", activeDirectory, mountDOM, hostId, listenerController }){
         if(!mountDOM) throw new Error('Collapsible bar needs a mount point in the DOM')
         if(!hostId) throw new Error("Collapsible bar needs id of host element")
         if(!listenerController) throw new Error("Collapsible bar needs listener controller to remove active listeners")
@@ -9,11 +9,13 @@ class CollapsibleBar{
         this.barDOM = `
         <div class="collapsible-container">
             <link rel="stylesheet" href="./css/collapsible.css">
-            <ul data-level="1" id="${this.collapsibleId}-bar-container" class="parent">
+            <ul data-level="1" data-name="${startingPath}" id="${this.collapsibleId}-bar-container" class="parent">
             
             </ul>
         </div>
         `
+        this.activeDirectory = activeDirectory
+        this.startingPath = startingPath
         this.mountDOM = mountDOM
         this.mountDOM.innerHTML = this.barDOM
         this.hostId = hostId
@@ -32,6 +34,8 @@ class CollapsibleBar{
         
         this.buildDOM(contents, barDOM)
 
+        
+
         window.addEventListener(`message-${this.hostId}`, (event)=>{
             const message = event.detail
             if(message.expandDir){
@@ -41,8 +45,13 @@ class CollapsibleBar{
                 
             }
         }, { signal })
+
         this.createCollapsibleFileMenu()
         this.createCollapsibleDirectoryMenu()
+
+        setTimeout(()=>{
+            this.openAtDirectory(this.activeDirectory)
+        }, 1000)
     }
     
     destroy(){
@@ -51,8 +60,26 @@ class CollapsibleBar{
         destroyPointer(this.pointerId)
     }
     
-    async openAtDirectory(){
+    async openAtDirectory(path){
         
+        const pathArray = path.split("/").filter(e => e != "")
+        let segmentedPath = ""
+        let clickCounter = 0
+        
+
+        let clickEvents = setInterval(()=>{
+            
+            if(clickCounter === pathArray.length){
+                clearInterval(clickEvents)
+                return true
+            }
+            let dirname = pathArray[clickCounter]
+            segmentedPath = segmentedPath + "/" + dirname
+            
+            let element = document.getElementById(`${this.stripName(dirname)}-${this.collapsibleId}-summary`)
+            element.click()
+            clickCounter++
+        }, 200)
     }
 
     async openDirectory(path, element){
@@ -84,24 +111,30 @@ class CollapsibleBar{
         return await exec(cmd, args, this.pointerId)
     }
 
+    stripName(name){
+        name = name.replace("@","")
+        name = name.replace("/","")
+        name = name.replace(".","")
+        return name
+    }
+
     makeDirectoryDOM(name, path, level=1){
-        const stripName = (name) =>{
-            name = name.replace("@","")
-            name = name.replace("/","")
-            name = name.replace(".","")
-            return name
-        }
+        
         return `
         <li class="directory-element collapse-element directory-element-${this.collapsibleId}"
-            id="${stripName(name)}-${this.collapsibleId}" 
+            id="${this.stripName(name)}-${this.collapsibleId}" 
             class="directory-line"
             data-path="${path}"
-            data-name="${stripName(name)}"
-            data-summaryid="${stripName(name)}-summary">
+            data-name="${this.stripName(name)}"
+            data-summaryid="${this.stripName(name)}-${this.collapsibleId}-summary">
             <details>
-                <summary id="${stripName(name)}-summary" onclick="sendEvent('message-${this.hostId}',{ expandDir:'${path}', ulElementId:'${stripName(name)}-${level}-${this.collapsibleId}-content' })">
+                <summary id="${this.stripName(name)}-${this.collapsibleId}-summary" onclick="sendEvent('message-${this.hostId}',{ expandDir:'${path}', ulElementId:'${this.stripName(name)}-${level}-${this.collapsibleId}-content' })">
                 <img src="./images/icons/folder-color-large.png" height="8px" width="8px"> ${name} </summary>
-                <ul class="directory-content" data-level="${level}" id="${stripName(name)}-${level}-${this.collapsibleId}-content">
+                <ul 
+                    class="directory-content" 
+                    data-level="${level}" 
+                    id="${this.stripName(name)}-${level}-${this.collapsibleId}-content"
+                    data-name="${name}">
                     
                 </ul
             </details>

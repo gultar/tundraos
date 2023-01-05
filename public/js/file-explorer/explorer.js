@@ -35,10 +35,11 @@ class FileExplorer{
         
         this.launchWindow()
         const folderView = document.querySelector(`#explorer-folder-view-${this.explorerId}`)
-        this.collapsible = new CollapsibleBar({ 
+        this.collapsible = new CollapsibleBar({
+            activeDirectory:this.workingDir,
             mountDOM:folderView, 
-            hostId:this.explorerId,
-            listenerController:this.listenerController
+            hostId:this.explorerId, 
+            listenerController:this.listenerController 
         })
         this.collapsible.init()
         await this.refreshExplorer()
@@ -122,16 +123,6 @@ class FileExplorer{
                                         <a 
                                             class="dir-link" 
                                             onclick="sendEvent('message-${this.explorerId}',{ 
-                                                setDir:'/${this.homePath}documents/',
-                                            })">Documents
-                                        </a>
-                                    </span>
-                                </li>
-                                <li>
-                                    <span>
-                                        <a 
-                                            class="dir-link" 
-                                            onclick="sendEvent('message-${this.explorerId}',{ 
                                                 setDir:'/${this.homePath}downloads/',
                                             })">Downloads
                                         </a>
@@ -195,21 +186,18 @@ class FileExplorer{
         this.currentDirContents = []
         this.fullPaths = []
         this.workingDir = ""
-        this.collapsible.destroy()
-        destroyPointer(this.pointerId)
     }
 
     launchWindow(){
         new ApplicationWindow({ 
-            title: "File Explorer",
-            label:"file-explorer-"+this.explorerId,
+            title: "File Explorer", 
             height:"60%", 
             width:"70%", 
             x:this.x,
             y:this.y,
             launcher:{
                 //enables start at boot
-                name:"makeFileExplorer",
+                name:"new FileExplorer",
                 params:[this.x, this.y, this.opts]
             },
             html:this.explorerDOM,

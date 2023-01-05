@@ -6,6 +6,7 @@ class Editor{
         this.editorId = Date.now()
         this.pathToFile = pathToFile
         this.filename = this.extractFilename(this.pathToFile)
+        this.dirname = this.extractPath(pathToFile)
         this.filenameDisplay = ""
         this.filepathDisplay = ""
         this.content = content
@@ -17,6 +18,7 @@ class Editor{
         this.saved = (pathToFile === '')
         this.listenerController = new AbortController();
         this.init()
+
     }
 
     async startEditor(filename, content=""){
@@ -77,10 +79,11 @@ class Editor{
         this.filenameDisplay = document.querySelector(`#filename-display-${this.editorId}`)
         this.filepathDisplay = document.querySelector(`#filepath-display-${this.editorId}`)
         
-        await this.exec('cd',["/"])
+        // await this.exec('cd',[this.pathToFile])
 
         if(this.pathToFile !== ''){
             this.content = await this.exec('getFileContent',[this.pathToFile])
+            
             if(this.content.error){
                 popup(`File Open Error: ${JSON.stringify(this.content)}`)
                 this.content = ""
@@ -164,10 +167,9 @@ class Editor{
     }
     
     collapsibleFileOpenHandler(payload, that){
-        console.log("That", that)
         
         const { path, id } = payload.detail
-        console.log('Payload',payload)
+        
         if(id !== this.editorId) return false
         
         if(!this.saved){
@@ -241,7 +243,8 @@ class Editor{
 
     makeFolderView(){
         const folderView = document.querySelector(`#folder-view-${this.editorId}`)
-        this.collapsible = new CollapsibleBar({ 
+        this.collapsible = new CollapsibleBar({
+            activeDirectory:this.dirname,
             mountDOM:folderView, 
             hostId:this.editorId, 
             listenerController:this.listenerController 

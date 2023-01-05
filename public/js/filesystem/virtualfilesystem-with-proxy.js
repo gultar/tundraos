@@ -1,34 +1,25 @@
 const { stringify } = require('./utils')
 const parenter = require('./proxy')
 const File = require('./file')
-const Directory = require('./directory')
 const DirectoryPointer = require('./directory-pointer')
 
 class VirtualFileSystem{
     constructor(username, persistance=persistanceInterface, basePath="."){
         //All objects will be treated like potential directories
         this.username = username
-        this.filesystem = {
-
-        }//new Proxy({}, parenter)
-        this.filesystem["/"] = new Directory("/", this.filesystem["/"])
-        
-        if(persistance.isInterface){
-            this.filesystem["/"].home = new Directory("home", this.filesystem["/"])
-            this.filesystem["/"].sys = new Directory("sys", this.filesystem["/"])
-            
-            this.home = this.filesystem["/"].home
-            this.sys = this.filesystem["/"].sys
-    
-            
-            this.home.desktop = new Directory("desktop", this.home)
-            this.home.documents = new Directory("documents", this.home)
-            this.home.downloads = new Directory("downloads", this.home)
-            this.home.applications = new Directory("applications", this.home)
-            this.home.images = new Directory("images", this.home)
-            this.sys.settings = new Directory("settings", this.sys)
-        }
-
+        this.filesystem = new Proxy({}, parenter)
+        this.filesystem["/"] = (!persistance.isInterface ? {} : {
+            home:{
+                desktop:{},
+                documents:{},
+                downloads:{},
+                applications:{},
+                images:{}
+            },
+            sys:{
+                settings:{}
+            },
+        })
         this.workingDir = this.filesystem["/"] 
         this.persistance = persistance
         this.basePath = basePath
@@ -105,6 +96,7 @@ class VirtualFileSystem{
                 const pointer = this.pointerPool[id]
 
                 if(pointer.lastUsed + (60 * 1000) < Date.now()){
+                    console.log("Deleting pointer", id)
                     delete this.pointerPool[id]
                 }
             }
@@ -114,7 +106,7 @@ class VirtualFileSystem{
     setDirectoryContent(directory, structureEntry){
         for(const prop in structureEntry){
             if(!Array.isArray(structureEntry[prop]) && typeof structureEntry[prop] == "object"){
-                directory[prop] = new Directory(prop, directory, structureEntry[prop].contents)
+                directory[prop] = structureEntry[prop]
                 this.setDirectoryContent(directory[prop], structureEntry[prop])
             }
             

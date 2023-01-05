@@ -14,13 +14,13 @@ class Persistance{
         user="", 
         rootDir=".", 
         userspaceDir="./public/userspaces/",
-        pointerWorkingDir=false){
+        pwd=false){
         // console.log('User', user)
         this.user = user
         this.rootDir = rootDir
         this.userspaceDir = userspaceDir
         this.baseDir = userspaceDir//`${userspaceDir}${user}`
-        this.pointerWorkingDir = pointerWorkingDir //should be pointer .pwd()
+        this.pwd = pwd //should be pointer .pwd()
         
         if(user == 'root'){
             this.baseDir = this.rootDir//`./public` 
@@ -33,7 +33,8 @@ class Persistance{
                 fs.mkdirSync(this.baseDir)
                 log(`Created user ${user} filesystem directory`)
             }catch(e){
-                console.log(e)
+                console.log(e);
+            throw e
                 throw e
             }
         }
@@ -41,17 +42,13 @@ class Persistance{
         mountPoint = process.MOUNT_POINT || 'system'
     }
 
-    getCurrentDir(path){
-        if(this.pointerWorkingDir){
-            path = this.pointerWorkingDir()
-            console.log("Path is:", path)
-        }
-
-        return path
+    registerPointer(id, pointer){
+        this.pointerIds[id] = pointer
     }
 
     resolvePath(pathString){
-        this.currentDir = this.getCurrentDir()
+        this.currentDir = this.pwd()
+
         let truePath = this.baseDir + this.currentDir
 
         const paths = pathString.split("/").filter(path => path !== "")
@@ -66,6 +63,7 @@ class Persistance{
         }
 
         truePath = truePath.replace("//", "/")
+        console.log('True Path', truePath)
         return truePath
     }
 
@@ -95,7 +93,8 @@ class Persistance{
     // }
 
     cd(path){
-        this.currentDir = this.getCurrentDir(path)
+        this.currentDir = this.pwd()
+        console.log('Current Dir', this.currentDir)
     }
 
     async touch(path, content=" "){
@@ -103,7 +102,8 @@ class Persistance{
             await fsx.outputFile(this.resolvePath(path), content, { encoding: 'utf-8' })
             return true
         }catch(e){
-            console.log(e)
+            console.log(e);
+            throw e
         }
     }
 
@@ -112,15 +112,16 @@ class Persistance{
             const newDir = fs.mkdirSync(this.resolvePath(path))
             log(`Created new directory ${path}:`, newDir)
         }catch(e){
-            console.log(e)
+            console.log(e);
+            throw e
         }
     }
 
     async cp(pathFrom, pathTo){
         try{
-            const isDirectory = fs.lstatSync(this.resolvePath(pathFrom)).isDirectory()
-            if(isDirectory){
-                const copied = await fs.cp(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
+            const stats = await fsa.lstat(this.resolvePath(pathFrom))
+            if(stats.isDirectory()){
+                const copied = await fsa.cp(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
                 log(`Copied directory ${pathFrom} recursively to ${pathTo}`, copied)
             }else{
                 const copied = await fsa.copyFile(this.resolvePath(pathFrom), this.resolvePath(pathTo))
@@ -128,7 +129,8 @@ class Persistance{
             }
             
         }catch(e){
-            console.log(e)
+            console.log(e);
+            throw e
         }
     }
 
@@ -151,22 +153,33 @@ class Persistance{
             }
 
         }catch(e){
+            console.log(e);
+            throw e
+        }
+    }
+
+    async rm(...paths){
+        try{
+            for(const path of paths){
+                const sourceRemoved = await fsa.rm(this.resolvePath(path))
+                log(`Deleted file ${path}`, sourceRemoved)
+            }
+        }catch(e){
             console.log(e)
+            throw e
         }
     }
 
-    rm(...paths){
-        for(const path of paths){
-            const sourceRemoved = fs.rmSync(this.resolvePath(path))
-            log(`Deleted file ${path}`, sourceRemoved)
-        }
-    }
-
-    rmdir(...paths){
-        for(const path of paths){
-            const sourceRemoved = fs.rmSync(this.resolvePath(path), { recursive:true })
-            log(`Deleted directory ${path}:`, sourceRemoved)
-        }
+    async rmdir(...paths){
+       try{
+            for(const path of paths){
+                const sourceRemoved = await fsa.rm(this.resolvePath(path), { recursive:true }).catch(e => console.log('Catch ',e))
+                log(`Deleted directory ${path}:`, sourceRemoved)
+            }
+       }catch(e){
+            console.log(e)
+            throw e
+       }
     }
 
     async editFile(filename, newContent){
@@ -176,7 +189,8 @@ class Persistance{
 
             return true
         }catch(e){
-            console.log(e)
+            console.log(e);
+            throw e
             throw new Error(e)
         }
     }
@@ -184,12 +198,10 @@ class Persistance{
     async getFileContent(path){
         try{
             const content = await fsa.readFile(path)
-            
             return content.toString()
         }catch(e){
-            console.log(e)
-            throw new Error(e)
-            // return { error:e.message }
+            console.log(e);
+            throw e
         }       
     }
 
@@ -200,8 +212,8 @@ class Persistance{
 
             return true
         }catch(e){
-            console.log(e)
-            throw new Error(e)
+            console.log(e);
+            throw e
         }
     }
 

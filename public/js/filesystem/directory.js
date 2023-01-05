@@ -1,11 +1,11 @@
 class Directory{
     
-    constructor(name, parent){
+    constructor(name, parent, contents=[], permissions=""){
         this[".."] = parent
         this.name = name
-        this.contents = []
+        this.contents = contents
         this.isDirectory = true
-        this.permissions = "" //to be implemented
+        this.permissions = permissions //to be implemented
     }
 
     getDirectoryProperties(){
