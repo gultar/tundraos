@@ -24,7 +24,6 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer.send('isDownloading', event)
     })
     
-  
     for (const dependency of ['chrome', 'node', 'electron']) {
       replaceText(`${dependency}-version`, process.versions[dependency])
     }

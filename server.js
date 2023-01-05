@@ -51,8 +51,8 @@ const isValidPassword = (username, password) =>{
 
 let FileSystem = null
 
-const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system" }) =>{
-
+const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
+  if(!config.mountPoint) throw new Error('Need to provide filesystem mount point value')
   // const runCommand = async (cmd, args) =>{
   //   try{
       
@@ -258,15 +258,15 @@ const runServer = (origin={ http:true, mountPoint:process.MOUNT_POINT || "system
     res.send({ result:`Pointer ${id} deleted successfully` })
   })
 
-  expressApp.get("/origin", (req, res)=>{
-    res.send(origin)
+  expressApp.get("/config", (req, res)=>{
+    res.send(config)
   })
   
   httpServer.listen(port, ()=>{
     log('HTTP Server listening on '+port)
   })
   
-  const config = hyperwatch(httpServer)
+  const configuration = hyperwatch(httpServer)
 
     
 }

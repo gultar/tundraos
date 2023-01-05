@@ -2,12 +2,9 @@ const VirtualFileSystem = require('../../public/js/filesystem/virtualfilesystem.
 const buildWorker = require('./build-controller.js')
 const Persistance = require('./persistance.js')
 const fs = require('fs')
-const mapLinuxFs = require('./map-linux-fs.js')
-const fsa = require("fs").promises
 
 let FileSystem = {}
 let persistance = {}
-let PointerPool = {}
 
 class Userspace{
     constructor(username){
@@ -48,14 +45,23 @@ class Userspace{
     }
 }
 
+process.MOUNT_POINT = "."
+
 const buildUserspace = async (username='root', rootPath="/") =>{
     let mountPoint = process.MOUNT_POINT || "system"
 
     const log = (...text) =>{
         console.log(`[${username}:>]`, ...text)
     }
+
+
     
     let userspacePath = "."
+
+    if(process.fullOs){
+        userspacePath = "/"
+    }
+    
 
     if(!fs.existsSync("./public/userspaces")){
         try{
@@ -80,37 +86,39 @@ const buildUserspace = async (username='root', rootPath="/") =>{
 
     log("Standy as I attempt to load the file system")
     
-    
     persistance = new Persistance(username, rootPath, userspacePath)
     let directories = {}
-
-    if(!process.fullOs) directories = await buildWorker(".")
-    else directories = global.linuxFs
 
     let sharedspace = await buildWorker("./public/sharedspace")
     
     let filesystemStructure = {}
-    
-    if(username === "root"){
-        filesystemStructure = { 
-            ...directories,
-        }
-        
-    }else{
-        filesystemStructure = { 
-            public:{
-                userspaces:{
-                    [username]:{
-                        ...directories.public.userspaces[username]
+    if(!process.fullOs) {
+        directories = await buildWorker(".")
+        if(username === "root"){
+            filesystemStructure = { 
+                ...directories,
+            }
+            
+        }else{
+            filesystemStructure = { 
+                public:{
+                    userspaces:{
+                        [username]:{
+                            ...directories.public.userspaces[username]
+                        },
                     },
-                },
-                sharedspace:{
-                    ...sharedspace,
-                },
+                    sharedspace:{
+                        ...sharedspace,
+                    },
+                }
             }
         }
+    }else{
+        directories = global.linuxFs
+        filesystemStructure = {
+            ...directories
+        }
     }
-    
 
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)    
     FileSystem.import(filesystemStructure)

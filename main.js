@@ -25,8 +25,12 @@ if(process.argv.includes("--full-os") || process.argv.includes("-f")){
 }
 
 
-if(!process.fullOs)process.MOUNT_POINT = 'system'
-else process.MOUNT_POINT = "/"
+const setMountPoint = () =>{
+  if(!process.fullOs)process.MOUNT_POINT = '.'
+  else process.MOUNT_POINT = "/"
+}
+
+
 
 app.on('ready', async () => {
     if(process.fullOs){
@@ -34,7 +38,8 @@ app.on('ready', async () => {
       global.linuxFs = linuxFs
     }
 
-    runServer({ electron:true, mountPoint:process.MOUNT_POINT || 'system' })
+    setMountPoint()
+    runServer({ electron:true, mountPoint:process.MOUNT_POINT })
     
     const win = new BrowserWindow({
       width:(fullscreen? 1366:800),
@@ -53,8 +58,6 @@ app.on('ready', async () => {
       },
     });
 
-
-    console.log('Path', path.join(__dirname, "./public/js/preload.js"))
     win.loadURL("http://localhost:8000/")
     
     listenForDownloads(win)

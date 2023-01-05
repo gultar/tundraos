@@ -48,9 +48,10 @@ class Persistance{
 
     resolvePath(pathString){
         this.currentDir = this.pwd()
-
+        console.log('Current Dir', this.currentDir)
         let truePath = this.baseDir + this.currentDir
-
+        console.log('First true path', truePath)
+        console.log('Base Dir', this.baseDir)
         const paths = pathString.split("/").filter(path => path !== "")
         for(const path of paths){
             if(path !== ".."){
@@ -63,38 +64,13 @@ class Persistance{
         }
 
         truePath = truePath.replace("//", "/")
-        console.log('True Path', truePath)
+        console.log('Second true path', truePath)
+        truePath = mountPoint + truePath
         return truePath
     }
 
-    // resolvePath(pathString){
-    //     this.currentDir = this.getCurrentDir()
-    //     pathString = pathString.replace(mountPoint, '')
-    //     this.currentDir = this.currentDir.replace(mountPoint, '').replace('//', '/')
-    //     this.baseDir = this.baseDir.replace(mountPoint, '')
-    //     const paths = pathString.split("/").filter(path => path !== "")
-        
-    //     let truePath = this.baseDir + this.currentDir
-        
-    //     for(const path of paths){
-    //         if(path !== ".."){
-    //             truePath = truePath + "/" + path
-    //         }else{
-    //             truePath = truePath.split("/")
-    //             truePath.pop()
-    //             truePath = truePath.join("/")
-    //         }
-
-            
-    //     }
-
-    //     truePath = truePath.replace("//", "/")
-    //     return truePath
-    // }
-
     cd(path){
         this.currentDir = this.pwd()
-        console.log('Current Dir', this.currentDir)
     }
 
     async touch(path, content=" "){

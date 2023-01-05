@@ -1,16 +1,16 @@
 const initScript = () =>{
     initParticles()
     initClock()
-    verifyIfElectronApp()
+    getServerConfig()
     setUsernameAsGlobal()
 }
 
-const verifyIfElectronApp = async () =>{
+const getServerConfig = async () =>{
     if(window.location.hostname == 'localhost'){
-        const origin = await $.get("http://localhost:8000/origin")
-        window.isElectron = origin.electron
-        window.MOUNT_POINT = origin.mountPoint
-        console.log('Received mount point', origin)
+        const config = await $.get("http://localhost:8000/config")
+        window.isElectron = config.electron
+        window.MOUNT_POINT = config.mountPoint
+        console.log('Received mount point', config)
     }
 }
 

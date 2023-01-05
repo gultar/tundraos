@@ -47,7 +47,7 @@ class FileExplorer{
         
         const { signal } = this.listenerController
         
-         window.addEventListener(`message-${this.explorerId}`, (e)=>{
+        window.addEventListener(`message-${this.explorerId}`, (e)=>{
             this.handleExplorerMessage(e)
         }, { signal });
         

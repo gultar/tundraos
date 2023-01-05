@@ -130,7 +130,7 @@ class DirectoryPointer{
 
     pwd(){
         let path = this.getAbsolutePath(this.workingDir)
-        path = path.unshift("/")
+        path = "/" + path
         return path
     }
 
