@@ -8,8 +8,6 @@ const initScript = async () =>{
     initDesktop()
     loadWindowState()
     startWindowStateRoutine()
-    
-    
 }
 
 const getServerConfig = async () =>{
@@ -17,6 +15,7 @@ const getServerConfig = async () =>{
         const config = await $.get("http://localhost:8000/config")
         window.isElectron = config.electron
         window.MOUNT_POINT = config.mountPoint
+        window.ENV_VARIABLES = config.ENV_VARIABLES
         console.log('Received mount point', config)
     }
 

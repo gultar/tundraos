@@ -243,6 +243,20 @@ class Browser{
         }
     }
     
+    preFormatURL(url){
+        if(url.slice(0, 4) == "http"){
+            return url
+        }else if(this.isValidDomain(url)){
+            return "https://"+url
+        }else if(url.slice(0, 5) == "data:"){
+            return url
+        }else if(url == "about:blank"){
+            return url
+        }else{
+            return `https://www.google.com/search?q=${url}`
+        }
+    }
+    
     searchOnGoogle(question){
         this.visit(`https://www.google.com/search?q=${question}`)
     }
@@ -267,7 +281,7 @@ class Browser{
             <webview 
                 class="responsive-webview" 
                 id="webview-${this.browserNumber}" 
-                src="${this.url}" 
+                src="${this.preFormatURL(this.url)}" 
                 autosize="on" 
                 style="display:flex; 
                 min-width:100%; 

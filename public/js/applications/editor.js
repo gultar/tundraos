@@ -95,7 +95,13 @@ class Editor{
            
             //watch for change to enable prompt for saving file upon closing window
             this.saved = false
-             console.log('Save is toggled', delta)
+        });
+        
+        this.editor.commands.on('afterExec', eventData => {
+            if (eventData.command.name === 'insertstring') {
+                console.log('User typed a character: ' + eventData.args);
+                this.saved = false
+            }
         });
         
         this.winbox = new ApplicationWindow({
@@ -220,24 +226,28 @@ class Editor{
 
     close(){
         const filecontent = this.editor.getValue()
+        const path = this.pathToFile
         this.editorWrapper.style.visibility = 'hidden'
         this.listenerController.abort()
         this.collapsible.destroy()
-        if(!this.saved){
+        if(this.saved === false){
             confirmation({
                 message:'Do you want to save before exiting?',
                 yes:async()=>{
                     
-                    const saved = await this.save(filecontent, this.pathToFile)
+                    const saved = await this.save(filecontent, path)
                     if(saved && saved.error) popup(JSON.stringify(saved))
                     
+                    this.destroy()
                 },
-                no:()=>{}
+                no:()=>this.destroy()
             })
-
+            
+        }else{
+            this.destroy()
         }
         
-        this.destroy()
+        
         
         
     }
@@ -313,8 +323,12 @@ class Editor{
     }
 
     saveEditorWindowState(){
-        this.winbox.launcher.opts.pathToFile = this.pathToFile
-        this.winbox.launcher.opts.content = this.content
+        try{
+            this.winbox.launcher.opts.pathToFile = this.pathToFile
+            this.winbox.launcher.opts.content = this.content
+        }catch(e){
+            console.log(e)
+        }
     }
 
     async changeFile(path){
@@ -329,24 +343,25 @@ class Editor{
             })
 
             if(willSave){
-                const saved = await this.save(filecontent, this.pathToFile)
+                const saved = await this.save()
                 if(saved && saved.error) popup(JSON.stringify(saved))
             }
         }
-
+ 
 
         this.selectFile(path)
     }
 
-    async save(){
+    async save(content, path){
+        if(!path) path = this.pathToFile 
         this.saveEditorWindowState()
-        const fileExists = await this.exec("getFile", [this.pathToFile])
-        if(!fileExists || this.pathToFile == ""){
+        const fileExists = await this.exec("getFile", [path])
+        if(!fileExists || path == ""){
             return await this.saveAs()
         }else{
-            const content = this.editor.getValue()
+            if(!content) content = this.editor.getValue()
             this.saved = true
-            return await this.exec("editFile", [this.pathToFile, content])
+            return await this.exec("editFile", [path, content])
         }
     }
     

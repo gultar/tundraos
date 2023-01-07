@@ -50,6 +50,7 @@
     border:none;
     color:black;
     cursor:pointer;
+    margin:0 10px;
 }
 
 .back-button:after{
