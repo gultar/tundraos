@@ -5,7 +5,7 @@ function turnToURLQueryText(args){
 }
 
 function runWeb(url){
-    launchBrowser(url)
+    new Browser(url)
 }
 
 function runLinguee(params=[]){
@@ -20,7 +20,7 @@ function runLinguee(params=[]){
 }
 
 function runTirex(){
-    createWindow({ title: "Tirex Game", height:"90%", width:"90%", url:'./pages/tirex.html' });
+    new ApplicationWindow({ title: "Tirex Game", height:"90%", width:"90%", url:'./pages/tirex.html' });
 }
 
 function runLofi(){

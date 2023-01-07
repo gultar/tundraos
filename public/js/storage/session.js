@@ -1,5 +1,6 @@
 class Storage extends Map{
-    constructor({ persist:false }){
+    constructor({ persist="" }){
+        super()
         this.storage = (persist? localStorage : sessionStorage)
     }
     set(id, value){

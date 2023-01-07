@@ -750,7 +750,6 @@ module.exports = File
 },{}],4:[function(require,module,exports){
 const saveState = () =>{
   const exported = FileSystem.export()
-  console.log('Exported', exported)
   return localStorage.setItem("filesystem", exported)
 }
 

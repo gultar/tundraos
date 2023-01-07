@@ -39,7 +39,13 @@ app.on('ready', async () => {
     }
 
     setMountPoint()
-    runServer({ electron:true, mountPoint:process.MOUNT_POINT })
+
+    const config = { 
+      electron:true, 
+      mountPoint:process.MOUNT_POINT, 
+    }
+
+    runServer(config)
     
     const win = new BrowserWindow({
       width:(fullscreen? 1366:800),

@@ -6,11 +6,9 @@ const DirectoryPointer = require('./directory-pointer')
 
 class VirtualFileSystem{
     constructor(username, persistance=persistanceInterface, basePath="."){
-        //All objects will be treated like potential directories
+        
         this.username = username
-        this.filesystem = {
-
-        }//new Proxy({}, parenter)
+        this.filesystem = {}
         this.filesystem["/"] = new Directory("/", this.filesystem["/"])
         
         if(persistance.isInterface){
@@ -36,7 +34,10 @@ class VirtualFileSystem{
         
         this.mainPointer = new DirectoryPointer(this.filesystem["/"], this.persistance)
         this.initMainPointer()
-        //this.startPointerCleaningRoutine()
+    }
+
+    wd(){
+        return this.mainPointer.workingDir
     }
 
     exposeCommands(){
@@ -120,6 +121,21 @@ class VirtualFileSystem{
             
         }
         return true
+    }
+
+    fromPathToArray(path){
+        let arrayOfDirectories = path.split("/")
+        arrayOfDirectories = arrayOfDirectories.filter(cell => cell != "")
+        return arrayOfDirectories
+    }
+
+    fromArrayToPath(arrayOfDirectories){
+        const path = this.convertToPathString(arrayOfDirectories)
+        return path
+    }
+
+    convertToPathString(directoriesArray){
+        return Array.isArray(directoriesArray) ? directoriesArray.join("/") : ""
     }
 
     import(structure){

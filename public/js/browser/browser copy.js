@@ -1,51 +1,71 @@
 activeWebviews = {}
 
 class Browser{
-    constructor(opts={}){
-        let { url, attach, browsersContainer } = opts
+    constructor(url){
         if(!url){
             if(window.isElectron) url = "https://google.com"
             else url = 'https://www.google.com/webhp?igu=1'
         }
-
         this.url = url
+        
         this.browserNumber = Date.now()
-        this.browsersContainer = browsersContainer || document.getElementById("browsers-container")
+
+        this.browsersContainer = document.getElementById("browsers-container")
         this.webviewDOM = ""
         this.webview = ""
-        this.id = `browser-container-${this.browserNumber}`
-        this.listenerController = new AbortController()
-        //By attaching 
-        this.attach = attach
-        if(!this.attach){
-            this.init()
-        }
+        this.init()
     }
     
     async init(){
-        const { signal } = this.listenerController
         this.injectDOM()
         this.browser = document.querySelector(`#browser-container-${this.browserNumber}`)
         this.webview = document.querySelector("#webview-"+this.browserNumber)
         this.urlBar = document.getElementById('url-bar-'+this.browserNumber)
+        this.webview.addEventListener("keypress",(event, message)=>{
+            console.log("Webview keypress", event, message)
+        })
+        this.openWindow()
         
-        if(!this.attach) this.openWindow()
-        
-        this.webview.addEventListener('dom-ready', (event)=>{
-            let id = event.target.id
-            if(id === `webview-${this.browserNumber}`){
-                this.startEventListeners(signal)
-            }else{
-                console.log('WebView Dom Ready Event Id is not matching')
-                console.log(event.target)
+        window.addEventListener("message", (event)=>{
+            console.log('Message', event)
+            const message = event.data
+            if(message.back){
+                
+                if(message.back == `browser-${this.browserNumber}`){
+                    this.webview.goBack()
+                }
+            }else if(message.forward){
+                
+                if(message.forward == `browser-${this.browserNumber}`){
+                    this.webview.goForward()
+                }
+                
+            }else if(message.refresh){
+                
+                if(message.refresh == `browser-${this.browserNumber}`){
+                    this.webview.reload()
+                }
+                
+            }else if(message.visitURL){
+                const { url, targetBrowser } = message.visitURL
+                this.addNewURL(url)
+            }else if(message.dialogSave){
+                window.ipcRenderer.send('download-path-selected',{ selected:message.dialogSave })
+            }else if(message.dialogCancel){
+                window.ipcRenderer.send('download-path-selected',{ cancelled:true })
             }
-        }, { signal })
+        })
+        
+        
+        window.addEventListener("visit-url", (e)=>this.visitURLHandler(e))
+        
+        window.addEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
+        window.ipcRenderer.on('confirm-download', this.confirmDownloadHandler)
+        window.ipcRenderer.on('select-download-path', this.selectDownloadPathHandler)
+        window.ipcRenderer.on('download-complete', this.downloadCompleteHandler)
+        this.browser.addEventListener("keypress", (e)=>this.pressEnterSubmit(e))
+        
 
-        return this.browser
-    }
-
-    getId(){
-        return this.browserNumber
     }
     
     async openWindow(){
@@ -56,66 +76,36 @@ class Browser{
             label:`browser-${this.browserNumber}`,
             mount:this.browser, 
             launcher:{
-                //enables reopening of the same window upon page reload
-                name:"Browser",
-                opts:{
-                    url:this.url
-                }
+                //enables start at boot
+                name:"new Browser",
+                params:[this.url]
             },
             onclose:()=>{
+                // this.browsersContainer.innerHTML = this.otherBrowsers
                 this.close()
+                // this.browserWindow.destroy()
             } 
         })
     
         activeWebviews[this.browserNumber] = this.browserWindow
         this.watchURLChange()
     }
-
-    startEventListeners(signal){
-        window.addEventListener(`message`, (event)=>{
-            const message = event.data
-            if(message.dialogSave){
-                window.ipcRenderer.send('download-path-selected',{ selected:message.dialogSave })
-            }else if(message.dialogCancel){
-                window.ipcRenderer.send('download-path-selected',{ cancelled:true })
-            }
-        }, { signal })
-        
-        
-        this.urlBar.addEventListener("visit-url", (e)=>this.visitURLHandler(e), { signal })
-        window.addEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e), { signal })
-        window.ipcRenderer.on('confirm-download', this.confirmDownloadHandler)
-        window.ipcRenderer.on('select-download-path', this.selectDownloadPathHandler)
-        window.ipcRenderer.on('download-complete', this.downloadCompleteHandler)
-        this.browser.addEventListener("keypress", (e)=>this.pressEnterSubmit(e), { signal })
-    }
-
-    hide(){
-        this.browser.style.display = "none"
-    }
-
-    show(){
-        this.browser.style.display = ""
-    }
     
     async close(){
-        this.listenerController.abort()
         window.removeEventListener("visit-url", (e)=>this.visitURLHandler(e))
         window.removeEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e))
         this.browser.removeEventListener("keypress", (e)=>this.pressEnterSubmit(e))
         this.browser.remove()
         // delete window.openWindows[`browser-${this.browserNumber}`]
-        
     }
     
     visitURLHandler(event){
-        console.log('Event from URL bar', event)
         const message = event.detail
         const { url, targetBrowser } = message.visitURL
         if(targetBrowser == `browser-${this.browserNumber}`) 
-            this.addNewURL(url)
+            console.log('Is same browser')
         
-        
+        this.addNewURL(url)
     }
     
     browserNavigationHandler(event){
@@ -159,27 +149,23 @@ class Browser{
     
     watchURLChange(){
         if(window.isElectron){
-            const { signal } = this.listenerController
-           this.webview.addEventListener("dom-ready", (event)=>{
-                //webview tag
-                this.webview.addEventListener('did-finish-load', (e) => {
-                    const url = this.webview.getURL()
-                    this.setURL(url)
-                    this.updateLauncherState(url)
-                }, { signal })
+            //webview tag
+            this.webview.addEventListener('did-finish-load', (e) => {
+                // const url = webview.getURL()
+                // addUrlToHistory(url)
+                // setURL(url)
+            })
 
-                this.webview.addEventListener('did-start-loading', (e) => {
-                    const url = this.webview.getURL()
-                    this.setURL(url)
-                    this.updateLauncherState(url)
-                }, { signal })
-
-           }, { signal })
+            this.webview.addEventListener('did-start-loading', (e) => {
+                const url = this.webview.getURL()
+                this.setURL(url)
+            })
 
         }else{
             //iframe tag
             this.webview.onload = () =>{
-                const url = this.webview.src
+                url = this.webview.src
+
                 this.setURL(url)
             }
         }
@@ -192,24 +178,14 @@ class Browser{
     setURL(url){
         console.log('Setting URL', url)
         this.urlBar.value = url.trim()
-        
     }
 
     visit(url){
-        const {signal} = this.listenerController
+        
         if(window.isElectron){
             this.webview.loadURL(url)
-            this.updateLauncherState(url)
         }else{
             this.webview.src = url
-        }
-    }
-
-    updateLauncherState(url){
-        try{
-            this.browserWindow.launcher.opts.url = url
-        }catch(e){
-            console.log(e)
         }
     }
 
@@ -236,8 +212,6 @@ class Browser{
             this.visit("https://"+question)
         }else if(question.slice(0, 5) == "data:"){
             this.visit(question) //
-        }else if(question == "about:blank"){
-            this.visit(question) //
         }else{
             this.searchOnGoogle(question)
         }
@@ -249,21 +223,14 @@ class Browser{
 
 
     pressEnterSubmit(e){
-        const target = e.target
-        const id = target.id
-        if(e.key === 'Enter') console.log("Wtf", e)
-        if(e.key == "Enter" && id === this.urlBar.id){
-            console.log('All good')
+        if(e.key == "Enter"){
             this.addNewURL(this.urlBar.value)
-        }else if(id !== this.urlBar.id){
-            console.log('Not good', target)
-            console.log('Source', e.srcElement)
         }
     }
-
-    makeWebviewDOM(){
+    
+    injectDOM(){
         if(window.isElectron){
-            return `
+            this.webviewDOM = `
             <webview 
                 class="responsive-webview" 
                 id="webview-${this.browserNumber}" 
@@ -276,19 +243,18 @@ class Browser{
             `
         }
         else{
-            return`<iframe 
+            this.webviewDOM = `<iframe 
                             class="responsive-webview" 
                             id="webview-${this.browserNumber}" 
                             src="${this.url}" 
                             autosize="on">
                           </iframe>`
         }
-    }
-
-    makeBrowserPageDOM(webviewDOM){
-        return `
+        
+        this.browserDOM = `
+          
         <div id="browser-container-${this.browserNumber}" class="browser-container">
-            <div id="browser-menu-${this.browserNumber}" class="browser-menu" style="min-width:100%;">
+            <div class="browser-menu" style="min-width:100%;">
                 <div class="navigation-buttons">
                     <span class="button"><a class="back-button" onclick="sendEvent('browser-navigation', { back:'browser-${this.browserNumber}' });return false"></a></span>
                         | 
@@ -308,31 +274,13 @@ class Browser{
                             } })"> 
                              GO  
                     </button>
-                     
-                    <button 
-                    id="url-button" 
-                    class="url-button"
-                    onclick="new Browser({ url:document.getElementById('url-bar-${this.browserNumber}').value })"> 
-                             New Window  
-                    </button>
                 </div>
                 <span class="button" class="settings-button"><a onclick="console.log('settings')"><img src="./images/icons/settings.png"></a></span>
             </div>
-            ${webviewDOM}
+            ${this.webviewDOM}
         </div>
         `
-    }
-    
-    injectDOM(){
-
-        this.webviewDOM = this.makeWebviewDOM()
-        this.browserDOM = this.makeBrowserPageDOM(this.webviewDOM)
-
-
         this.otherBrowsers = this.browsersContainer.innerHTML
-        this.browsersContainer.innerHTML = this.browserDOM + this.otherBrowsers 
+        this.browsersContainer.innerHTML = this.otherBrowsers + this.browserDOM
     }
-
 }
-
-window.Browser = Browser

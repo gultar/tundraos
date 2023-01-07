@@ -1,7 +1,5 @@
-const parenter = require('./proxy')
 const File = require('./file')
 const Directory = require('./directory')
-const Persistance = require('../../../src/filesystem/persistance')
 
 class DirectoryPointer{
     constructor(root, persistance){
@@ -22,6 +20,7 @@ class DirectoryPointer{
             rmdir:this.rmdir,
             mkdir:this.mkdir,
             touch:this.touch,
+            whereis:this.whereis,
             createVirtualFile:this.createVirtualFile,
             cat:this.cat,
             cp:this.cp,
@@ -66,8 +65,9 @@ class DirectoryPointer{
         if(path === "") path = this.workingDir.name
         if(path === "/") return this.root()
         if(path === ".." && this.isRootDir(this.workingDir)) return this.workingDir
-        if(path === ".") return this.workingDir        
-
+        if(path === ".") return this.workingDir  
+        
+        // if(path[0] === ".") path.slice(0,1)
 
         const isDirectChild = this.workingDir[path]
         if(isDirectChild) return this.workingDir[path]
@@ -273,6 +273,23 @@ class DirectoryPointer{
         this.persistance.touch(filePath, content)
 
         return true
+    }
+
+    async whereis(name){
+        let possibilities = []
+        for await(const directory of this.walk()){
+            if(directory.name === name){
+                const pathArray = this.walkBackToRootDir(directory)
+                const path = pathArray.join("/")
+                possibilities.push(path+"/")
+            }else if(directory.hasFile(name) === true){
+                const pathArray = this.walkBackToRootDir(directory)
+                const path = pathArray.join("/")
+                possibilities.push(path+"/"+name)
+            }
+        }
+
+        return possibilities
     }
 
     createVirtualFile(filePath, content=""){

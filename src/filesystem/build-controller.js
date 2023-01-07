@@ -1,5 +1,9 @@
 const { Worker } = require('worker_threads')
 
+const log = (...args) =>{
+  console.log("[Worker:>]", ...args)
+}
+
 const buildWorker = (path=__dirname) =>{
     return new Promise((resolve) =>{
       const worker = new Worker("./src/filesystem/build-worker.js", {
@@ -12,6 +16,8 @@ const buildWorker = (path=__dirname) =>{
           console.log('Loaded ', path)
           resolve(message.success)
           worker.terminate()
+        }else if(message.log){
+           if(!process.silentBuild) log(message.log)
         }else if(message.error){
             console.log('Worker Error', message.error)
           throw new Error(message.error)

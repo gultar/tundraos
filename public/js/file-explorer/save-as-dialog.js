@@ -1,3 +1,5 @@
+let mountPoint = window.MOUNT_POINT
+
 class SaveAsDialog{
     constructor(opts={}){
         this.width = opts.width || '55%'
@@ -43,7 +45,7 @@ class SaveAsDialog{
         <link rel="stylesheet" href="./css/save-as-dialog.css">
         <div id="dialog-window-wrapper">
             <div id="dialog-window">
-                <span id="save-as-label">Save file to:</span>
+                <span id="save-as-label">${this.mode} file</span>
                 <div id="input-line">
                     <input id="path-viewer-input" type="text" value="/system/home/downloads" />
                     <button onclick="window.postMessage({ setDir:document.getElementById('path-viewer-input').value })" id="select-path">Select</button>

@@ -98,6 +98,7 @@ body{
 .desktop-icon{
   display:block;
   margin:10px;
+  padding:5px;
 }
 
 #desktop-logo{
@@ -114,14 +115,18 @@ body{
 
 #icon-container{
   padding:5vh 2vh;
-  /* display:grid;
+  /* display:flex;
+  flex-direction:row; */
+  display:grid;
   grid-template-columns: repeat(auto-fill, var(--size-of-desktop-icon-slot));
-  grid-template-rows: repeat(auto-fill, var(--size-of-desktop-icon-slot)); */
+  grid-template-rows: repeat(auto-fill, var(--size-of-desktop-icon-slot)); 
+  width:100%;
   list-style: none;
   background-color: transparent;
   position:fixed;
   text-align: center;
   font-size:9pt !important;
+  flex-wrap: wrap;
 }
 
 

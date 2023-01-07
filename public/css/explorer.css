@@ -52,7 +52,8 @@
     min-height: 100%;
     margin:2vh;
     display:block;
-    background-color: var(--background) !important;
+    background-color: var(--nav-background-color) !important;
+    border:1px solid white;
     resize: horizontal;
     scroll-behavior: smooth;
 }

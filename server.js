@@ -53,25 +53,6 @@ let FileSystem = null
 
 const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
   if(!config.mountPoint) throw new Error('Need to provide filesystem mount point value')
-  // const runCommand = async (cmd, args) =>{
-  //   try{
-      
-  //     if(!args) args = []
-
-  //     const availableCommands = FileSystem.exposeCommands()
-  //     if(availableCommands[cmd]){
-  //       const result = await FileSystem[cmd](...args)
-        
-  //       return result
-  //     }else{
-  //       return { error:`Command ${cmd} unavailable` }
-  //     }
-
-  //   }catch(e){
-  //     log(e)
-  //     return { error:e.message }
-  //   }
-  // }
 
   const execute = async (cmd, args, pointerId) =>{
     try{
@@ -211,13 +192,6 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
     log(FileSystem)
   })
 
-  // expressApp.post('/command', async(req, res)=> {
-  //   const { cmd, args } = req.body
-  //   const result = await runCommand(cmd, args)
-  //   if(result.error) res.json({ error:result.error })
-  //   else res.json({ result:result })
-  // });
-
   expressApp.post('/execute', async(req, res)=> {
     const { cmd, args, pointerId } = req.body
     const result = await execute(cmd, args, pointerId)
@@ -250,12 +224,22 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
   
   expressApp.post("/destroypointer", (req, res)=>{
     const { id } = req.body
-    if(!id) res.send({ error:"Server: Need to provide Id of directory pointer to destroy" })
-    FileSystem.deletePointer(id)
-
+    if(!id) return res.send({ error:"Server: Need to provide Id of directory pointer to destroy" })
+    else if(id) FileSystem.deletePointer(id)
     console.log("Active Pointers", Object.keys(FileSystem.pointerPool))
 
     res.send({ result:`Pointer ${id} deleted successfully` })
+  })
+
+  expressApp.post("/destroyallpointers", (req, res)=>{
+    const { all } = req.body
+    if(all) {
+      FileSystem.deleteAllPointers()
+      console.log("Active Pointers", Object.keys(FileSystem.pointerPool))
+      return res.send({ result:`All pointer deleted successfully` })
+    }else{
+      return res.send({ error:"No pointers were destroyed" })
+    }
   })
 
   expressApp.get("/config", (req, res)=>{

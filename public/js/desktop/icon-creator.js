@@ -14,6 +14,14 @@ const createIcon = (opts) =>{
     iconContainer.innerHTML = iconContainer.innerHTML + iconDOM
 }
 
+const createDesktopGrid = ()=>{
+    const iconContainer = document.querySelector('#icon-container')
+    for(var i=0; i < 120; i++){
+        iconContainer.innerHTML = iconContainer.innerHTML + `<div class="desktop-icon" style="background:green"></div>`
+    }
+    
+}
+
 const saveIconState = () =>{
     const iconContainer = document.querySelector('#icon-container')
     const children = iconContainer.children

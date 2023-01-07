@@ -51,7 +51,7 @@ class CollapsibleBar{
 
         setTimeout(()=>{
             this.openAtDirectory(this.activeDirectory)
-        }, 1000)
+        }, 200)
     }
     
     destroy(){
@@ -79,7 +79,7 @@ class CollapsibleBar{
             let element = document.getElementById(`${this.stripName(dirname)}-${this.collapsibleId}-summary`)
             element.click()
             clickCounter++
-        }, 200)
+        }, 80)
     }
 
     async openDirectory(path, element){
@@ -160,7 +160,7 @@ class CollapsibleBar{
             selector: `.file-element-${this.collapsibleId}`, 
             callback: function(key, options){
                 if(key == 'Open file') sendEvent(`collapsible-file-open-${hostId}`, { path:this.context.dataset.path, id:hostId })
-                else if(key == 'Open in Editor') new Editor(this.context.dataset.path)
+                else if(key == 'Open in Editor') new Editor({ pathToFile:this.context.dataset.path })
                 else if(key == 'Delete') sendEvent(`collapsible-file-delete-${hostId}`, { path:this.context.dataset.path, id:hostId })
                 else if(key == 'Get info') popup(this.context.dataset.path)
             },   
@@ -178,7 +178,7 @@ class CollapsibleBar{
         return $.contextMenu({
             selector: `.directory-element-${this.collapsibleId}`, 
             callback: function(key, options) {
-                if(key == 'Open in Explorer') new FileExplorer(0,0, { workingDir:this.context.dataset.path })
+                if(key == 'Open in Explorer') new FileExplorer({ workingDir:this.context.dataset.path })
                 else if(key == 'Delete') sendEvent(`collapsible-directory-delete-${hostId}`, { path:this.context.dataset.path, id:hostId })
                 else if(key == 'Get info') popup(this.context.dataset.path)
             },   

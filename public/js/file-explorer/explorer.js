@@ -1,9 +1,12 @@
-let mountPoint = window.MOUNT_POINT || "system"
+const getMountPoint = () =>{
+    return (window.MOUNT_POINT === "." ? "" : window.MOUNT_POINT)
+}
+
 
 class FileExplorer{
-    constructor(x=0, y=0, opts={}){
-        this.x = x
-        this.y = y
+    constructor(opts={}){
+        this.x = opts.x
+        this.y = opts.y
         this.width = opts.width || '70%'
         this.height = opts.height || '60%'
         this.explorerId = Date.now()
@@ -16,9 +19,9 @@ class FileExplorer{
         this.listenerController = new AbortController()
         this.homePath = (
             window.username == 'root' ? 
-                mountPoint+"/public/userspaces/root/home/" 
+                getMountPoint()+"/public/userspaces/root/home/" 
                 : 
-                mountPoint+"/home/"
+                getMountPoint()+"/home/"
             )
         this.init()
         this.listener = ""
@@ -189,22 +192,44 @@ class FileExplorer{
     }
 
     launchWindow(){
-        new ApplicationWindow({ 
+        this.winbox = new ApplicationWindow({ 
             title: "File Explorer", 
-            height:"60%", 
-            width:"70%", 
+            height:this.height, 
+            width:this.width,
+            min:this.min,
             x:this.x,
             y:this.y,
             launcher:{
                 //enables start at boot
-                name:"new FileExplorer",
-                params:[this.x, this.y, this.opts]
+                name:"FileExplorer",
+                opts:{
+                    ...this.opts
+                }
             },
             html:this.explorerDOM,
             onclose:()=>{
                 this.close()
             }
         })
+    }
+
+    extractAllPropertiesExceptGlobalWindow(winbox){
+        let extracted = {}
+        for(const prop in winbox){
+            if(prop !== 'Window'){
+                extracted[prop] = winbox.prop
+            }
+        }
+
+        console.log(extracted)
+    }
+
+    updateLauncherState(workingDir){
+        try{
+            this.winbox.launcher.opts.workingDir = workingDir
+        }catch(e){
+            console.log(e)
+        }
     }
 
     handleExplorerMessage(event, that){
@@ -228,6 +253,7 @@ class FileExplorer{
 
     async refreshExplorer(){
         this.setCurrentDirContents(this.workingDir)
+        this.updateLauncherState(this.workingDir)
         document.querySelector(`#navigation-bar-${this.explorerId}`).value = this.workingDir
         return true
     }
@@ -328,7 +354,7 @@ class FileExplorer{
             
             this.viewImage(file)
         }else{
-            new Editor(path, file.content)
+            new Editor({ pathToFile:path, content:file.content })
         }
         
     }
@@ -343,6 +369,7 @@ class FileExplorer{
     
 
     handleExtension(filename){
+        if(!filename) return false
         const [ name, ...extensions ] = filename.split(".")
     
         return extensions[extensions.length - 1]
@@ -464,7 +491,7 @@ class FileExplorer{
             if(hasDirectory){
                 if(this.workingDir === "/" && targetDir === "..")
                     this.workingDir = "/"
-                else if(this.workingDir == mountPoint+"/..")
+                else if(this.workingDir == getMountPoint()+"/..")
                     this.workingDir = "/"
                 else if(this.workingDir !== "/" && targetDir === "..")
                     targetDir = targetDir + "/"   
@@ -573,3 +600,6 @@ class FileExplorer{
     }
     
 }
+
+
+window.FileExplorer = FileExplorer

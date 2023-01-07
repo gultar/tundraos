@@ -1,8 +1,8 @@
 
 
 class Editor{
-    constructor(pathToFile="", content=""){
-        
+    constructor(opts={}){
+        const { pathToFile="", content="" } = opts
         this.editorId = Date.now()
         this.pathToFile = pathToFile
         this.filename = this.extractFilename(this.pathToFile)
@@ -79,7 +79,6 @@ class Editor{
         this.filenameDisplay = document.querySelector(`#filename-display-${this.editorId}`)
         this.filepathDisplay = document.querySelector(`#filepath-display-${this.editorId}`)
         
-        // await this.exec('cd',[this.pathToFile])
 
         if(this.pathToFile !== ''){
             this.content = await this.exec('getFileContent',[this.pathToFile])
@@ -93,8 +92,10 @@ class Editor{
         this.editor = await this.startEditor(this.filename, this.content)
 
         this.editor.session.on('change', function(delta) {
+           
             //watch for change to enable prompt for saving file upon closing window
             this.saved = false
+             console.log('Save is toggled', delta)
         });
         
         this.winbox = new ApplicationWindow({
@@ -103,6 +104,15 @@ class Editor{
             height:"95%", 
             width:"80%",
             mount:this.editorWrapper,
+            launcher:{
+                name:"Editor",
+                opts:{
+                  x:this.x,
+                  y:this.y,
+                  pathToFile:this.pathToFile,
+                  content:this.content,
+                }
+            },
             onclose:()=>{
                 this.close()
                 // this.winbox.destroy()
@@ -286,6 +296,7 @@ class Editor{
         this.setMode(mode)
         this.filenameDisplay.innerText = this.filename
         this.filepathDisplay.innerText = this.pathToFile
+        this.saveEditorWindowState()
     }
 
     async selectFile(path, filename=""){
@@ -297,6 +308,13 @@ class Editor{
         this.setMode(mode)
         this.filenameDisplay.innerText = this.filename
         this.filepathDisplay.innerText = this.pathToFile
+        
+        this.saveEditorWindowState()
+    }
+
+    saveEditorWindowState(){
+        this.winbox.launcher.opts.pathToFile = this.pathToFile
+        this.winbox.launcher.opts.content = this.content
     }
 
     async changeFile(path){
@@ -316,10 +334,12 @@ class Editor{
             }
         }
 
+
         this.selectFile(path)
     }
 
     async save(){
+        this.saveEditorWindowState()
         const fileExists = await this.exec("getFile", [this.pathToFile])
         if(!fileExists || this.pathToFile == ""){
             return await this.saveAs()
@@ -428,3 +448,5 @@ class Editor{
         `
     }
 }
+
+window.Editor = Editor

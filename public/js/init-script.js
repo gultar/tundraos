@@ -1,8 +1,15 @@
-const initScript = () =>{
+// const { init } = require("node-wifi")
+
+const initScript = async () =>{
     initParticles()
     initClock()
-    getServerConfig()
+    await getServerConfig()
     setUsernameAsGlobal()
+    initDesktop()
+    loadWindowState()
+    startWindowStateRoutine()
+    
+    
 }
 
 const getServerConfig = async () =>{
@@ -12,6 +19,8 @@ const getServerConfig = async () =>{
         window.MOUNT_POINT = config.mountPoint
         console.log('Received mount point', config)
     }
+
+    return true
 }
 
 const setUsernameAsGlobal = () =>{
@@ -21,11 +30,17 @@ const setUsernameAsGlobal = () =>{
 
 const initClock = () => {
    
-  setInterval(()=>{
+  const clockRoutine = setInterval(()=>{
     const date = new Date()
     $("#clock").text(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
   }, 1000)
 
+}
+
+const startWindowStateRoutine = () =>{
+  const stateRoutine =setInterval(()=>{
+    saveWindowState()
+  }, 1*1000)
 }
 
 

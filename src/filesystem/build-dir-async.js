@@ -1,15 +1,6 @@
 const fs = require("fs").promises
 const File = require('../../public/js/filesystem/file.js')
-
-
-// class RootFS{
-//     constructor(){
-//         this.system = {
-//             contents:[]
-//         },
-//         this.contents = []
-//     }
-// }
+const { parentPort } = require("worker_threads")
 
 const root = {
     contents:[]
@@ -27,7 +18,7 @@ const buildFileSystemRepresentation = async (dirPath, fsPosition=root) =>{ //new
     try{
         files = await fs.readdir(dirPath)
     }catch(e){
-        log('DIR BUILD ERROR', e)
+        parentPort.postMessage({ log:e })
         
         files = []
     }
@@ -42,7 +33,7 @@ const buildFileSystemRepresentation = async (dirPath, fsPosition=root) =>{ //new
             fsPosition[dir] = {
                 contents:[]
             }
-            log(`Adding directory ${dir}`)
+            parentPort.postMessage({ log:`Adding directory ${dir}` })
             totalDirectories++
             await buildFileSystemRepresentation(dirPath + "/" + file, fsPosition[dir])
         } else if(!stats.isSymbolicLink()){
@@ -53,13 +44,13 @@ const buildFileSystemRepresentation = async (dirPath, fsPosition=root) =>{ //new
             totalFiles++
             const newFile = new File(file, fileContent, path)
             fsPosition.contents.push(newFile)
-            log(`\\_Adding file ${path}`)
+            parentPort.postMessage({ log:`\\_Adding file ${path}` })
         }else{
             console.log('SYMBOLIC LINK', stats)
         }
 
     }catch(e){
-        log('DIR BUILD statSync ERROR',e)
+        parentPort.postMessage({ log:e })
     }
   }
   return fsPosition

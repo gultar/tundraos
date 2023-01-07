@@ -12,10 +12,12 @@
     <link rel="stylesheet" href="./css/external/jquery.contextMenu.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <link rel="stylesheet" href="./css/editor.css">
+    <link rel="stylesheet" href="./css/browser.css">
     <link rel="stylesheet" href="./css/hyperwatch.css">
     <link rel="stylesheet" href="./css/external/font-awesome.min.css">
     <link rel="stylesheet" href="./css/external/quill.bubble.css">
     <link rel="stylesheet" href="./css/external/quill.snow.css">
+
     <!-- External scripts -->
     <script src="./js/external/winbox.bundle.min.js"></script>
     <script src="./js/external/vanilla-context-menu.js"></script>
@@ -35,7 +37,8 @@
     <script src="./js/storage/session.js"></script>
     <!-- Browser related scripts -->
     <script src="./js/browser/browser.js"></script>
-    <script src="./js/commands/web-shortcuts.js"></script>
+    <script src="./js/browser/tabs.js"></script>
+    <script src="./js/browser/web-shortcuts.js"></script>
     <!-- Settings and configurations -->
     <script src="./js/settings/settings.js"></script>
     <!-- Terminal/Shell scripts -->
@@ -56,12 +59,12 @@
     <script src="./js/desktop/desktop-menu.js"></script>
     <script src="./js/desktop/context-window.js"></script>
     <script src="./js/desktop/icon-creator.js"></script>
-    <script src="./js/window-manager/create-window.js"></script> 
+    <script src="./js/window-manager/create-window.js"></script>
     <script src="./js/applications/rich-text-editor.js"></script>
     <script src="./js/applications/markdown-editor.js"></script>
     <script src="./js/applications/notepad.js"></script>
     <!-- Init scripts -->
-    
+    <script src="./js/desktop/desktop-functions.js" defer></script>
     <script src="./js/init-script.js" defer></script>
 
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
@@ -137,146 +140,67 @@
         </nav>
 
         <div id="page-anchor"></div>
-        <div id="filemanager"></div>
-        
-        <div id="text-editor-container"></div>
 
-        <div id="editor-container"></div>
-        
+        <div id="logo-container"> 
+            <img id="desktop-logo" src="./images/icons/constellation-3.png" />
+        </div>
+
+        <div id="icon-container" style="background:transparent">
+            <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, (()=>new Browser()))" id="browser-icon">
+                <img class="desktop-icon" src="./images/icons/browser-color-large.png">
+                <span>Browser</span>
+            </a>
+            <a data-name="explorer-icon" class="desktop-icon-link" onclick="select(this, (()=>new FileExplorer(0,0)))" id="explorer-icon">
+                <img class="desktop-icon" src="./images/icons/explorer-color-large.png">
+                <span>Explorer</span>
+            </a>
+            <a data-name="terminal-icon" class="desktop-icon-link" onclick="select(this, (()=>new TerminalWindow()))" id="terminal-icon">
+                <img class="desktop-icon" src="./images/icons/terminal-color-large.png">
+                <span>Terminal</span>
+            </a>
+            <a data-name="editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Editor()))" id="editor-icon">
+                <img class="desktop-icon" src="./images/icons/editor-color-large.png">
+                <span>Code Editor</span>
+            </a>
+            <a data-name="text-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new RichTextEditor()))" id="text-editor-icon">
+                <img class="desktop-icon" src="./images/icons/quill-color-large.png">
+                <span>Text Editor</span>
+            </a>
+            <a data-name="markdown-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new MarkdownEditor()))" id="markdown-editor-icon">
+                <img class="desktop-icon" src="./images/icons/markdown-color-large.png">
+                <span>Text Editor</span>
+            </a>
+            <a data-name="notepad-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Notepad()))" id="notepad-icon">
+                <img class="desktop-icon" src="./images/icons/text-editor-color-large.png">
+                <span>Notepad</span>
+            </a>
+        </div>
+
         <div id="main-container">
-            
-            <div id="logo-container"> 
-                <img id="desktop-logo" src="./images/icons/constellation-3.png" />
+            <div id="browser-tabs" style="width:100%; height:100%;">
+                <div id="browsers-container" style="width:100%; height:95%;"></div>
             </div>
 
-            <div id="icon-container" style="background:transparent">
-                <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, (()=>new Browser()))" id="browser-icon">
-                    <img class="desktop-icon" src="./images/icons/browser-color-large.png">
-                    <span>Browser</span>
-                </a>
-                <a data-name="explorer-icon" class="desktop-icon-link" onclick="select(this, (()=>new FileExplorer(0,0)))" id="explorer-icon">
-                    <img class="desktop-icon" src="./images/icons/explorer-color-large.png">
-                    <span>Explorer</span>
-                </a>
-                <a data-name="terminal-icon" class="desktop-icon-link" onclick="select(this, (()=>new TerminalWindow()))" id="terminal-icon">
-                    <img class="desktop-icon" src="./images/icons/terminal-color-large.png">
-                    <span>Terminal</span>
-                </a>
-                <a data-name="editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Editor()))" id="editor-icon">
-                    <img class="desktop-icon" src="./images/icons/editor-color-large.png">
-                    <span>Code Editor</span>
-                </a>
-                <a data-name="text-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new RichTextEditor()))" id="text-editor-icon">
-                    <img class="desktop-icon" src="./images/icons/quill-color-large.png">
-                    <span>Text Editor</span>
-                </a>
-                <a data-name="markdown-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new MarkdownEditor()))" id="markdown-editor-icon">
-                    <img class="desktop-icon" src="./images/icons/markdown-color-large.png">
-                    <span>Text Editor</span>
-                </a>
-                <a data-name="notepad-editor-icon" class="desktop-icon-link" onclick="select(this, (()=>new Notepad()))" id="notepad-icon">
-                    <img class="desktop-icon" src="./images/icons/text-editor-color-large.png">
-                    <span>Notepad</span>
-                </a>
-            </div>
+            <div id="dialog-message" title="System Message"></div>
+
+            <div id="filemanager"></div>
+        
+            <div id="text-editor-container"></div>
+    
+            <div id="editor-container"></div>
 
             <canvas class="background" ></canvas>
+            
             <div id="webamp"></div>
         </div>
         
-        <div id="browsers-container" style="width:90%; height:90%;"></div>
-        <div id="dialog-message" title="System Message"></div>
 
+        
     </div>
-    <script type="text/javascript">
-
-        makeDesktopMenu()
-        cycleThroughWindows()
-        
-        
-        $("#icon-container").sortable()
-
-        const select = (element, func) =>{
-            if(element.classList.contains('selected')){
-                func()
-                element.classList.remove('selected')
-            }else{
-                element.classList.add('selected')
-                setTimeout(()=>{
-                    element.classList.remove('selected')
-                }, 1000)
-            }
-        }
-
-        //prevent dragging start menu elements
-        $("nav a").on('dragstart drop', function(e){
-            e.preventDefault();
-            return false;
-        });
-
-        const getUsername = () =>{
-            //Probably useless
-            if(window.location.hostname == 'localhost'){
-                const [ url, searchParams ] = window.location.href.split("?")
-                const [ tokenAndValue, usernameAndValue ] = searchParams.split("&")
-                let [ usernameLabel, value ] = usernameAndValue.split("=")
-                value = value.replace("#", '')
-                return value
-            }else{
-                return 'guest'
-            }
-            
-        }
-
-
-
-        const logout = async () =>{
-            
-            const [ url, searchParams ] = window.location.href.split("?")
-            const username = getUsername()
-            window.location.href = url
-            
-            if(window.location.hostname == 'localhost'){
-                const loggedOut = await Promise.resolve($.post("/logout", {
-                    logout:true,
-                    username:username
-                }))
-            }
-
-        }
-
-        const reboot = () =>{
-            confirmation({
-                message:"Are you sure you want to reboot?",
-                yes:()=>{
-                    window.openWindows = {}
-                    if(location.hostname === 'localhost')
-                        location.href = location.origin
-                    else
-                        location.reload()
-                },
-                no:()=>{}
-            })
-        }
-
-        const shutdown = () =>{
-            confirmation({
-                message:"Are you sure you want to shutdown?",
-                yes:()=>{
-                    window.openWindows = {}
-                    window.close()
-                },
-                no:()=>{}
-            })
-        }
-        
-        window.onbeforeunload = (event) => { 
-            window.ipcRenderer.send("destroy-directory-pointers")
-        };
-        
+    
+    <script>
+        // createDesktopGrid()
     </script>
-
-
 </body>
 </html>
 

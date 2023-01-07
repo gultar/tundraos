@@ -253,7 +253,7 @@ class Terminal{
       content = file.content
     }
 
-    new Editor(currentDir+"/"+path, content)
+    new Editor({ pathToFile:currentDir+"/"+path, content:content })
     return true
   }
   
@@ -351,7 +351,7 @@ class Terminal{
   }
 
   async testSomething(args){
-  
+    new BrowserTabs()
       
   }
 
