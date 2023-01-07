@@ -50,7 +50,7 @@ const destroyPointer = async (id) =>{
     else return result
     
   }else{
-    delete directoryPointers[id] //If local file without server, make unique id from timestamp
+    delete directoryPointers[id] //If local file without server, destroy stored pointer
   }
 }
 

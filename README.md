@@ -62,10 +62,9 @@ Ideally, all installed client applications are attached to the Window object to 
 
 An ApplicationWindow instance is a wrapper for the WinBox library, which enables the creation of flexible, elegant and customizable windows. 
 
-The wrapper gives WinBox instances the ability to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications to be loaded without having to manually open the applications they're currently using. 
+The wrapper gives WinBox instances the ability to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications they're working on without having to manually reopen them. 
 
-The ApplicationWindow constructor takes in the same basic arguments as the WinBox class, but to save the window's state,
-it needs to receive the launcher object that contains several properties.
+The ApplicationWindow constructor takes in the same basic arguments as the WinBox class, but to save the window's state, it needs to receive the launcher object that contains several properties.
 
 Here is an example:
 
@@ -78,15 +77,15 @@ this.winbox = new ApplicationWindow({
 		width:"80%",
 		mount:this.editorWrapper,  //For a simple and more flexible usage, opt for mounting DOM
 		launcher:{                 //elements instead of including an HTML string
-				name:"Editor",
-				opts:{           //The launcher needs a class name, and the opts, or options, are
-					x:this.x,      //The properties that will be passed to the class constructor
-					y:this.y,
-					pathToFile:this.pathToFile,
-					content:this.content,
-				}
+            name:"Editor",
+            opts:{                 //The launcher needs a class name, and the opts are
+                x:this.x,          //The properties are passed to the class constructor
+                y:this.y,          //The X and Y properties are used to place the window on screen
+                pathToFile:this.pathToFile,
+                content:this.content,
+            }
 		},
-		onclose:()=>{       //Don't forget to disable all event listeners and to remove mounted DOM elements
+		onclose:()=>{           //Don't forget to disable all event listeners and to remove mounted DOM elements
 				this.close()    //otherwise, you may end up with wonky behaviour.
 		}
 })
@@ -98,6 +97,23 @@ Launches a cool and simple code editor powered by Ace, with some file management
 
 ```
 const myEditor = new Editor({ pathToFile:'/path/to/file' })
+```
+
+### Exec Command and Directory Pointers
+
+To interact with the underlying virtual filesystem, it is necessary to create a unique
+directory pointer ID, and include it in all filesystem commands like so.
+
+```
+const pointerId = await getNewPointerId()
+const result = await exec("ls",["path/to/dir"], pointerId)
+```
+
+It can be helpful to create a wrapping function to avoid having to add the id everytime.
+
+When you are finished and want to close the application, it is necesary to destroy the pointer
+```
+destroyPointer(pointerId)
 ```
 
 
