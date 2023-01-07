@@ -21,7 +21,7 @@ Or, simply visit the website and follow the steps provided.
 https://nodejs.org/en/
 
 
-##Installation
+## Installation
 
 You will first need to clone the repo by running the following command:
 ```
@@ -33,10 +33,12 @@ Then you need to install all necessary dependencies:
 npm install
 ```
 
-##Running
+## Running
+
 If you are using the application on Windows,
 you may want to enter the Windows Subsystem for Linux, as this project was built
 with Linux in mind first.
+
 You can, however, run the following command and have a filesystem built at the root of the
 project's directory.
 ```
@@ -59,11 +61,13 @@ Ideally, all installed client applications are attached to the Window object to 
 ### ApplicationWindow
 
 An ApplicationWindow instance is a wrapper for the WinBox library, which enables the creation of flexible, elegant and customizable windows. 
+
 The wrapper gives WinBox instances the ability to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications to be loaded without having to manually open the applications they're currently using. 
+
 The ApplicationWindow constructor takes in the same basic arguments as the WinBox class, but to save the window's state,
 it needs to receive the launcher object that contains several properties.
 
-Here is an example
+Here is an example:
 
 
 ```
