@@ -104,6 +104,9 @@ const myEditor = new Editor({ pathToFile:'/path/to/file' })
 To interact with the underlying virtual filesystem, it is necessary to create a unique
 directory pointer ID, and include it in all filesystem commands like so.
 
+A directory "pointer" works by making a reference to directories, which are objects containing circular
+references leading to their parent directory
+
 ```
 const pointerId = await getNewPointerId()
 const result = await exec("ls",["path/to/dir"], pointerId)
