@@ -92,10 +92,6 @@
   .help-line{
     line-height:10px !important;
   }
-  .help-cmd{
-    text-decoration: underline;
-  }
-  
   .terminal-window:before {
     content: "";
     position: absolute;

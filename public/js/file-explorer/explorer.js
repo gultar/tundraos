@@ -54,6 +54,20 @@ class FileExplorer{
             this.handleExplorerMessage(e)
         }, { signal });
         
+        window.addEventListener(`collapsible-directory-open-${this.explorerId}`, (e)=>{
+            const message = event.detail
+            if(!message) return false
+            
+            const { path, id } = message
+            if(id === this.explorerId){
+                this.setWorkingDir(path)
+            }else{
+                console.log('Message ID',id)
+                console.log('Explorer ID',this.explorerId)
+            }
+            
+        }, { signal })
+        
         
     }
 

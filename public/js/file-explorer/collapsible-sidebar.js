@@ -178,11 +178,13 @@ class CollapsibleBar{
         return $.contextMenu({
             selector: `.directory-element-${this.collapsibleId}`, 
             callback: function(key, options) {
-                if(key == 'Open in Explorer') new FileExplorer({ workingDir:this.context.dataset.path })
+                if(key == 'Open') sendEvent(`collapsible-directory-open-${hostId}`, { path:this.context.dataset.path, id:hostId })
+                else if(key == 'Open in Explorer') new FileExplorer({ workingDir:this.context.dataset.path })
                 else if(key == 'Delete') sendEvent(`collapsible-directory-delete-${hostId}`, { path:this.context.dataset.path, id:hostId })
                 else if(key == 'Get info') popup(this.context.dataset.path)
             },   
             items: {
+                "Open": {name: "Open", icon: 'fa-edit'},
                 "Open in Explorer": {name: "Open in Explorer", icon: 'fa-edit'},
                 'Delete': {name: "Delete", icon: "fa-delete"},
                 'Get info': {name: "Get info", icon: "fa-delete"},

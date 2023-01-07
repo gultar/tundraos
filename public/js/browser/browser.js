@@ -29,6 +29,8 @@ class Browser{
         this.webview = document.querySelector("#webview-"+this.browserNumber)
         this.urlBar = document.getElementById('url-bar-'+this.browserNumber)
         
+        this.webview.focus()
+        
         if(!this.attach) this.openWindow()
         
         this.webview.addEventListener('dom-ready', (event)=>{

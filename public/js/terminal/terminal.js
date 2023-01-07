@@ -28,18 +28,27 @@ class Terminal{
         "ls":'List information about the FILEs (the current directory by default). Usage: ls directory/',
         "rm":'Removes specified file. By default, it does not remove directories. . Usage: rm filename',
         "cd":"Change the working directory of the shell environment. Usage: cd dir1/",
+        "cp":"Copies file or entire directory to selected path. Usage: cp src/ target/",
+        "mv":"Moves file or entire directory to selected path. Usage: mv src/ target/",
         "pwd":"Print the name of current working directory",
         "cat":"Concatenate FILE(s) to standard output. Usage: cat filename",
         "mkdir":"Create the DIRECTORY, if it does not already exist. Usage: mkdir directoryname/",
         "touch":"Creates an empty file if it does not already exist. Usage: touch filename",
         "rmdir":"Remove the DIRECTORY, if it is empty. Usage: rmdir directoryname",
         "whoami":"Displays information concerning host",
+        "whereis":"Search for possible paths for a file or directory name",
         "reboot":"Reboots/refreshes system",
+        "logout":"Closes the current user's session",
         "shutdown":"Shuts down system",
+      },
+      "effect":{
+          "Possible Commands":"effect particles/wave/halo",
+          "effect wave":"Toggles a background color wave effect. Colors are set in variables.css",
+          "effect halo":"Toggles a colored halo around cursor. Usage: effect halo 300 - Default is 200 (px)",
+          "effect particles":"Toggles javascript particles effect in background.",
       },
       "settings":{
         "background":"Changes the background image. Usage: background http://url.url",
-        "effect":"Choose between 'wave', 'halo', and 'particle' and see the result"
       },
       "applications":{
         "browser":"Launches a simple Web browser",
@@ -51,7 +60,18 @@ class Terminal{
         "tirex":"Start the famous tirex game from Google",
         "lofi":"Opens up Lo Fi Girl's Youtube channel",
         "webamp":"Launches a Webamp Music Player window",
-        "editor":"Launches a text editor window"
+        "editor":"Launches a code editor window",
+        "markdown":"Launches a markdown file editor window",
+        "text":"Launches a rich text editor window",
+        "view":"Opens a simple image viewer",
+        "weather":"Displays local weather information",
+        "explorer":"Launches a file explorer window at selected path. Usage: explorer path/",
+      },
+      "wifi":{
+        "Possible Commands":"wifi scan/list/connect/disconnect",
+        "wifi scan":"Scans for available wifi networks and returns them as objects",
+        "wifi list":"Lists active wifi connections",
+        "wifi connect":"Connects to network. Usage: wifi connect --ssid 'NetworkName' --password 'psswrd123' "
       }
     };
 
@@ -151,6 +171,16 @@ class Terminal{
     if(args.length > 0){
       const commandName = args[0]
       let found = false
+      
+      if(this.helpMsgs[commandName]){
+          const category = this.helpMsgs[commandName]
+          for(const name in category){
+            const message = category[name]
+            found = message
+            this.output(this.formatHelpMessage(name, message))
+          }
+      }
+      
       for(const category in this.helpMsgs){
         if(this.helpMsgs[category][commandName]){
           found = this.helpMsgs[category][commandName]
@@ -274,14 +304,6 @@ class Terminal{
     const file = await this.exec("getFile", [path])
     let content = ""
     
-    // try{
-    //     if(file){
-    //       content = JSON.parse(file.content)
-    //     }
-    // }catch(e){
-    //     this.output(e.message)
-    //     return { error:e }
-    // }
 
     const editor = new RichTextEditor(path, file.content)
     return true
