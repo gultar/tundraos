@@ -70,24 +70,24 @@ Here is an example:
 
 
 ```
-this.winbox = new ApplicationWindow({
-		title:"Code Editor",
-		label: `editor-${this.editorId}`, //make sure the label is unique, to avoid having
-		height:"95%",                     //conflicting application window IDs
-		width:"80%",
-		mount:this.editorWrapper,  //For a simple and more flexible usage, opt for mounting DOM
-		launcher:{                 //elements instead of including an HTML string
-            name:"Editor",
-            opts:{                 //The launcher needs a class name, and the opts are
-                x:this.x,          //The properties are passed to the class constructor
-                y:this.y,          //The X and Y properties are used to place the window on screen
-                pathToFile:this.pathToFile,
-                content:this.content,
-            }
-		},
-		onclose:()=>{           //Don't forget to disable all event listeners and to remove mounted DOM elements
-				this.close()    //otherwise, you may end up with wonky behaviour.
+new ApplicationWindow({
+	title:"Code Editor",
+	label: `editor-${this.editorId}`, //make sure the label is unique, to avoid having
+	height:"95%",                     //conflicting application window IDs
+	width:"80%",
+	mount:this.editorWrapper,  //For a simple and more flexible usage, opt for mounting DOM
+	launcher:{                 //elements instead of including an HTML string
+		name:"Editor",
+		opts:{                 //The launcher needs a class name, and the opts are
+			x:this.x,          //The properties are passed to the class constructor
+			y:this.y,          //The X and Y properties are used to place the window on screen
+			pathToFile:this.pathToFile,
+			content:this.content,
 		}
+	},
+	onclose:()=>{           //Don't forget to disable all event listeners and to remove mounted DOM elements
+			this.close()    //otherwise, you may end up with wonky behaviour.
+	}
 })
 ```
 
