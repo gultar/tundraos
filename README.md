@@ -1,5 +1,25 @@
-# Toundra OS
+# Tundra OS
 An electron-powered desktop graphical environment
+
+## Requirements
+
+First, you need to have Node.js and NPM installed. Ideally, you're using a linux system or
+Window Subsystem for Linux, but the environment still works on Window, with some possible limitations.
+
+So, to install Node.js, you need to run the following commands:
+```
+curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+```
+
+Then install the Node.js package like so:
+```
+sudo apt-get install -y nodejs
+```
+
+Or, simply visit the website and follow the steps provided.
+
+https://nodejs.org/en/
+
 
 ##Installation
 
@@ -39,7 +59,7 @@ Ideally, all installed client applications are attached to the Window object to 
 ### ApplicationWindow
 
 An ApplicationWindow instance is a wrapper for the WinBox library, which enables the creation of flexible, elegant and customizable windows. 
-The wrapper gives WinBox instances to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications to be loaded without having to manually open the applications they're currently using. 
+The wrapper gives WinBox instances the ability to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications to be loaded without having to manually open the applications they're currently using. 
 The ApplicationWindow constructor takes in the same basic arguments as the WinBox class, but to save the window's state,
 it needs to receive the launcher object that contains several properties.
 
