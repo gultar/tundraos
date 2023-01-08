@@ -48,8 +48,7 @@ class Userspace{
 process.MOUNT_POINT = "."
 
 const buildUserspace = async (username='root', rootPath="/") =>{
-    let mountPoint = process.MOUNT_POINT || "system"
-
+    
     const log = (...text) =>{
         console.log(`[${username}:>]`, ...text)
     }
@@ -122,6 +121,8 @@ const buildUserspace = async (username='root', rootPath="/") =>{
 
     FileSystem = new VirtualFileSystem(username, persistance, userspacePath)    
     FileSystem.import(filesystemStructure)
+    
+    persistance.pwd = ()=> FileSystem.mainPointer.pwd()
 
     if(username === 'root' && !process.fullOs) 
         FileSystem.root().contents = directories.contents

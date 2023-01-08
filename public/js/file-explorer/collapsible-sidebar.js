@@ -58,6 +58,7 @@ class CollapsibleBar{
         $.contextMenu("destroy",`.file-element-${this.collapsibleId}`)
         $.contextMenu("destroy",`.directory-element-${this.collapsibleId}`)
         destroyPointer(this.pointerId)
+        clearInterval(this.clickEvents)
     }
     
     async openAtDirectory(path){
@@ -67,10 +68,10 @@ class CollapsibleBar{
         let clickCounter = 0
         
 
-        let clickEvents = setInterval(()=>{
+        this.clickEvents = setInterval(()=>{
             
             if(clickCounter === pathArray.length){
-                clearInterval(clickEvents)
+                clearInterval(this.clickEvents)
                 return true
             }
             let dirname = pathArray[clickCounter]

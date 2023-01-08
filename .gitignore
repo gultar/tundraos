@@ -5,3 +5,4 @@ accounts.json
 public/userspaces/*
 trashcan/
 trashcan/*
+public/sharedspace/*

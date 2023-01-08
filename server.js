@@ -9,6 +9,17 @@ const crypto = require('crypto')
 const buildUserspace = require('./src/filesystem/build-userspace.js')
 const hyperwatch = require("hyperwatch")
 const wifiTools = require("./src/wifi/network-tools")
+  const {
+    validateLogin,
+    isValidPassword,
+    createUser,
+    createUserHandler,
+    addUserToAccountFile,
+    getAccountsFromFile,
+    userExists,
+    getUser,
+}  = require("./src/users/usershandler.js")
+  
 
 const log = (...text) =>{
   console.log("[server:>]", ...text)
@@ -43,7 +54,7 @@ const createNewUser = (username, password) =>{
   return true
 }
 
-const isValidPassword = (username, password) =>{
+const isPasswordValid = (username, password) =>{
   const user = authorizedUsers[username]
   const isValidPassword = sha256(password) === user.passwordHash
   return isValidPassword
@@ -52,6 +63,7 @@ const isValidPassword = (username, password) =>{
 let FileSystem = null
 
 const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
+  
   if(!config.mountPoint) throw new Error('Need to provide filesystem mount point value')
 
   const execute = async (cmd, args, pointerId) =>{
@@ -123,7 +135,37 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
       const newUser = createNewUser(username, password)
     }
     
-    if(!isValidPassword(username, password)){
+    if(!isPasswordValid(username, password)){
+      return { 
+        error:`Password of user ${username} is invalid`, 
+        status:401 
+      }
+    }
+
+    let code = `${username}${password}${timestamp}`
+
+    let hexHash = sha256(code)
+
+    authorizedUsers[username].tokenHash = hexHash
+    
+    global.activeUser = username
+    return { 
+        token:{
+          hash:hexHash.toString("hex"),
+          username:username,
+          status:200,
+        }
+    }
+    
+  }
+  
+    const loginUser = (username, password, timestamp) =>{
+
+    if(!authorizedUsers[username]){
+      const newUser = createNewUser(username, password)
+    }
+    
+    if(!isPasswordValid(username, password)){
       return { 
         error:`Password of user ${username} is invalid`, 
         status:401 
@@ -181,6 +223,8 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
       global.FileSystem = FileSystem
     }
   })
+  
+  expressApp.post("/createUser", async (req, res)=>createUserHandler(req, res))
 
   expressApp.post("/logout", (req, res)=>{
     const { username } = req.body
@@ -241,6 +285,18 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
       return res.send({ error:"No pointers were destroyed" })
     }
   })
+  
+  expressApp.post("/togglehyperwatch", (req, res)=>{
+    if(hyperwatchIsEnabled){
+        configuration.disable()
+        hyperwatchIsEnabled = false
+    }
+    else{
+        configuration.enable()
+        hyperwatchIsEnabled = true
+    }
+    res.send({ enabled:hyperwatchIsEnabled })
+  })
 
   expressApp.get("/config", (req, res)=>{
     res.send(config)
@@ -250,8 +306,9 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
     log('HTTP Server listening on '+port)
   })
   
+  let hyperwatchIsEnabled = true
   const configuration = hyperwatch(httpServer)
-
+  configuration.scrollback(500)
     
 }
 module.exports = runServer 

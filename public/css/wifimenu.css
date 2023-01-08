@@ -1,0 +1,58 @@
+        
+#wifi-menu{
+    display:block;
+    width:450px;
+    height:350px;
+    background-color: darkgray;
+    padding:2vh;
+}
+
+#dialog-window{
+    display:flex;
+    overflow: hidden;
+}
+
+#network-list{
+    display:block;
+    width:97%;
+    height:20vh;
+    background-color: rgb(253, 253, 253);
+    border:1px dotted rgb(54, 54, 54);
+    overflow: scroll;
+    padding:1vh;
+    color:black;
+    font-size:8pt;
+}
+
+#wifi-menu-window div{
+    margin-top:1vh;
+}
+
+#network-menu-label{
+    width:100%;
+    text-align:center;
+}
+
+#interface-select{
+    display:block;
+    width:10vh;
+}
+
+.network-entry{
+    display:block;
+}
+
+.network-entry:hover{
+    background-color:blue;
+    color:white;
+}
+
+.network-entry:focus{
+    background-color:blue;
+    color:white;
+}
+
+.selected-network{
+    background-color:blue;
+    color:white;
+}

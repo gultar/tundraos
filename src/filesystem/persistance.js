@@ -7,14 +7,14 @@ const log = (...text) =>{
     console.log("[persistance:>]", ...text)
 }
 
-let mountPoint = "system"
+let mountPoint = ""
 
 class Persistance{
     constructor(
         user="", 
         rootDir=".", 
         userspaceDir="./public/userspaces/",
-        pwd=false){
+        pwd=()=>{ return "/" }){
         // console.log('User', user)
         this.user = user
         this.rootDir = rootDir
@@ -39,7 +39,7 @@ class Persistance{
             }
         }
 
-        mountPoint = process.MOUNT_POINT || 'system'
+        mountPoint = (process.MOUNT_POINT == "." ? "" : process.MOUNT_POINT)
     }
 
     registerPointer(id, pointer){
@@ -64,6 +64,7 @@ class Persistance{
         }
 
         truePath = truePath.replace("//", "/")
+        
         console.log('Second true path', truePath)
         truePath = mountPoint + truePath
         return truePath

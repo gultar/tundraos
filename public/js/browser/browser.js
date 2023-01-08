@@ -1,5 +1,7 @@
 activeWebviews = {}
 
+
+
 class Browser{
     constructor(opts={}){
         let { url, attach, browsersContainer } = opts
@@ -123,11 +125,11 @@ class Browser{
     browserNavigationHandler(event){
         const message = event.detail
         if(message.back == `browser-${this.browserNumber}`){
-                this.webview.goBack()
+                return this.webview.goBack()
         }else if(message.forward == `browser-${this.browserNumber}`){
-                this.webview.goForward()
+                return this.webview.goForward()
         }if(message.refresh == `browser-${this.browserNumber}`){
-                this.webview.reload()
+                return this.webview.reload()
         }
     }
     
@@ -151,10 +153,12 @@ class Browser{
 
     selectDownloadPathHandler(event, message){
         const startingPath = message
-
+        
+        if(window.saveDialogOpened) return true
+        
         new SaveAsDialog({
-            startingPath:startingPath,
-            filename:""
+                startingPath:startingPath,
+                filename:""
         })
 
     }

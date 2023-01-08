@@ -52,6 +52,7 @@ class Editor{
         });
         if(content && !content.error) editor.setValue(content);
         window.editorInstance = editor
+        
         return editor
     }
 
@@ -88,21 +89,6 @@ class Editor{
                 this.content = ""
             }
         }
-
-        this.editor = await this.startEditor(this.filename, this.content)
-
-        this.editor.session.on('change', function(delta) {
-           
-            //watch for change to enable prompt for saving file upon closing window
-            this.saved = false
-        });
-        
-        this.editor.commands.on('afterExec', eventData => {
-            if (eventData.command.name === 'insertstring') {
-                console.log('User typed a character: ' + eventData.args);
-                this.saved = false
-            }
-        });
         
         this.winbox = new ApplicationWindow({
             title:"Code Editor",
@@ -142,6 +128,22 @@ class Editor{
             }
         })
 
+        this.editor = await this.startEditor(this.filename, this.content)
+
+        this.editor.session.on('change', function(delta) {
+           
+            //watch for change to enable prompt for saving file upon closing window
+            this.saved = false
+        });
+        
+        this.editor.commands.on('afterExec', eventData => {
+            if (eventData.command.name === 'insertstring') {
+                // console.log('User typed a character: ' + eventData.args);
+                this.saved = false
+            }
+        });
+        
+
         this.makeFolderView()
         
         this.editorMessageHandler = async (event)=>{
@@ -165,7 +167,14 @@ class Editor{
         window.addEventListener("collapsible-directory-delete-"+this.editorId, (payload)=>this.collapsibleDirectoryDeleteHandler(payload), {signal})
         window.addEventListener("collapsible-file-open-"+this.editorId, (payload)=>this.collapsibleFileOpenHandler(payload), {signal})
         window.addEventListener("collapsible-file-delete-"+this.editorId, (payload)=>this.collapsibleFileDeleteHandler(payload), {signal})
+        window.addEventListener("beforeunload", (event)=>{
+            this.close("force")
+            event.preventDefault()
+            
+        })
         
+        
+        this.saved = true
     }
     
     
@@ -224,12 +233,16 @@ class Editor{
         
     }
 
-    close(){
+    close(force=false){
+        this.editorWrapper.remove()
         const filecontent = this.editor.getValue()
         const path = this.pathToFile
-        this.editorWrapper.style.visibility = 'hidden'
+        this.editorWrapper.style.display = 'none'
         this.listenerController.abort()
         this.collapsible.destroy()
+        
+        if(force) return this.destroy()
+        
         if(this.saved === false){
             confirmation({
                 message:'Do you want to save before exiting?',
@@ -255,7 +268,6 @@ class Editor{
     destroy(){
         
         this.editor.destroy()
-        this.editorWrapper.remove()
         this.editor.container.remove()
         destroyPointer(this.dirPointerId)
         // delete window.openWindows[`editor-${this.editorId}`]
@@ -418,7 +430,8 @@ class Editor{
     injectDOM(){
         this.editorContainer = document.querySelector("#editor-container")
         const editorDOMString = this.buildEditorDOM()
-        this.editorContainer.innerHTML = this.editorContainer.innerHTML + editorDOMString
+        this.editorContainer.insertAdjacentHTML("beforeend", editorDOMString);
+        // this.editorContainer.innerHTML = this.editorContainer.innerHTML + editorDOMString
         const editorDOM = document.querySelector(`#editor-${this.editorId}`)
         return editorDOM
     }

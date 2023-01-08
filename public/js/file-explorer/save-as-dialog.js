@@ -1,7 +1,14 @@
 let mountPoint = window.MOUNT_POINT
 
+window.saveDialogOpened = false
+
 class SaveAsDialog{
     constructor(opts={}){
+        
+        if(window.saveDialogOpened) return new Error('Already Opened')
+        
+        window.saveDialogOpened = true
+        
         this.width = opts.width || '55%'
         this.height = opts.height || '82%'
         this.dialogWindow = ""
@@ -16,13 +23,15 @@ class SaveAsDialog{
         this.dialogDOM = ""
         this.homePath = (
             window.username == 'root' ? 
-                mountPoint+"/public/userspaces/root/home/" 
+                getMountPoint()+"/public/userspaces/root/home/" 
                 : 
-                mountPoint+"/home/"
+                getMountPoint()+"/home/"
             )
         this.init()
         this.listener = ""
         this.opts = opts
+        
+        
     }
 
     async exec(cmd, args){
@@ -35,6 +44,9 @@ class SaveAsDialog{
         this.launchWindow()
         await this.refreshExplorer()
         this.makeExplorerMenu()
+        
+        
+        
         this.listener = window.addEventListener("message", (e)=>{
             this.handleExplorerMessage(e)
         }, true);
@@ -47,7 +59,7 @@ class SaveAsDialog{
             <div id="dialog-window">
                 <span id="save-as-label">${this.mode} file</span>
                 <div id="input-line">
-                    <input id="path-viewer-input" type="text" value="/system/home/downloads" />
+                    <input id="path-viewer-input" type="text" value="/" />
                     <button onclick="window.postMessage({ setDir:document.getElementById('path-viewer-input').value })" id="select-path">Select</button>
                 </div>
                 <div id="dialog-explorer-box">
@@ -86,6 +98,7 @@ class SaveAsDialog{
         this.currentDirContents = []
         this.fullPaths = []
         this.workingDir = ""
+        window.saveDialogOpened = false
     }
 
     launchWindow(){
@@ -402,7 +415,7 @@ class SaveAsDialog{
             if(hasDirectory){
                 if(this.workingDir === "/" && targetDir === "..")
                     this.workingDir = "/"
-                else if(this.workingDir == mountPoint+"/..")
+                else if(this.workingDir == getMountPoint()+"/..")
                     this.workingDir = "/"
                 else if(this.workingDir !== "/" && targetDir === "..")
                     targetDir = targetDir + "/"   

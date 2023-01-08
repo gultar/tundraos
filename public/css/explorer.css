@@ -25,7 +25,7 @@
 .explorer-window{
     margin-top:0;
     width:100%;
-    height:95%;
+    height:100%;
     display:flex;
     justify-content: flex-start;
 }
@@ -57,7 +57,6 @@
     /*background-color: rgb(57, 64, 71);*/
     border:1px solid white;
     resize: horizontal;
-    scroll-behavior: smooth;
 }
 
 .side-bar ul{
@@ -110,6 +109,7 @@
     min-width: 40%;
     width:75%;
     min-height: 100%;
+    height:100%;
     display: grid;
     grid-template-columns: repeat(var(--number-of-explorer-items), var(--size-of-item));
     grid-auto-rows: var(--height-of-item);
@@ -152,6 +152,8 @@
 
 .folder-view-explorer{
     resize: none !important;
+    height:100%;
+    display:flex;
 }
 
 .folder-view-explorer .directory-content {

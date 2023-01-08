@@ -61,6 +61,18 @@ nav a:hover {
 	color:var(--nav-background-color);
 }
 
+.wifi-icon:hover { 
+	background-color: var(--hover-color); 
+	color:var(--nav-background-color);
+	cursor:pointer;
+
+}
+
+.wifi-icon{
+    width:12px;
+	height:12px;
+}
+
 /* Hide Dropdowns by Default */
 nav ul ul {
 	display: none;

@@ -12798,14 +12798,43 @@ function through (write, end, opts) {
 },{"_process":7,"stream":13}],71:[function(require,module,exports){
 
 
+window.hyperwatchEnabled = false
 
-require('hyperwatch')({
-  mini: {
-    position: 'top right',
-    width: 100,
-    height: 100,
-    fontSize:6,
+const toggleHyperwatch = () =>{
+  if(window.hyperwatcherEnabled){
+      const result = $.post("http://localhost:8000/togglehyperwatch")
+      console.log('Res', result)
+      window.hyperwatchEnabled = false
+  }else{
+      const result = $.post("http://localhost:8000/togglehyperwatch")
+      console.log('Res', result)
+      window.hyperwatchEnabled = true
   }
-});
+  
+}
+
+const startHyperwatcher = () =>{
+    window.hyperwatcher = require('hyperwatch')({
+      mini: {
+        position: 'top right',
+        width: 100,
+        height: 100,
+        fontSize:6,
+      }
+  });
+  console.log('hyperwatch',window.hyperwatcher)
+  window.hyperwatchEnabled = true
+}
+
+window.toggleHyperwatch = toggleHyperwatch
+window.startHyperwatcher = startHyperwatcher
+// require('hyperwatch')({
+//   mini: {
+//     position: 'top right',
+//     width: 100,
+//     height: 100,
+//     fontSize:6,
+//   }
+// });
 
 },{"hyperwatch":62}]},{},[71]);

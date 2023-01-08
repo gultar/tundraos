@@ -119,6 +119,7 @@ class Terminal{
       test:async(args)=>await this.testSomething(args),
       explorer:async(args)=>await this.runExplorer(args),
       wifi:async(args)=>await this.makeWifiCommand(args),
+      hyperwatch:async()=>await toggleHyperWatch(),
     }
   }
   
@@ -283,7 +284,11 @@ class Terminal{
       content = file.content
     }
 
-    new Editor({ pathToFile:currentDir+"/"+path, content:content })
+    if(path){
+        path = currentDir+"/"+path
+    }
+
+    new Editor({ pathToFile:path, content:content })
     return true
   }
   
@@ -311,7 +316,8 @@ class Terminal{
 
   async runExplorer(args){
     const current = await this.exec("pwd")
-    new FileExplorer(0,0, { workingDir:current })
+    const path = args[0]
+    new FileExplorer({ workingDir:current+"/"+path })
   }
 
   startBrowser(args){
@@ -373,8 +379,8 @@ class Terminal{
   }
 
   async testSomething(args){
-    new BrowserTabs()
-      
+    // new BrowserTabs()
+     const menu = new WifiMenu()
   }
 
   async getWeather(){

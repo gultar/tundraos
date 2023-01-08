@@ -68,8 +68,8 @@ const resolvePath = (virtualPath=FileSystem.pwd())=>{
 
 let FileSystem = {}
 let commands = {}
-const makeFileSystem = (user='root') =>{
-  FileSystem = buildUserspace(user)
+const makeFileSystem = async (user='root') =>{
+  FileSystem = await buildUserspace(user)
   commands = FileSystem.exposeCommands()
 
   FileSystem.help = help

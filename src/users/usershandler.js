@@ -1,5 +1,7 @@
-const fs = require("fs");
+const fs = require("fs").promises;
 const bcrypt = require('bcrypt')
+
+let accountFilePath = "./users/accounts.json"
 
 const validateLogin = async ({ username, password }) =>{
 
@@ -56,8 +58,20 @@ const createUserHandler = async (req, res) =>{
     }
 }
 
-const addUserToAccountFile = ({ username, hash, timestamp, rounds}) =>{
+const addUserToAccountFile = async ({ username, hash, timestamp, rounds}) =>{
+    try{
+        const exists = await fs.readFile(accountFilePath)
+        if(!exists){
+            await createAccountFile()
+        }
+    }catch(e){
+        console.log(e)
+        throw e
+    }
+    
     const accounts = getAccountsFromFile()
+    
+    if(accounts[username] !== undefined) throw new Error(`User ${username} already exists`)
     
     accounts[username] = {
       hash:hash,
@@ -65,14 +79,42 @@ const addUserToAccountFile = ({ username, hash, timestamp, rounds}) =>{
       rounds:rounds
     }
   
-    const written = fs.writeFileSync("./accounts.json",JSON.stringify(accounts))
+    const written = await fs.writeFile(accountFilePath,JSON.stringify(accounts))
     return written
 }
+
+const createAccount = async ({ username, password, timestamp }) =>{
+    const rounds = 10
+    const hash = await bcrypt.hash(password, rounds)
+    const user = {
+        username:username,
+        hash:hash,
+        timestamp:timestamp,
+    }
+    return user
+}
+
+const createAccountFile = async () =>{
+    
+    const accounts = {
+        root:await createAccount({ username:'root', password:'root', timestamp:Date.now() }),
+        guest:await createAccount({ username:'guest', password:'guest', timestamp:Date.now() })
+    }
   
-const getAccountsFromFile = () =>{
-    const accountsFileString = fs.readFileSync("./accounts.json").toString()
-    const accounts = JSON.parse(accountsFileString)
-    return accounts
+    const written = await fs.writeFile(accountFilePath,JSON.stringify(accounts))
+    return written
+    
+}
+  
+const getAccountsFromFile = async () =>{
+    try{
+        const accountsFileString = await fs.readFile(accountFilePath).toString()
+        const accounts = JSON.parse(accountsFileString)
+        return accounts
+    }catch(e){
+        console.log(e)
+        return false
+    }
 }
   
 const userExists = (username) =>{

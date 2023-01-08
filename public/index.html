@@ -52,6 +52,7 @@
     <script src="./js/file-explorer/collapsible-sidebar.js"></script>
     <script src="./js/file-explorer/explorer.js"></script>
     <script src="./js/file-explorer/save-as-dialog.js"></script>
+    <script src="./js/file-explorer/wifimenu.js"></script>
 <!-- Applications and visual effects -->
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
@@ -134,7 +135,11 @@
                     </li>
                 </li>
             </ul>
+
             <li class="clock-container">
+                <span onclick="new WifiMenu({})" class="wifi-icon" style="display:inline-block">
+                    <img height="12" width="12" src="./images/icons/wifi-small.png" />
+                </span>
                 <span id="clock">
                 </span>
             </li>
@@ -189,6 +194,8 @@
             <div id="text-editor-container"></div>
     
             <div id="editor-container"></div>
+            
+            <div id="wifi-menu-container"></div>
 
             <canvas class="background" ></canvas>
             
