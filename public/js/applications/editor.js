@@ -365,6 +365,7 @@ class Editor{
     }
 
     async save(content, path){
+        console.log('Editor Save Path', path)
         if(!path) path = this.pathToFile 
         this.saveEditorWindowState()
         const fileExists = await this.exec("getFile", [path])

@@ -46,29 +46,67 @@ class Persistance{
         this.pointerIds[id] = pointer
     }
 
-    resolvePath(pathString){
+    resolvePath(path){
+        let resolvedPath = ""
         this.currentDir = this.pwd()
-        console.log('Current Dir', this.currentDir)
-        let truePath = this.baseDir + this.currentDir
-        console.log('First true path', truePath)
-        console.log('Base Dir', this.baseDir)
-        const paths = pathString.split("/").filter(path => path !== "")
-        for(const path of paths){
-            if(path !== ".."){
-                truePath = truePath + "/" + path
+        
+        const directories = path.split("/").filter(directory => directory !== "")
+        for(const dirname of directories){
+            if(dirname !== ".."){
+                resolvedPath = resolvedPath + "/" + dirname
             }else{
-                truePath = truePath.split("/")
-                truePath.pop()
-                truePath = truePath.join("/")
+                resolvedPath = resolvedPath.split("/")
+                resolvedPath.pop()
+                resolvedPath = resolvedPath.join("/")
             }
+
+            console.log('Resolved Path', resolvedPath)
         }
 
-        truePath = truePath.replace("//", "/")
+        resolvedPath = this.currentDir + resolvedPath
+        console.log('Resolved Path', resolvedPath)
         
-        console.log('Second true path', truePath)
-        truePath = mountPoint + truePath
-        return truePath
+
+        if(resolvedPath.slice(0,2) == "//" && !process.fullOs)
+            resolvedPath = resolvedPath.replace("//", "./")
+        else
+            resolvedPath = resolvedPath.replace("//", "/")
+
+            console.log('Resolve Path No //', resolvedPath)
+
+        return resolvedPath
     }
+
+    // resolvePath(pathString){
+    //     console.trace('pathString',pathString)
+    //     this.currentDir = this.pwd()
+    //     console.log('Current Dir', this.currentDir)
+    //     let truePath = this.baseDir + this.currentDir
+    //     console.log('First true path', truePath)
+    //     console.log('Base Dir', this.baseDir)
+    //     const paths = pathString.split("/").filter(path => path !== "")
+    //     for(const path of paths){
+    //         if(path !== ".."){
+    //             truePath = truePath + "/" + path
+    //         }else{
+    //             truePath = truePath.split("/")
+    //             truePath.pop()
+    //             truePath = truePath.join("/")
+    //         }
+    //     }
+
+        
+        
+    //     console.log('Second true path', truePath)
+    //     truePath = mountPoint + truePath
+    //     if(truePath.slice(0,2) == "//" && !process.fullOs)
+    //          truePath = truePath.replace("//", "./")
+    //     else
+    //         truePath = truePath.replace("//", "/")
+
+    //         console.log('Last True Path')
+    //     return truePath
+    // }
 
     cd(path){
         this.currentDir = this.pwd()
