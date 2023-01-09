@@ -3,6 +3,8 @@ const fsa = require("fs").promises
 const { writeFile } = fsa
 const fsx = require('fs-extra')
 
+const path = require('path')
+
 const log = (...text) =>{
     console.log("[persistance:>]", ...text)
 }
@@ -47,35 +49,47 @@ class Persistance{
     }
 
     resolvePath(path){
-        let resolvedPath = ""
         this.currentDir = this.pwd()
-        
-        const directories = path.split("/").filter(directory => directory !== "")
-        for(const dirname of directories){
-            if(dirname !== ".."){
-                resolvedPath = resolvedPath + "/" + dirname
-            }else{
-                resolvedPath = resolvedPath.split("/")
-                resolvedPath.pop()
-                resolvedPath = resolvedPath.join("/")
-            }
-
-            console.log('Resolved Path', resolvedPath)
-        }
-
-        resolvedPath = this.currentDir + resolvedPath
-        console.log('Resolved Path', resolvedPath)
-        
-
-        if(resolvedPath.slice(0,2) == "//" && !process.fullOs)
-            resolvedPath = resolvedPath.replace("//", "./")
+        path = this.currentDir + path
+        if(path.slice(0,2) == "//" && !process.fullOs)
+            path = path.replace("//", "./")
         else
-            resolvedPath = resolvedPath.replace("//", "/")
+            path = path.replace("//", "/")
 
-            console.log('Resolve Path No //', resolvedPath)
-
-        return resolvedPath
+            console.log('Path', path)
+        return path
     }
+
+    // resolvePath(path){
+    //     let resolvedPath = ""
+    //     this.currentDir = this.pwd()
+        
+    //     const directories = path.split("/").filter(directory => directory !== "")
+    //     for(const dirname of directories){
+    //         if(dirname !== ".."){
+    //             resolvedPath = resolvedPath + "/" + dirname
+    //         }else{
+    //             resolvedPath = resolvedPath.split("/")
+    //             resolvedPath.pop()
+    //             resolvedPath = resolvedPath.join("/")
+    //         }
+
+    //         console.log('Resolved Path', resolvedPath)
+    //     }
+
+    //     resolvedPath = this.currentDir + resolvedPath
+    //     console.log('Resolved Path', resolvedPath)
+        
+
+    //     if(resolvedPath.slice(0,2) == "//" && !process.fullOs)
+    //         resolvedPath = resolvedPath.replace("//", "./")
+    //     else
+    //         resolvedPath = resolvedPath.replace("//", "/")
+
+    //         console.log('Resolve Path No //', resolvedPath)
+
+    //     return resolvedPath
+    // }
 
     // resolvePath(pathString){
     //     console.trace('pathString',pathString)
