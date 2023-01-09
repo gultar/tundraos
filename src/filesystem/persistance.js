@@ -148,7 +148,7 @@ class Persistance{
 
     async cp(pathFrom, pathTo){
         try{
-            const stats = await fsa.lstat(this.resolvePath(pathFrom))
+            const stats = await fsa.lstat(this.resolvePath(pathFrom)).catch(e => console.trace(e))
             if(stats.isDirectory()){
                 const copied = await fsa.cp(this.resolvePath(pathFrom), this.resolvePath(pathTo), {recursive: true});
                 log(`Copied directory ${pathFrom} recursively to ${pathTo}`, copied)
