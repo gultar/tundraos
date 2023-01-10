@@ -56,7 +56,7 @@ const destroyPointer = async (id) =>{
 
 const runFileSystemCommand = (cmd, args=[]) =>{
   try{
-    const commandResult = FileSystem[cmd](...args)
+    const commandResult = window.FileSystem[cmd](...args)
     return commandResult
   }catch(e){
     console.log(e)

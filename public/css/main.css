@@ -129,14 +129,14 @@ body{
   background-color: transparent;
   position:fixed;
   text-align: center;
-  font-size:9pt !important;
+  font-size:8pt !important;
   flex-wrap: wrap;
 }
 
 
 .desktop-icon{
-  height:var(--size-of-desktop-icons);
-  width:var(--size-of-desktop-icons);
+  height:var(--height-of-desktop-icons);
+  width:var(--width-of-desktop-icons);
   text-align: center;
 }
 
@@ -147,10 +147,11 @@ body{
 .desktop-icon-link{
   display:flex;
   flex-direction:column;
+  padding:5px;
 }
 
 .desktop-icon-link span{
-    
+    margin-top:0;
 }
 
 .placeholder{

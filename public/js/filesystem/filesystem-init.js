@@ -21,8 +21,9 @@ const init = () =>{
   const VirtualFileSystem = require('./virtualfilesystem')
   const persistance = require('./localstorage-persistance')
   FileSystem = new VirtualFileSystem("guest",persistance) //ADD FSBACKUP
+
   FileSystem.import(fsBackup)
-  window.Filesystem = FileSystem
+  window.FileSystem = FileSystem
 
   document.addEventListener('visibilitychange', function() {
       saveState()
@@ -32,6 +33,7 @@ const init = () =>{
 window.addEventListener("load", (event) => {
   console.log("page is fully loaded");
   init()
+  initScript()
 });
 
 window.saveState = saveState

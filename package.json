@@ -26,6 +26,7 @@
     "express-session": "^1.17.3",
     "helmet": "^6.0.0",
     "hyperwatch": "^0.5.4",
+    "loudness": "^0.4.1",
     "mime": "^3.0.0",
     "morgan": "^1.10.0",
     "node-downloader-helper": "^2.1.6",

@@ -1,5 +1,5 @@
 # Tundra OS
-An electron-powered desktop graphical environment
+An electron-powered desktop environment
 
 ## Requirements
 

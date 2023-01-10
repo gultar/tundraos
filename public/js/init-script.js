@@ -1,6 +1,10 @@
 // const { init } = require("node-wifi")
-
+let initScriptStarted = false
 const initScript = async () =>{
+    if(initScriptStarted) return 'Already started'
+    
+    
+    initScriptStarted = true
     initParticles()
     initClock()
     await getServerConfig()
@@ -9,10 +13,27 @@ const initScript = async () =>{
     loadWindowState()
     startWindowStateRoutine()
     
+    makeMockIpcRenderer()
     
     setTimeout(()=>{
         startHyperwatcher()
     }, 5000)
+}
+
+const makeMockIpcRenderer = () =>{
+  //If it is runned from a simple http server, without Electron, make
+  //a mock version based on event emitters to still enable communication to take place
+  
+  if(!window.ipcRenderer){
+    window.ipcRenderer = {
+      send:(eventType, payload)=>{
+        window.sendEvent(eventType, payload)
+      },
+      on:(eventType, callback, ...opts)=>{
+        window.addEventListener(eventType, callback, ...opts)
+      }
+    }
+  }
 }
 
 const getServerConfig = async () =>{
@@ -49,5 +70,4 @@ const startWindowStateRoutine = () =>{
 
 
 
-initScript()
 
