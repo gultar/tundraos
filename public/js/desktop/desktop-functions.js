@@ -81,8 +81,16 @@ const startPreReloadRoutine = () =>{
 
 const preReloadRoutine = (event)=>{
         event.preventDefault()
+        saveIconState()
         clearPointers()
         restoreAllWindows()
+        
+}
+
+const startSlowRoutine = () =>{
+    setInterval(async ()=>{
+        saveIconState()
+    }, 15*1000)
 }
 
 const clearPointers = () =>{

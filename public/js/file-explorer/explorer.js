@@ -388,6 +388,16 @@ class FileExplorer{
     
         return extensions[extensions.length - 1]
     }
+    
+    setFileImageOrThumbnail(element, path){
+        const fileExtension = this.handleExtension(element)
+        if(fileExtension == 'png' || fileExtension == 'jpg' || fileExtension == 'jpeg'){
+            path = path.replace("public",".")
+            return `${path}${element}`
+        }else{
+            return "./images/icons/file-color-large.png"
+        }
+    }
 
     createElement(element, path){
         if(path === "/") path = ""
@@ -426,7 +436,7 @@ class FileExplorer{
                             }) }))"
                             class="explorer-item link file">
                             <img id="${element}-${this.explorerId}" class="explorer-icon draggable" 
-                                src="./images/icons/file-color-large.png"
+                                src="${this.setFileImageOrThumbnail(element, path)}"
                             />
                             
                     </a>
@@ -574,7 +584,7 @@ class FileExplorer{
                 },{ 
                   label: 'Open in Explorer',
                   iconHTML: `<img src="./images/icons/folder.png" height="20px" width="20px">`,
-                  callback: () => new FileExplorer(0,0, { workingDir:element.dataset.path })
+                  callback: () => new FileExplorer({ workingDir:element.dataset.path })
                 },{ 
                     label: 'Remove',
                     iconHTML: `<img src="./images/icons/file.png" height="20px" width="20px">`,

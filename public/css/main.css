@@ -161,6 +161,19 @@ body{
 .selected{
 }
 
+#volume-menu{
+
+}
+#volume-slider{
+  /* width:200px;
+  height:30px;
+  background-color: var(--nav-background-color);
+  position:fixed;
+  display:block;
+  top:30px;
+  right:0; */
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;

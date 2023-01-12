@@ -250,9 +250,8 @@ const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
     if(!wifiTools[wifiCmd]) return res.send({ error:`Ẁifi Command ${wifiCmd} not found` })
     else{
       try{
-        console.log(wifiTools)
         const result = await wifiTools[wifiCmd]({ ssid:ssid, password:password, iface:iface })
-        console.log('RESULT OF WIFI', result)
+        // console.log('RESULT OF WIFI', result)
         return res.send(result) 
       }catch(e){
         return res.send({ error:e })

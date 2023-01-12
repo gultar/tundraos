@@ -42,7 +42,10 @@
     <script src="./js/browser/tabs.js"></script>
     <script src="./js/browser/web-shortcuts.js"></script>
 <!-- Settings and configurations -->
-    <script src="./js/settings/settings.js"></script>
+    <script src="./js/settings/effect.js"></script>
+    <script src="./js/settings/wifimenu.js"></script>
+    <script src="./js/settings/batterylevel.js"></script>
+    <script src="./js/settings/audiomenu.js"></script>
 <!-- Terminal/Shell scripts -->
     <script src="./js/terminal/terminal.js"></script>
     <script src="./js/terminal/terminal-window-init.js"></script>
@@ -53,7 +56,6 @@
     <script src="./js/file-explorer/collapsible-sidebar.js"></script>
     <script src="./js/file-explorer/explorer.js"></script>
     <script src="./js/file-explorer/save-as-dialog.js"></script>
-    <script src="./js/file-explorer/wifimenu.js"></script>
 <!-- Applications and visual effects -->
     <script src="./js/applications/weather.js"></script>
     <script src="./js/external/particles.min.js"></script>
@@ -91,6 +93,7 @@
                                         <li><a onclick='new Editor()'><img class="main-menu-icons" src="./images/icons/editor.png" />Code Editor</a></li>
                                         <li><a onclick='new RichTextEditor()'><img class="main-menu-icons" src="./images/icons/quill.png" />Rich Text Editor</a></li>
                                         <li><a onclick='new MarkdownEditor()'><img class="main-menu-icons" src="./images/icons/markdown.png" />Markdown Editor</a></li>
+                                        <li><a onclick='new Notepad()'><img class="main-menu-icons" src="./images/icons/notepad.png" />Notepad</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/system.png" />System</a>
@@ -137,14 +140,25 @@
                 </li>
             </ul>
 
-            <li class="clock-container">
-                <span onclick="new WifiMenu({})" class="wifi-icon" style="display:inline-block">
-                    <img height="12" width="12" src="./images/icons/wifi-small.png" />
+            <li class="settings-container">
+                <span>
+                    <div class="battery">
+                        <img id="battery-icon" title="100%" src="./images/icons/battery-full.png" height="15" width="15" />
+                    </div>
+                </span>
+                <span id="audio-icon" class="settings-icon" style="display:inline-block">
+                    <img  style="display:inline-block" id="audio-icon-image" height="15" width="15" src="./images/icons/audio-color-medium.png" />
+                    
+                </span>
+                <span onclick="new WifiMenu({})" class="settings-icon" style="display:inline-block">
+                    <img id="wifi-icon-image" height="15" width="15" src="./images/icons/no-wifi-color-medium.png" />
                 </span>
                 <span id="clock">
                 </span>
             </li>
         </nav>
+
+        
 
         <div id="page-anchor"></div>
 
@@ -197,18 +211,26 @@
             <div id="editor-container"></div>
             
             <div id="wifi-menu-container"></div>
+            
+            <div id="volume-menu-hider" style="display:none">
+                <div id="volume-menu">
+                    <span>Volume:</span>
+                    <input id="volume-slider" type="range" min="0" max="100" value="0">    
+                </div>
+            </div>
 
             <canvas class="background" ></canvas>
             
             <div id="webamp"></div>
         </div>
         
-        
+        <script>
+            window.ipcRenderer.on("battery-level", (event, level)=>{
+                console.log('Battery Level', level)
+            })
+        </script>
     </div>
     
-    <script>
-        // createDesktopGrid()
-    </script>
 </body>
 </html>
 

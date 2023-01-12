@@ -6,6 +6,7 @@ const runServer = require('./server.js')
 const {listenForDownloads} = require('./src/downloads/download-listener')
 const contextMenu = require("electron-context-menu")
 const mapLinuxFs = require("./src/filesystem/map-linux-fs")
+const { watchForVolumeChange, watchForVolumeMute } = require("./src/audio/volumecontrol.js")
 
 let fullscreen = true
 if(process.argv.includes("--no-full")){
@@ -66,7 +67,11 @@ app.on('ready', async () => {
 
     win.loadURL("http://localhost:8000/")
     
+    watchForVolumeChange()
+    watchForVolumeMute()
+    
     listenForDownloads(win)
+    
   
 });
 

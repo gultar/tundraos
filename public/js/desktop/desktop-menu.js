@@ -73,6 +73,33 @@ const makeDesktopMenu = () =>{
     })
 }
 
+let audioMenuOpened = false
+const makeAudioMenu = (x, y) =>{
+    let audioMenu = {}
+    if(!audioMenuOpened){
+        audioMenu = new WinBox({
+            class: [ "no-min", "no-max", "no-full", "no-resize", "no-move" ],
+            height:80,
+            width:200,
+            y:30,
+            x:x-80,
+            onclose:()=>{
+                audioMenuOpened = false
+                audioMenu = {}
+            },
+            mount:document.querySelector("#volume-menu")
+        //     html:`
+        // <div id="volume-menu">
+        //     <span>Volume:</span>
+        //     <input id="volume-slider" type="range" min="0" max="100" value="0">    
+        // </div>`
+        })
+        audioMenuOpened = true
+    }else{
+        audioMenu.focus()
+    }
+}
+
 const createDesktopMenu = () =>{
     $.contextMenu({
         selector: '#page-wrapper', 

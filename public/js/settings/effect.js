@@ -65,7 +65,6 @@ function toggleMouseHaloEffect(force, radius){
     const { x, y } = pageWrapper.getBoundingClientRect();
     pageWrapper.style.setProperty("--x", e.clientX - x);
     pageWrapper.style.setProperty("--y", e.clientY - y);
-    console.log('Screen', x, y)
   }
 
   

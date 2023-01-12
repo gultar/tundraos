@@ -33,6 +33,7 @@
     left: 0;
     width:auto;
     height:95%;
+    overflow:scroll;
 }
 
 

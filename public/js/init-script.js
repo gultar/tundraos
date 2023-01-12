@@ -5,18 +5,28 @@ const initScript = async () =>{
     
     
     initScriptStarted = true
-    initParticles()
-    initClock()
+    await initParticles()
+    await initClock()
     await getServerConfig()
-    setUsernameAsGlobal()
-    initDesktop()
-    loadWindowState()
-    startWindowStateRoutine()
+    await setUsernameAsGlobal()
+    await initDesktop()
+    await loadWindowState()
+    await startWindowStateRoutine()
     
-    makeMockIpcRenderer()
+    await monitorWifiConnectionStatus()
+
+    await makeMockIpcRenderer()
     
+   
+    await watchBatteryLevel()
+    
+    await enableVolumeControlMenu()
+    await watchVolumeControl()
+    
+    await loadIconState()
+    startSlowRoutine()
     setTimeout(()=>{
-        startHyperwatcher()
+        toggleHyperwatch()
     }, 5000)
 }
 
@@ -60,6 +70,21 @@ const initClock = () => {
     $("#clock").text(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
   }, 1000)
 
+}
+
+const monitorWifiConnectionStatus = async () =>{
+  const wifiImage = document.querySelector("#wifi-icon-image")
+  if(!wifiImage) throw new Error('Could not find wifi icon image')
+
+  setInterval(async ()=>{
+    const { result, error } = await runWifiCommand('list',{})
+
+    if(result && result.length == 0){
+      wifiImage.src = "./images/icons/no-wifi-color-medium.png"
+    }else{
+      wifiImage.src = "./images/icons/wifi-color-medium.png"
+    }
+  }, 10*1000)
 }
 
 const startWindowStateRoutine = () =>{

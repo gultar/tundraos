@@ -70,6 +70,8 @@ class Browser{
                 this.close()
             } 
         })
+
+        this.browserWindow.focus()
     
         activeWebviews[this.browserNumber] = this.browserWindow
         this.watchURLChange()
