@@ -1,127 +1,69 @@
-# Tundra OS
-An electron-powered desktop environment
+# Tundra OS ❄️🖥️
 
-## Requirements
+An electron-powered desktop environment designed to provide a seamless user experience.
 
-First, you need to have Node.js and NPM installed. Ideally, you're using a linux system or
-Window Subsystem for Linux, but the environment still works on Window, with some possible limitations.
+## Requirements 🛠️
 
-So, to install Node.js, you need to run the following commands:
+To use Tundra OS, ensure that you have Node.js and NPM (Node Package Manager) installed. It is recommended to use a Linux system or Windows Subsystem for Linux, although the environment is also compatible with Windows, with some potential limitations.
+
+To install Node.js, run the following commands:
+
 ```
 curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 ```
 
-Then install the Node.js package like so:
+Then, install the Node.js package by running:
+
 ```
 sudo apt-get install -y nodejs
 ```
 
-Or, simply visit the website and follow the steps provided.
+Alternatively, you can visit the [Node.js website](https://nodejs.org/en/) and follow the provided steps.
 
-https://nodejs.org/en/
+## Installation 🚀
 
+To get started with Tundra OS, follow these steps:
 
-## Installation
+1. Clone the repository by running the command:
 
-You will first need to clone the repo by running the following command:
-```
-git clone https://github.com/gultar/workspace
-```
+   ```
+   git clone https://github.com/gultar/workspace
+   ```
 
-Then you need to install all necessary dependencies:
-```
-npm install
-```
+2. Install all the necessary dependencies by running:
 
-## Running
+   ```
+   npm install
+   ```
 
-If you are using the application on Windows,
-you may want to enter the Windows Subsystem for Linux, as this project was built
-with Linux in mind first.
+## Running 🏃
 
-You can, however, run the following command and have a filesystem built at the root of the
-project's directory.
+If you are using Tundra OS on Windows, it is recommended to enter the Windows Subsystem for Linux (WSL) since the project was primarily built with Linux in mind.
+
+To launch the application with a built-in filesystem at the root of the project's directory, run the following command:
+
 ```
 npm run electron
 ```
 
-OR
+Alternatively, if you wish to have access to the entire Linux filesystem, use the following command:
 
-If you wish to have access to Linux's entire filsystem, run the following command instead:
 ```
 npm run electron-full
 ```
 
+## API 📚
 
-## API
+Tundra OS provides the following API tools:
 
-There are several tools attached to the global Window object as well as node's global object.
-Ideally, all installed client applications are attached to the Window object to enable system-wide usage.
+- **ApplicationWindow**: An ApplicationWindow instance serves as a wrapper for the WinBox library, enabling the creation of flexible, elegant, and customizable windows. It allows for saving and loading window states, making it convenient for developers to reload changes made to the front-end of their applications without reopening them.
 
-### ApplicationWindow
+- **Editor**: The Editor tool launches a cool and simple code editor powered by Ace, with file management capabilities. Initialize it with the desired path to a file.
 
-An ApplicationWindow instance is a wrapper for the WinBox library, which enables the creation of flexible, elegant and customizable windows. 
+- **Exec Command and Directory Pointers**: To interact with the virtual filesystem, use unique directory pointer IDs and include them in filesystem commands. Directory "pointers" reference directories through circular references to their parent directory. Creating a wrapping function can help simplify the process. Don't forget to destroy the pointer when you're finished.
 
-The wrapper gives WinBox instances the ability to be saved and loaded on page reload, allowing developers to reload changes made to the front-end part of the applications they're working on without having to manually reopen them. 
-
-The ApplicationWindow constructor takes in the same basic arguments as the WinBox class, but to save the window's state, it needs to receive the launcher object that contains several properties.
-
-Here is an example:
-
-
-```
-new ApplicationWindow({
-	title:"Code Editor",
-	label: `editor-${this.editorId}`, //make sure the label is unique, to avoid having
-	height:"95%",                     //conflicting application window IDs
-	width:"80%",
-	mount:this.editorWrapper,  //For a simple and more flexible usage, opt for mounting DOM
-	launcher:{                 //elements instead of including an HTML string
-		name:"Editor",
-		opts:{                 //The launcher needs a class name, and the opts are
-			x:this.x,          //The properties are passed to the class constructor
-			y:this.y,          //The X and Y properties are used to place the window on screen
-			pathToFile:this.pathToFile,
-			content:this.content,
-		}
-	},
-	onclose:()=>{           //Don't forget to disable all event listeners and to remove mounted DOM elements
-			this.close()    //otherwise, you may end up with wonky behaviour.
-	}
-})
-```
-
-### Editor
-
-Launches a cool and simple code editor powered by Ace, with some file management capabilities.
-
-```
-const myEditor = new Editor({ pathToFile:'/path/to/file' })
-```
-
-### Exec Command and Directory Pointers
-
-To interact with the underlying virtual filesystem, it is necessary to create a unique
-directory pointer ID, and include it in all filesystem commands like so.
-
-A directory "pointer" works by making a reference to directories, which are objects containing circular
-references leading to their parent directory
-
-```
-const pointerId = await getNewPointerId()
-const result = await exec("ls",["path/to/dir"], pointerId)
-```
-
-It can be helpful to create a wrapping function to avoid having to add the id everytime.
-
-When you are finished and want to close the application, it is necesary to destroy the pointer
-```
-destroyPointer(pointerId)
-```
-
-
-
-Built by:
+## Built by ✨
 
 Sacha-Olivier Dulac
 
+Enjoy using Tundra OS and explore the seamless electron-powered desktop environment it offers! ❄️🖥️

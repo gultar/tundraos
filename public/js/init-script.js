@@ -23,10 +23,11 @@ const initScript = async () =>{
     await enableVolumeControlMenu()
     await watchVolumeControl()
     
-    await loadIconState()
+    // await loadIconState()
     startSlowRoutine()
     setTimeout(()=>{
         toggleHyperwatch()
+        drawSystemMonitor()
     }, 5000)
 }
 

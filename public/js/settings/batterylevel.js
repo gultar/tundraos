@@ -18,14 +18,14 @@ const setBatteryIcon = (level) =>{
 
 const setBatteryLevel = async () =>{
     const batteryIcon = document.querySelector("#battery-icon")
+    const batteryPercentage = document.querySelector("#battery-percentage")
     const { level } = await navigator.getBattery()
     setBatteryIcon(level)
     
-    batteryIcon.title = `${level * 100}%`
+    batteryPercentage.innerText = `${level * 100}%`
 }
 
 const watchBatteryLevel = async () =>{
-    $("#battery-icon").tooltip()
     await setBatteryLevel()
     
     setInterval(async ()=>{

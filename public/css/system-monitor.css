@@ -1,0 +1,15 @@
+
+
+#system-monitor{
+    display:block;
+    width:180px;
+    height:auto;
+    background:transparent;
+    color:#57ff0a;
+    z-index:9;
+    position:fixed;
+    top:50px;
+    right:5%;
+    margin:3%;
+    font-size:7pt;
+}

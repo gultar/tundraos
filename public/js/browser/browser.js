@@ -17,6 +17,7 @@ class Browser{
         this.webview = ""
         this.id = `browser-container-${this.browserNumber}`
         this.listenerController = new AbortController()
+        this.readyForNextEvent = true
         //By attaching 
         this.attach = attach
         if(!this.attach){
@@ -35,7 +36,12 @@ class Browser{
         
         if(!this.attach) this.openWindow()
         
+        let started = false
         this.webview.addEventListener('dom-ready', (event)=>{
+            console.log('Dom ready event', event)
+            if(started) return false
+            
+            started = true
             let id = event.target.id
             if(id === `webview-${this.browserNumber}`){
                 this.startEventListeners(signal)
@@ -88,12 +94,28 @@ class Browser{
         }, { signal })
         
         
-        this.urlBar.addEventListener("visit-url", (e)=>this.visitURLHandler(e), { signal })
-        window.addEventListener("browser-navigation", (e)=>this.browserNavigationHandler(e), { signal })
+        this.urlBar.addEventListener(`visit-url-${this.browserNumber}`, (e)=>this.visitURLHandler(e), { signal })
+        window.addEventListener(`browser-navigation-${this.browserNumber}`, (e)=>this.browserNavigationHandler(e), { signal })
         window.ipcRenderer.on('confirm-download', this.confirmDownloadHandler)
         window.ipcRenderer.on('select-download-path', this.selectDownloadPathHandler)
         window.ipcRenderer.on('download-complete', this.downloadCompleteHandler)
         this.browser.addEventListener("keypress", (e)=>this.pressEnterSubmit(e), { signal })
+    }
+    
+    wait(seconds){
+       return new Promise((resolve)=>{
+            if(!this.readyForNextEvent){
+                throw new Error("Browser ${this.browserNumber} is not ready yet")
+            }
+            
+            this.readyForNextEvent = false
+            
+            setTimeout(()=>{
+                this.readyForNextEvent = true
+                
+                resolve('is ready')
+            }, seconds)
+       })
     }
 
     hide(){
@@ -124,7 +146,10 @@ class Browser{
         
     }
     
-    browserNavigationHandler(event){
+    async browserNavigationHandler(event){
+        await this.wait(1000)
+        console.log('Nav event', event)
+        
         const message = event.detail
         if(message.back == `browser-${this.browserNumber}`){
                 return this.webview.goBack()
@@ -312,10 +337,10 @@ class Browser{
         <div id="browser-container-${this.browserNumber}" class="browser-container">
             <div id="browser-menu-${this.browserNumber}" class="browser-menu" style="min-width:100%;">
                 <div class="navigation-buttons">
-                    <span class="button"><a class="back-button" onclick="sendEvent('browser-navigation', { back:'browser-${this.browserNumber}' });return false"></a></span>
+                    <span class="button"><a class="back-button" onclick="sendEvent('browser-navigation-${this.browserNumber}', { back:'browser-${this.browserNumber}' });return false"></a></span>
                         | 
-                    <span class="button" ><a class="forward-button" onclick="sendEvent('browser-navigation', { forward:'browser-${this.browserNumber}' });return false"></a></span>
-                    <span class="button" ><a class="refresh-button" onclick="sendEvent('browser-navigation', { refresh:'browser-${this.browserNumber}' });return false"><img src="./images/icons/refresh.png"/></a></span>
+                    <span class="button" ><a class="forward-button" onclick="sendEvent('browser-navigation-${this.browserNumber}', { forward:'browser-${this.browserNumber}' });return false"></a></span>
+                    <span class="button" ><a class="refresh-button" onclick="sendEvent('browser-navigation-${this.browserNumber}', { refresh:'browser-${this.browserNumber}' });return false"><img src="./images/icons/refresh.png"/></a></span>
                 </div>
                 <div class="url-container">
                     <input id="url-bar-${this.browserNumber}" class="url-bar" type="text" placeholder="http://google.com" value="${this.url}">
@@ -323,7 +348,7 @@ class Browser{
                     id="url-button" 
                     class="url-button"
                     onclick="
-                        sendEvent('visit-url',{ 
+                        sendEvent('visit-url-${this.browserNumber}',{ 
                             visitURL:{ 
                                 url:document.getElementById('url-bar-${this.browserNumber}').value, 
                                 targetBrowser:'browser-${this.browserNumber}' 
@@ -351,8 +376,9 @@ class Browser{
         this.browserDOM = this.makeBrowserPageDOM(this.webviewDOM)
 
 
-        this.otherBrowsers = this.browsersContainer.innerHTML
-        this.browsersContainer.innerHTML = this.browserDOM + this.otherBrowsers 
+        // this.otherBrowsers = this.browsersContainer.innerHTML
+        // this.browsersContainer.innerHTML = this.browserDOM + this.otherBrowsers 
+        this.browsersContainer.insertAdjacentHTML("beforeend", this.browserDOM)
     }
 
 }

@@ -1,7 +1,8 @@
 class BrowserTabs{
     constructor(opts={}){
-        let { url } = opts
+        let { url, urls } = opts
         const startPage = new Browser({ url:url, attach:true })
+        
         this.startPage = startPage
         this.browsers = {
             [startPage.getId()]:startPage
@@ -9,6 +10,7 @@ class BrowserTabs{
 
         this.browserTabsId = Date.now()
         this.listenerController = new AbortController()
+        
         this.init()
     }
 
@@ -32,6 +34,7 @@ class BrowserTabs{
         setTimeout(()=>{
             this.browserTabs.append(this.browsersContainer)
             this.openWindow()
+            
         }, 200)
     }
 

@@ -74,9 +74,6 @@ const runWifiCommand = async (wifiCmd, params)=>{
           iface:iface
     }));
 
-    console.log("RUN", {          ssid:ssid,
-      password:password,
-      iface:iface})
     const { error, success } = response
     
     if(error) return { error:error }

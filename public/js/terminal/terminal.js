@@ -119,7 +119,7 @@ class Terminal{
       test:async(args)=>await this.testSomething(args),
       explorer:async(args)=>await this.runExplorer(args),
       wifi:async(args)=>await this.makeWifiCommand(args),
-      hyperwatch:async()=>await toggleHyperWatch(),
+      hyperwatch:()=>this.enableHyperwatch()
     }
   }
   
@@ -323,6 +323,25 @@ class Terminal{
   startBrowser(args){
     const url = args[0]
     new Browser(url)
+  }
+  
+  enableHyperwatch(args){
+    if(args){
+        const enabled = args[0]
+        if(enabled == 'on'){
+           window.hyperwatchDisabled = false
+        }else if(enabled == 'off'){
+           window.hyperwatchDisabled = true
+        }else{
+           this.output("ERROR: You can only toggle hyperwatch by providing an 'on' or 'off' parameter")
+        }
+        this.output("Hyperwatch enabled: "+ !window.hyperwatchDisabled)
+    }else{
+        window.hyperwatchDisabled = !window.hyperwatchDisabled
+        this.output("Hyperwatch enabled: "+ !window.hyperwatchDisabled)
+    }
+
+    this.output("To disable or enable hyperwatch, you have to either login again or reload the environment")
   }
 
   async makeWifiCommand(args){

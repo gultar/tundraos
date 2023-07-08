@@ -7,6 +7,7 @@ const {listenForDownloads} = require('./src/downloads/download-listener')
 const contextMenu = require("electron-context-menu")
 const mapLinuxFs = require("./src/filesystem/map-linux-fs")
 const { watchForVolumeChange, watchForVolumeMute } = require("./src/audio/volumecontrol.js")
+const { updateSystemMonitor } = require("./src/server-events/systeminfo.js")
 
 let fullscreen = true
 if(process.argv.includes("--no-full")){
@@ -69,6 +70,7 @@ app.on('ready', async () => {
     
     watchForVolumeChange()
     watchForVolumeMute()
+    updateSystemMonitor(win)
     
     listenForDownloads(win)
     

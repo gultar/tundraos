@@ -26,9 +26,18 @@
     cursor:pointer;
 }
 
+
 #battery-icon{
     display:inline-block;
 }
+
+#battery-percentage{
+    font-size:6pt;
+}
+
+/*#battery-widget-container{*/
+/*    width:70px;*/
+/*}*/
 
 nav {
 	background-color: var(--nav-background-color);

@@ -97,5 +97,3 @@ class TerminalWindow{
 }
 
 window.TerminalWindow = TerminalWindow
-// module.exports = createTerminalWindow
-// module.exports = initTerminalClock

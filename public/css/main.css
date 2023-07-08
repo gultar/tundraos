@@ -33,6 +33,8 @@ body{
   height:100%;
   width:100%;
   position: relative;
+  background:url("../images/sunset.png");
+  background-size:cover;
 }
 
 .mouse-halo::after {

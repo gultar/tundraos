@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="./css/external/font-awesome.min.css">
     <link rel="stylesheet" href="./css/external/quill.bubble.css">
     <link rel="stylesheet" href="./css/external/quill.snow.css">
-
+    <link rel="stylesheet" href="./css/system-monitor.css">
 <!-- External scripts -->
     <script src="./js/external/winbox.bundle.min.js"></script>
     <script src="./js/external/vanilla-context-menu.js"></script>
@@ -64,6 +64,7 @@
     <script src="./js/desktop/desktop-menu.js"></script>
     <script src="./js/desktop/context-window.js"></script>
     <script src="./js/desktop/icon-creator.js"></script>
+    <script src="./js/desktop/system-monitor.js"></script>
     <script src="./js/window-manager/create-window.js"></script>
     <script src="./js/applications/rich-text-editor.js"></script>
     <script src="./js/applications/markdown-editor.js"></script>
@@ -109,20 +110,20 @@
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/games.png" />Games</a>
                                     <ul>
-                                        <li><a onclick="new Browser('https://d07riv.github.io/diabloweb/')"><img class="main-menu-icons" src="./images/diablo.png" />Diablo Web</a></li>
+                                        <li><a onclick="new BrowserTabs( url:'https://d07riv.github.io/diabloweb/')"><img class="main-menu-icons" src="./images/diablo.png" />Diablo Web</a></li>
                                         <li><a onclick="runTirex()"><img class="main-menu-icons" src="./images/icons/Lonelytrex.webp" />Tirex Game</a></li>
-                                        <li><a onclick="new Browser('https://gba.js.org/')"><img class="main-menu-icons" src="./images/icons/games.png" />Game Boy Advance</a></li>
-                                        <li><a onclick="new Browser('https://browserquest.io/')"><img class="main-menu-icons" src="./images/icons/games.png" />BrowserQuest</a></li>
+                                        <li><a onclick="new BrowserTabs({ url:'https://gba.js.org/'})"><img class="main-menu-icons" src="./images/icons/games.png" />Game Boy Advance</a></li>
+                                        <li><a onclick="new BrowserTabs({ url:'https://browserquest.io/'})"><img class="main-menu-icons" src="./images/icons/games.png" />BrowserQuest</a></li>
                                     </ul>
                                 </li>
                                 <li><a href="#"><img class="main-menu-icons" src="./images/icons/browser.png" />Browser</a>
                                     <ul>
-                                        <li><a onclick='new Browser()'><img class="main-menu-icons" src="./images/icons/google.png" />Google</a></li>
+                                        <li><a onclick='new BrowserTabs({})'><img class="main-menu-icons" src="./images/icons/google.png" />Google</a></li>
                                         <li><a onclick="runLinguee([])"><img class="main-menu-icons" src="./images/icons/translation.png" />Linguee</a></li>
-                                        <li><a onclick="new Browser('https://gdt.oqlf.gouv.qc.ca/Resultat.aspx')"><img class="main-menu-icons" src="./images/icons/dictionary.png" />GDT</a></li>
-                                        <li><a onclick='new Browser("https://wikipedia.org")'><img class="main-menu-icons" src="./images/icons/wikipedia.png" />Wiki</a></li>
-                                        <li><a onclick='new Browser("https://gultar.github.io/iching/")'><img class="main-menu-icons" src="./images/icons/yinyang.png" />I-Ching</a></li>
-                                        <li><a onclick='new Browser("https://georatio.com/")'><img class="main-menu-icons" src="./images/icons/constellation.png" />Georatio</a></li>
+                                        <li><a onclick="new BrowserTabs({ url:'https://gdt.oqlf.gouv.qc.ca/Resultat.aspx'})"><img class="main-menu-icons" src="./images/icons/dictionary.png" />GDT</a></li>
+                                        <li><a onclick='new BrowserTabs({ url:"https://wikipedia.org"})'><img class="main-menu-icons" src="./images/icons/wikipedia.png" />Wiki</a></li>
+                                        <li><a onclick='new BrowserTabs({ url:"https://gultar.github.io/iching/"})'><img class="main-menu-icons" src="./images/icons/yinyang.png" />I-Ching</a></li>
+                                        <li><a onclick='new BrowserTabs({ url:"https://georatio.com/"})'><img class="main-menu-icons" src="./images/icons/constellation.png" />Georatio</a></li>
                                         
                                     </ul>
                                 </li>
@@ -142,8 +143,9 @@
 
             <li class="settings-container">
                 <span>
-                    <div class="battery">
+                    <div id="battery-widget-container" class="battery">
                         <img id="battery-icon" title="100%" src="./images/icons/battery-full.png" height="15" width="15" />
+                        <span id="battery-percentage">100%</span>
                     </div>
                 </span>
                 <span id="audio-icon" class="settings-icon" style="display:inline-block">
@@ -167,7 +169,7 @@
         </div>
 
         <div id="icon-container" style="background:transparent">
-            <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, (()=>new Browser()))" id="browser-icon">
+            <a data-name="browser-icon" class="desktop-icon-link" onclick="select(this, (()=>new BrowserTabs()))" id="browser-icon">
                 <img class="desktop-icon" src="./images/icons/browser-color-large.png">
                 <span>Browser</span>
             </a>
@@ -221,14 +223,11 @@
 
             <canvas class="background" ></canvas>
             
-            <div id="webamp"></div>
+            <div id="system-monitor">
+                <pre id="system-monitor-content"></pre>
+            </div>
         </div>
         
-        <script>
-            window.ipcRenderer.on("battery-level", (event, level)=>{
-                console.log('Battery Level', level)
-            })
-        </script>
     </div>
     
 </body>

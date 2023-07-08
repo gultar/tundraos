@@ -12796,11 +12796,11 @@ function through (write, end, opts) {
 
 }).call(this)}).call(this,require('_process'))
 },{"_process":7,"stream":13}],71:[function(require,module,exports){
-window.hyperwatcher = false
 
 const toggleHyperwatch = () =>{
+  if(window.hyperwatchDisabled) return false
   
-  window.hyperwatcher = require('hyperwatch')({
+  require('hyperwatch')({
       mini: {
         position: 'bottom right',
         width: 100,

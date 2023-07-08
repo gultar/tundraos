@@ -32,7 +32,6 @@ const loadIconState = () =>{
     const desktopIconsHTML = localStorage.getItem('desktopIcons')
     const iconContainer = document.querySelector('#icon-container')
     
-    console.log("desktopIconsHTML",desktopIconsHTML)
    if(desktopIconsHTML !== null) iconContainer.innerHTML = desktopIconsHTML
 }
 

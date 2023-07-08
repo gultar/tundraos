@@ -60,7 +60,7 @@ class WifiMenu{
         }, { signal })
         
         const { result, error } = await runWifiCommand('scan',{})
-        console.log("Result", result)
+        
         
         this.networkList.innerHTML = ""
         
@@ -93,7 +93,6 @@ class WifiMenu{
     
     createEntry(networkEntry){
         
-        console.log(networkEntry)
         
         return `<span 
                     class="network-entry" 

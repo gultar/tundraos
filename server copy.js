@@ -18,25 +18,52 @@ const wifiTools = require("./src/wifi/network-tools")
     getAccountsFromFile,
     userExists,
     getUser,
-    accounts,
-    sha256,
-    isValidTokenHash,
-    getTokenHash,
-    makeSessionTokenHash,
-    loadAccounts
 }  = require("./src/users/usershandler.js")
+  
 
 const log = (...text) =>{
   console.log("[server:>]", ...text)
 }
 
+const sha256 = (text) =>{
+  return crypto
+  .createHash('sha256')
+  .update(text)
+  .digest('hex');
+}
 
+const authorizedUsers = {
+  root:{
+    passwordHash : sha256("root"),
+    tokenHash:""
+  },
+  guest:{
+    passwordHash: sha256("guest"),
+    tokenHash:""
+  }
+}
+
+const createNewUser = (username, password) =>{
+  if(authorizedUsers[username] !== undefined) return false
+  
+  authorizedUsers[username] = {
+    passwordHash : sha256(password),
+    tokenHash:""
+  }
+
+  return true
+}
+
+const isPasswordValid = (username, password) =>{
+  const user = authorizedUsers[username]
+  const isValidPassword = sha256(password) === user.passwordHash
+  return isValidPassword
+}
 
 let FileSystem = null
 
-const runServer = async (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
-  await loadAccounts()
-
+const runServer = (config={ http:true, mountPoint:process.MOUNT_POINT }) =>{
+  
   if(!config.mountPoint) throw new Error('Need to provide filesystem mount point value')
 
   const execute = async (cmd, args, pointerId) =>{
@@ -67,13 +94,11 @@ const runServer = async (config={ http:true, mountPoint:process.MOUNT_POINT }) =
   expressApp.get("/", async (req, res)=>{
     const query = req.query
     const { token, username } = query
-    console.log('Token', token, username)
-    console.log('isValidTokenHash(username, token)',isValidTokenHash(username, token))
     if(!query.token){
       return res.redirect("/log")
-    }else if(!isValidTokenHash(username, token)){
+    }else if(authorizedUsers[username].tokenHash !== token){
       log('Session token did not match')
-      log('Stored', accounts[username].tokenHash)
+      log('Stored', authorizedUsers[username].tokenHash)
       log('Sent', token)
       return res.redirect("/log")
     }else{
@@ -89,28 +114,28 @@ const runServer = async (config={ http:true, mountPoint:process.MOUNT_POINT }) =
 
   })
   
-  // expressApp.get("/desktop2", async (req, res)=>{
-  //   const query = req.query
-  //   const { token, username } = query
-  //   if(!query.token){
-  //     return res.redirect("/log")
-  //   }else if(accounts[username].tokenHash !== token){
-  //     log('Session token did not match')
-  //     log('Stored', accounts[username].tokenHash)
-  //     log('Sent', token)
-  //     return res.redirect("/log")
-  //   }else{
+  expressApp.get("/desktop2", async (req, res)=>{
+    const query = req.query
+    const { token, username } = query
+    if(!query.token){
+      return res.redirect("/log")
+    }else if(authorizedUsers[username].tokenHash !== token){
+      log('Session token did not match')
+      log('Stored', authorizedUsers[username].tokenHash)
+      log('Sent', token)
+      return res.redirect("/log")
+    }else{
       
-  //     if(FileSystem === null){
-  //       FileSystem = await buildUserspace(username)
-  //       global.FileSystem = FileSystem
-  //     }
+      if(FileSystem === null){
+        FileSystem = await buildUserspace(username)
+        global.FileSystem = FileSystem
+      }
 
-  //     res.sendFile(__dirname + '/public/index.html')
+      res.sendFile(__dirname + '/public/index.html')
       
-  //   }
+    }
 
-  // })
+  })
 
   expressApp.use('/',express.static(__dirname + '/public'));
   expressApp.use('/desktop2',express.static(__dirname + '/public'));
@@ -121,33 +146,69 @@ const runServer = async (config={ http:true, mountPoint:process.MOUNT_POINT }) =
   expressApp.use(bodyParser.json({ limit: "200mb" }));
   expressApp.use(bodyParser.urlencoded({ limit: "200mb",  extended: true, parameterLimit: 1000000 }));
 
-  expressApp.post("/login", async (req, res)=>{
+  expressApp.post("/login", (req, res)=>{
     const { username, password, timestamp } = req.body
-    const loggedIn = await login(username, password, timestamp)
+    const loggedIn = login(username, password, timestamp)
     if(loggedIn.error) res.status(401).send({ error:loggedIn.error })
     else return res.status(200).send(loggedIn)
   })
 
-  const login = async (username, password, timestamp) =>{
+  const login = (username, password, timestamp) =>{
 
-    // if(!accounts[username]){
-    //   const newUser = await createUser({ username, password, timestamp })
-    //   console.log('Accounts', accounts)
-    // }
-    const passwordIsValid = await isValidPassword(username, password)
-    console.log('Is pass valid', passwordIsValid)
-    if(!passwordIsValid){
+    if(!authorizedUsers[username]){
+      const newUser = createNewUser(username, password)
+    }
+    
+    if(!isPasswordValid(username, password)){
       return { 
         error:`Password of user ${username} is invalid`, 
         status:401 
       }
     }
 
-    const token = await makeSessionTokenHash(username, password, timestamp)
-    console.log('Token', token)
+    let code = `${username}${password}${timestamp}`
+
+    let hexHash = sha256(code)
+
+    authorizedUsers[username].tokenHash = hexHash
+    
     global.activeUser = username
     return { 
-        token:token
+        token:{
+          hash:hexHash.toString("hex"),
+          username:username,
+          status:200,
+        }
+    }
+    
+  }
+  
+    const loginUser = (username, password, timestamp) =>{
+
+    if(!authorizedUsers[username]){
+      const newUser = createNewUser(username, password)
+    }
+    
+    if(!isPasswordValid(username, password)){
+      return { 
+        error:`Password of user ${username} is invalid`, 
+        status:401 
+      }
+    }
+
+    let code = `${username}${password}${timestamp}`
+
+    let hexHash = sha256(code)
+
+    authorizedUsers[username].tokenHash = hexHash
+    
+    global.activeUser = username
+    return { 
+        token:{
+          hash:hexHash.toString("hex"),
+          username:username,
+          status:200,
+        }
     }
     
   }
@@ -193,7 +254,7 @@ const runServer = async (config={ http:true, mountPoint:process.MOUNT_POINT }) =
     const { username } = req.body
     FileSystem = null;
     
-    accounts[username].token = ""
+    authorizedUsers[username].token = ""
     global.activeUser = ""
     log(`Logged out of user ${username}'s session`)
     log(FileSystem)
